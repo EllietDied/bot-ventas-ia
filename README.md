@@ -1,4 +1,4 @@
-# 🤖 Bot de Ventas Multiplataforma basado en IA (demo académica)
+1. Bot de Ventas Multiplataforma basado en IA (demo académica)
 
 Aplicación web desarrollada en **React + TypeScript (Vite)** para el curso **Taller de Aplicaciones**
 (Universidad Señor de Sipán – Ciclo IV). Implementa el diseño del **RA1**: arquitectura por capas,
@@ -11,7 +11,7 @@ clases del UML y estructuras de datos (Lista, Cola **FIFO** y Pila **LIFO**). Es
 
 ---
 
-## 🚀 Instalación y ejecución
+2. Instalación y ejecución
 
 Requisitos: tener **Node.js 18+** instalado.
 
@@ -30,7 +30,7 @@ npm run preview  # sirve la versión compilada
 npm run test     # ejecuta las pruebas automatizadas (Vitest)
 ```
 
-### Cuentas de prueba
+3. Cuentas de prueba
 
 | Rol       | Correo               | Contraseña |
 |-----------|----------------------|------------|
@@ -41,7 +41,7 @@ npm run test     # ejecuta las pruebas automatizadas (Vitest)
 
 ---
 
-## 📱 PWA y multiplataforma
+4. PWA y multiplataforma
 
 - **Actualmente es una PWA (Progressive Web App) responsive e instalable** en PC y celular: se puede
   agregar a la pantalla de inicio y abrir en su propia ventana (modo *standalone*), como una app.
@@ -54,7 +54,7 @@ Cómo instalarla: ver [COMO-EJECUTAR.md](COMO-EJECUTAR.md).
 
 ---
 
-## 🧱 Arquitectura por capas
+5. Arquitectura por capas
 
 El proyecto respeta la **arquitectura de 3 capas** del RA1:
 
@@ -79,7 +79,7 @@ src/
 
 ---
 
-## 🧩 Clases del UML → `src/core/modelos`
+6. Clases del UML → `src/core/modelos`
 
 Herencia: **Persona → Usuario → Comprador / Vendedor** (en TypeScript con `extends`).
 
@@ -100,7 +100,7 @@ Herencia: **Persona → Usuario → Comprador / Vendedor** (en TypeScript con `e
 
 ---
 
-## 🗂️ Estructuras de datos
+7. Estructuras de datos
 
 | Estructura      | Implementación                          | Uso en el sistema                         |
 |-----------------|-----------------------------------------|-------------------------------------------|
@@ -112,7 +112,7 @@ Todo esto se visualiza en la pantalla **Evidencia académica** (`/evidencia`).
 
 ---
 
-## ⚙️ Algoritmos del RA1 → código
+8. Algoritmos del RA1 → código
 
 | Algoritmo (RA1)            | Dónde está                                   |
 |----------------------------|----------------------------------------------|
@@ -124,7 +124,7 @@ Todo esto se visualiza en la pantalla **Evidencia académica** (`/evidencia`).
 
 ---
 
-## ✅ Funcionalidades
+9. Funcionalidades
 
 - Registro e inicio de sesión con selección de rol (comprador / vendedor).
 - Catálogo de productos tecnológicos con buscador y filtro por categoría.
@@ -138,7 +138,7 @@ Todo esto se visualiza en la pantalla **Evidencia académica** (`/evidencia`).
 - Pantalla **Evidencia académica** con las listas, la cola FIFO y la pila LIFO.
 - Formularios con validaciones y mensajes de error.
 
-### Validaciones incluidas
+10. Validaciones incluidas
 
 - **Campos vacíos:** login, registro y publicación de productos.
 - **Correo:** formato válido en el registro; no se permite correo duplicado.
@@ -149,7 +149,7 @@ Todo esto se visualiza en la pantalla **Evidencia académica** (`/evidencia`).
 - **Carrito vacío:** no se puede ir al pago sin productos.
 - **Mensajes:** no se permiten mensajes ni respuestas vacíos.
 
-### 🧪 Pruebas automatizadas (Vitest)
+11. Pruebas automatizadas (Vitest)
 El proyecto incluye **34 pruebas** que verifican la lógica del `core` (sin tocar la interfaz):
 - **Cola FIFO** (`ColaPedidos`) y **Pila LIFO** (`PilaConsultas`).
 - **Cálculos del carrito**: subtotal, descuento (5% / 10%) y total.
@@ -160,7 +160,7 @@ Se ejecutan con `npm run test`.
 
 ---
 
-## 🔄 Flujo de la aplicación
+12. Flujo de la aplicación
 
 1. El usuario **inicia sesión** o se **registra** eligiendo su rol.
 2. **Comprador:** explora el **catálogo**, consulta el **chatbot**, agrega productos al **carrito**,
@@ -172,7 +172,7 @@ Se ejecutan con `npm run test`.
 
 ---
 
-## 🛠️ Tecnologías
+13. Tecnologías
 
 - React 18 + TypeScript (modo estricto)
 - Vite (entorno de desarrollo y build)
@@ -183,7 +183,7 @@ Se ejecutan con `npm run test`.
 
 ---
 
-## 📁 Documentación de la demo
+14. Documentación de la demo
 
 En la raíz: **[`COMO-EJECUTAR.md`](COMO-EJECUTAR.md)** — guía rápida de instalación, ejecución y cómo instalar la PWA.
 
@@ -194,11 +194,11 @@ En la carpeta [`docs/`](docs) encontrarás:
 
 ---
 
-## ☁️ Despliegue: subir a GitHub y publicar en Vercel
+15. Despliegue: subir a GitHub y publicar en Vercel
 
 > Requisito: tener **Git** instalado ([git-scm.com](https://git-scm.com)) y una cuenta en GitHub y en Vercel (ambas gratis).
 
-### 1. Subir el proyecto a GitHub
+# 1. Subir el proyecto a GitHub
 Crea un repositorio **vacío** en [github.com](https://github.com) (por ejemplo `bot-ventas-ia`). Luego,
 desde la carpeta del proyecto, en la terminal:
 
@@ -214,7 +214,7 @@ git push -u origin main
 > Reemplaza `USUARIO` por tu usuario de GitHub. El `.gitignore` ya evita subir `node_modules`, `dist`
 > y archivos locales, así que el repositorio queda limpio.
 
-### 2. Conectar con Vercel
+# 2. Conectar con Vercel
 1. Entra a [vercel.com](https://vercel.com) e inicia sesión **con tu cuenta de GitHub**.
 2. **Add New → Project** e **importa** el repositorio `bot-ventas-ia`.
 3. Vercel detecta **Vite** automáticamente:
@@ -229,7 +229,7 @@ git push -u origin main
 
 ---
 
-## 🧪 Pruebas después de publicar
+16. Pruebas después de publicar
 
 Con la URL de Vercel en línea, verifica:
 
