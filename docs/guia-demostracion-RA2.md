@@ -70,7 +70,8 @@ Tiempo estimado: **10 – 12 minutos**.
 
 ## 10. Evidencia académica (1 min) — **clave para el RA2**
 
-- Abre la pantalla **Evidencia académica** (`/evidencia`).
+- Abre la pantalla **Evidencia académica** escribiendo la ruta **`/evidencia`** en el navegador
+  (no está en el menú: es una vista de apoyo para la demostración).
 - Muestra las **Listas** (productos, usuarios, pedidos y **mensajes**), la **Cola FIFO**, la **Pila LIFO** y el **cálculo** de totales.
 - Aquí se ven, en un solo lugar, todas las estructuras de datos del RA1 funcionando con datos reales de la demo.
 

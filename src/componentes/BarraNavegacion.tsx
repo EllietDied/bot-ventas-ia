@@ -46,7 +46,6 @@ export function BarraNavegacion() {
               Mensajes {noLeidos > 0 && <span className="badge">{noLeidos}</span>}
             </Link>
             <Link to="/pedidos">Pedidos</Link>
-            <Link to="/evidencia">Evidencia</Link>
 
             <span className="navbar-usuario">
               {usuarioActual.nombre} ({usuarioActual.rol})
