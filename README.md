@@ -27,6 +27,7 @@ Otros comandos:
 ```bash
 npm run build    # compila y verifica TypeScript (genera la carpeta dist/)
 npm run preview  # sirve la versión compilada
+npm run test     # ejecuta las pruebas automatizadas (Vitest)
 ```
 
 ### Cuentas de prueba
@@ -147,6 +148,15 @@ Todo esto se visualiza en la pantalla **Evidencia académica** (`/evidencia`).
 - **Roles:** el comprador no entra al panel del vendedor y viceversa (rutas protegidas).
 - **Carrito vacío:** no se puede ir al pago sin productos.
 - **Mensajes:** no se permiten mensajes ni respuestas vacíos.
+
+### 🧪 Pruebas automatizadas (Vitest)
+El proyecto incluye **34 pruebas** que verifican la lógica del `core` (sin tocar la interfaz):
+- **Cola FIFO** (`ColaPedidos`) y **Pila LIFO** (`PilaConsultas`).
+- **Cálculos del carrito**: subtotal, descuento (5% / 10%) y total.
+- **Validaciones** de inicio de sesión y registro.
+- **Búsqueda** de productos y **recomendación** del chatbot.
+
+Se ejecutan con `npm run test`.
 
 ---
 
