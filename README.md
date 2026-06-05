@@ -1,13 +1,14 @@
 1. Bot de Ventas Multiplataforma basado en IA (demo académica)
 
-Aplicación web desarrollada en **React + TypeScript (Vite)** para el curso **Taller de Aplicaciones**
-(Universidad Señor de Sipán – Ciclo IV). Implementa el diseño del **RA1**: arquitectura por capas,
-clases del UML y estructuras de datos (Lista, Cola **FIFO** y Pila **LIFO**). Es una **PWA instalable** y **responsive** (PC y celular).
+Aplicación web desarrollada en React + TypeScript (Vite) para el curso Taller de Aplicaciones
+(Universidad Señor de Sipán – Ciclo IV). Implementa el diseño del RA1: arquitectura por capas,
+clases del UML y estructuras de datos (Lista, Cola FIFO y Pila LIFO). Es una PWA instalable y responsive (PC y celular).
 
-> La **inteligencia artificial** del chatbot y los **pagos** están **simulados** (no usan servicios
-> externos). Todo funciona **sin backend**, guardando los datos en `localStorage`.
+> La inteligencia artificial del chatbot y los pagos están simulados (no usan servicios
+> externos).
+Todo funciona sin backend, guardando los datos en `localStorage`.
 
-**Autores:** Beryher Agip · Andherson Mendoza · Fabricio Salazar
+Autores: Beryher Agip · Andherson Mendoza · Fabricio Salazar . Odar Andrea 
 
 ---
 
