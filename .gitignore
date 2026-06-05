@@ -1,0 +1,34 @@
+# Dependencias
+node_modules
+
+# Build / salida
+dist
+dist-ssr
+*.local
+
+# Cachés
+.vite
+*.tsbuildinfo
+
+# Variables de entorno (por si se agregan en el futuro)
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Editores
+.vscode/*
+!.vscode/extensions.json
+.idea
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Herramientas de Claude (configuración local de la vista previa)
+.claude
