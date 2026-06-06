@@ -11,7 +11,7 @@ No es una tienda con un chatbot agregado, sino un asistente de ventas con un cat
 > La **inteligencia artificial** del chatbot y los **pagos** están **simulados** (no usan servicios
 > externos). Todo funciona **sin backend**, guardando los datos en `localStorage`.
 
-**Autores:** Beryher Agip · Andherson Mendoza · Fabricio Salazar
+**Autores:** Beryher Agip · Andherson Mendoza · Fabricio Salazar · Andrea Odar
 
 ---
 
