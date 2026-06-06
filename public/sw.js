@@ -1,9 +1,9 @@
-// Service Worker de la PWA "Bot de Ventas IA".
+// Service Worker de la PWA "IA InkaShop".
 // Su trabajo es guardar en caché los archivos principales para que la app
 // cargue rápido y pueda abrirse incluso sin conexión.
 // (No toca la lógica de negocio: solo es la capa de entrega.)
 
-const CACHE = 'bot-ventas-v4'
+const CACHE = 'inkashop-v1'
 
 // Archivos base de la app (con nombres estables).
 const ARCHIVOS_BASE = [

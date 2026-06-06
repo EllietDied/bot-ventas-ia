@@ -36,8 +36,8 @@ export function Login() {
         <div className="auth-logo">
           <LogoUSS size="medium" />
         </div>
-        <h1 className="auth-titulo">🤖 Asistente IA de Ventas</h1>
-        <p className="auth-subtitulo">Inicia sesión y habla con tu asistente de ventas</p>
+        <h1 className="auth-titulo">🤖 IA InkaShop</h1>
+        <p className="auth-subtitulo">Compra con respaldo, vende con innovación.</p>
 
         <form onSubmit={enviar} className="formulario">
           <label className="campo">

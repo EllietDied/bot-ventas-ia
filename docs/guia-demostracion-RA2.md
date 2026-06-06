@@ -1,6 +1,6 @@
 # 🎤 Guía de demostración — RA2
 
-Guion paso a paso para sustentar el **Bot de Ventas Multiplataforma basado en IA**.
+Guion paso a paso para sustentar **IA InkaShop** — asistente inteligente de ventas multiplataforma.
 Tiempo estimado: **10 – 12 minutos**.
 
 > **Antes de empezar:** ejecuta `npm run dev`, abre `http://localhost:5173` y, para una demo limpia,
@@ -13,7 +13,7 @@ Tiempo estimado: **10 – 12 minutos**.
 
 ## 1. Introducción (1 min)
 
-- Presenta el proyecto: "Bot de Ventas Multiplataforma basado en IA", del curso Taller de Aplicaciones.
+- Presenta el proyecto: **"IA InkaShop"** (asistente inteligente de ventas multiplataforma), del curso Taller de Aplicaciones.
 - Menciona que es la **implementación del RA1**: arquitectura por capas, clases del UML y estructuras de datos.
 - Aclara que la **IA y los pagos son simulados** y que la app funciona **sin backend** (datos en `localStorage`).
 - Señala que es una **PWA instalable** y responsive (PC y celular); Telegram/WhatsApp son integraciones **futuras**, y **no** es una app nativa.
@@ -30,7 +30,7 @@ Tiempo estimado: **10 – 12 minutos**.
 - Inicia sesión con `comprador@demo.com` / `123456`.
 - Explica el algoritmo `IniciarSesion` (`AuthService.ts`) y las **rutas protegidas**.
 
-## 4. Asistente IA de Ventas — pantalla principal (2.5 min) — **lo más importante**
+## 4. IA InkaShop — pantalla principal del asistente (2.5 min) — **lo más importante**
 
 - Al iniciar sesión, lo primero que aparece es el **Asistente IA** (el chatbot es el centro de la app).
 - Usa los **botones rápidos**: “Recomiéndame una laptop”, “Busco algo económico”, “Armar una PC básica”, “Ver productos gamer”.

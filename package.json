@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "description": "Bot de Ventas Multiplataforma basado en IA (simulada) - Taller de Aplicaciones (RA1)",
+  "description": "IA InkaShop - Asistente inteligente de ventas multiplataforma (demo académica) - Taller de Aplicaciones (RA1)",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",

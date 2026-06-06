@@ -26,7 +26,7 @@ export function BarraNavegacion() {
     <nav className="navbar">
       <Link to="/" className="navbar-marca">
         <LogoUSS size="small" />
-        <span>Bot de Ventas IA</span>
+        <span>IA InkaShop</span>
       </Link>
 
       <div className="navbar-links">

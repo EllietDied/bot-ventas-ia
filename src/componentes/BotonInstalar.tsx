@@ -43,7 +43,7 @@ export function BotonInstalar() {
 
   return (
     <button className="btn btn-primario btn-pequeno" onClick={instalar}>
-      ⬇️ Instalar aplicación
+      ⬇️ Instalar IA InkaShop
     </button>
   )
 }

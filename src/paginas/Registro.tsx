@@ -50,8 +50,8 @@ export function Registro() {
         <div className="auth-logo">
           <LogoUSS size="medium" />
         </div>
-        <h1 className="auth-titulo">Crear cuenta</h1>
-        <p className="auth-subtitulo">Regístrate como comprador o vendedor</p>
+        <h1 className="auth-titulo">Crear cuenta · IA InkaShop</h1>
+        <p className="auth-subtitulo">Compra con respaldo, vende con innovación.</p>
 
         <form onSubmit={enviar} className="formulario">
           <div className="form-grid">

@@ -1,7 +1,7 @@
 {
-  "name": "Bot de Ventas IA",
-  "short_name": "Bot Ventas",
-  "description": "Bot de ventas multiplataforma basado en IA (demo académica).",
+  "name": "IA InkaShop",
+  "short_name": "IA InkaShop",
+  "description": "Asistente inteligente de ventas multiplataforma (demo académica).",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

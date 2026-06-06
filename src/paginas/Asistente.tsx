@@ -54,7 +54,7 @@ export function Asistente() {
   const bienvenida: MensajeAsistente = {
     id: 'A-0',
     emisor: 'bot',
-    texto: `¡Hola${primerNombre ? ', ' + primerNombre : ''}! 👋 Soy tu Asistente IA de Ventas 🤖. Cuéntame qué buscas (por categoría, uso o presupuesto) y te recomendaré las mejores opciones. También puedes usar los botones rápidos de abajo.`,
+    texto: `¡Hola${primerNombre ? ', ' + primerNombre : ''}! 👋 Bienvenido a IA InkaShop 🤖. Soy tu asistente de ventas: cuéntame qué buscas (por categoría, uso o presupuesto) y te recomendaré las mejores opciones. También puedes usar los botones rápidos de abajo.`,
   }
 
   const [mensajes, setMensajes] = useState<MensajeAsistente[]>(() =>
@@ -175,8 +175,8 @@ export function Asistente() {
   return (
     <div className="pagina">
       <header className="asistente-cabecera">
-        <h1>🤖 Asistente IA de Ventas</h1>
-        <p>Tu asistente te guía desde la consulta hasta el pedido.</p>
+        <h1>🤖 IA InkaShop</h1>
+        <p>Compra con respaldo, vende con innovación.</p>
       </header>
 
       {/* Bloque institucional discreto */}

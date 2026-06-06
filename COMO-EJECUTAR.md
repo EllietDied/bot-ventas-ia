@@ -1,4 +1,4 @@
-# ▶️ Cómo ejecutar — Bot de Ventas IA
+# ▶️ Cómo ejecutar — IA InkaShop
 
 Guía rápida de una página para correr el proyecto. *(Versión más detallada en el [README](README.md)).*
 
@@ -67,7 +67,7 @@ La opción de instalar aparece cuando la app se sirve por **HTTPS** (por ejemplo
 - **iPhone / iPad (Safari):** botón **Compartir** → **“Agregar a inicio”**.
   *(En iOS el botón automático no aparece; se agrega manualmente.)*
 
-Una vez instalada, se abre en su **propia ventana** (modo standalone), con su ícono y nombre **Bot Ventas**.
+Una vez instalada, se abre en su **propia ventana** (modo standalone), con su ícono y nombre **IA InkaShop**.
 
 ---
 

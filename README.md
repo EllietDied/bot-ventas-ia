@@ -1,10 +1,12 @@
-# 🤖 Bot de Ventas Multiplataforma basado en IA (demo académica)
+# 🤖 IA InkaShop
+
+**Asistente inteligente de ventas multiplataforma** — _Compra con respaldo, vende con innovación._ (demo académica)
 
 Aplicación web desarrollada en **React + TypeScript (Vite)** para el curso **Taller de Aplicaciones**
 (Universidad Señor de Sipán – Ciclo IV). Implementa el diseño del **RA1**: arquitectura por capas,
 clases del UML y estructuras de datos (Lista, Cola **FIFO** y Pila **LIFO**). Es una **PWA instalable** y **responsive** (PC y celular).
 
-La experiencia gira en torno a un **Asistente IA de Ventas**: el comprador conversa con el asistente,
+La experiencia gira en torno a **IA InkaShop**, un asistente inteligente de ventas: el comprador conversa con el asistente,
 que le recomienda productos (por categoría, uso o presupuesto) y lo **guía desde la consulta hasta el pedido**.
 No es una tienda con un chatbot agregado, sino un asistente de ventas con un catálogo de apoyo.
 
@@ -130,7 +132,7 @@ Estas estructuras se usan en las pantallas: la **cola FIFO** en Pedidos, la **pi
 
 ## ✅ Funcionalidades
 
-- **Asistente IA de Ventas (pantalla principal):** el comprador conversa con el asistente, que recomienda
+- **IA InkaShop — pantalla principal (asistente):** el comprador conversa con el asistente, que recomienda
   productos según el **texto**, la **categoría**, el **presupuesto**, el **historial** y los **populares**.
   Las recomendaciones aparecen como **tarjetas dentro del chat** con acciones (*ver detalle, agregar,
   comparar, consultar vendedor*) y hay **botones rápidos**.
@@ -214,7 +216,7 @@ desde la carpeta del proyecto, en la terminal:
 ```bash
 git init
 git add .
-git commit -m "Bot de Ventas IA - PWA"
+git commit -m "IA InkaShop - PWA"
 git branch -M main
 git remote add origin https://github.com/USUARIO/bot-ventas-ia.git
 git push -u origin main
