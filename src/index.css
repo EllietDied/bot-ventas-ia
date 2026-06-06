@@ -16,7 +16,9 @@
 
   /* Acento IA (turquesa) — identifica al Asistente */
   --acento-ia: #14b8a6;
-  --acento-ia-suave: #f0fdfa; /* superficie turquesa muy clara (asistente) */
+  --acento-ia-suave: #f0fdfa; /* superficie turquesa muy clara (tip, recomendados) */
+  --ia-bg: #3a4450; /* fondo de la burbuja del asistente (igual en claro y oscuro) */
+  --usuario-bg: #0d9488; /* fondo de los mensajes que envía el usuario */
 
   /* Superficies */
   --fondo: #f8fafc; /* fondo general */
@@ -69,30 +71,31 @@
   /* Color principal (azul) */
   --primario: #60a5fa;
   --primario-oscuro: #3b82f6;
-  --acento-suave: #1e293b; /* superficie azul/slate (chips, etiquetas) */
+  --acento-suave: #2c2c2c; /* superficie gris (chips, etiquetas) */
   --acento-texto: #93c5fd;
 
   /* Acento IA (turquesa) */
   --acento-ia: #2dd4bf;
-  --acento-ia-suave: #123f3a; /* superficie turquesa oscura (asistente) */
+  --acento-ia-suave: #3a4450; /* superficie azul-gris (tip, recomendados) */
+  --usuario-bg: #0d9488; /* fondo de los mensajes que envía el usuario */
 
-  /* Superficies */
-  --fondo: #0b1220; /* fondo general */
-  --tarjeta: #111827; /* fondo de tarjetas */
-  --superficie: #1e293b; /* tarjetas secundarias / superficie sutil */
-  --input-bg: #0b1220;
-  --navbar-bg: #111827;
+  /* Superficies (gris neutro, sin tinte azul) */
+  --fondo: #1a1a1a; /* fondo general */
+  --tarjeta: #242424; /* fondo de tarjetas */
+  --superficie: #2c2c2c; /* tarjetas secundarias / superficie sutil */
+  --input-bg: #161616;
+  --navbar-bg: #1f1f1f;
 
   /* Texto */
-  --texto: #f8fafc;
-  --texto-tenue: #cbd5e1;
+  --texto: #f5f5f5;
+  --texto-tenue: #c2c2c2;
 
   /* Bordes */
-  --borde: #334155;
+  --borde: #3a3a3a;
 
   /* Botón secundario */
-  --boton-sec-bg: #334155;
-  --boton-sec-hover: #475569;
+  --boton-sec-bg: #3a3a3a;
+  --boton-sec-hover: #4a4a4a;
 
   /* Éxito */
   --exito: #4ade80;
@@ -827,13 +830,13 @@ a:hover {
   white-space: pre-line;
 }
 .burbuja.bot {
-  background: var(--acento-ia-suave);
-  color: var(--texto);
+  background: var(--ia-bg);
+  color: #fff;
   align-self: flex-start;
   border-bottom-left-radius: 4px;
 }
 .burbuja.usuario {
-  background: var(--primario);
+  background: var(--usuario-bg);
   color: #fff;
   align-self: flex-end;
   border-bottom-right-radius: 4px;
