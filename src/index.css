@@ -239,12 +239,12 @@ a:hover {
   justify-content: center;
   border-radius: 10px;
 }
-/* En modo CLARO el logo va directo sobre la superficie (más integrado).
-   En modo OSCURO se coloca sobre una placa clara para que se vea bien. */
-[data-theme='dark'] .logo-uss-caja {
-  background: #ffffff;
-  padding: 6px 11px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+/* En modo CLARO el logo va directo (oscuro sobre fondo claro).
+   En modo OSCURO no usamos placa: el logo se vuelve BLANCO para verse
+   directamente sobre el fondo oscuro. */
+[data-theme='dark'] .logo-uss-img {
+  filter: brightness(0) invert(1) drop-shadow(1px 0 0 #475569) drop-shadow(-1px 0 0 #475569)
+    drop-shadow(0 1px 0 #475569) drop-shadow(0 -1px 0 #475569);
 }
 .logo-uss-img {
   display: block;

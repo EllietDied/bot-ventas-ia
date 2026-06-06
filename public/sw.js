@@ -3,7 +3,7 @@
 // cargue rápido y pueda abrirse incluso sin conexión.
 // (No toca la lógica de negocio: solo es la capa de entrega.)
 
-const CACHE = 'bot-ventas-v3'
+const CACHE = 'bot-ventas-v4'
 
 // Archivos base de la app (con nombres estables).
 const ARCHIVOS_BASE = [
