@@ -4,6 +4,7 @@ import { useCarrito } from '../contexto/CarritoContext'
 import { useMensajeria } from '../contexto/MensajeriaContext'
 import { esVendedor } from '../core/modelos/Vendedor'
 import { BotonInstalar } from './BotonInstalar'
+import { BotonTema } from './BotonTema'
 
 // Barra superior de navegación. Muestra opciones según el rol del usuario.
 export function BarraNavegacion() {
@@ -58,6 +59,9 @@ export function BarraNavegacion() {
 
         {/* Botón para instalar la PWA (aparece solo si el navegador lo permite) */}
         <BotonInstalar />
+
+        {/* Botón para cambiar entre modo claro y oscuro */}
+        <BotonTema />
       </div>
     </nav>
   )

@@ -143,6 +143,7 @@ Todo esto se visualiza en la pantalla **Evidencia académica** (`/evidencia`).
 - Historial de pedidos y de consultas.
 - Pantalla **Evidencia académica** con las listas, la cola FIFO y la pila LIFO.
 - Formularios con validaciones y mensajes de error.
+- **Modo claro y oscuro** con un switch en la barra de navegación (recuerda tu preferencia).
 
 ### Validaciones incluidas
 
@@ -188,6 +189,7 @@ Se ejecutan con `npm run test`.
 - React Context (estado global)
 - localStorage (persistencia local, sin backend)
 - PWA: *manifest* + *service worker* (instalable y con caché de los archivos principales)
+- **Tema claro/oscuro** con variables CSS (la preferencia se guarda en `localStorage`)
 
 ---
 

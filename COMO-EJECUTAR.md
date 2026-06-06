@@ -39,6 +39,14 @@ npm run preview    # sirve esa versión en http://localhost:4173
 
 ---
 
+## 🌗 Modo claro / oscuro
+
+La app incluye **modo claro y oscuro**. Usa el botón **☀️ / 🌙** de la barra de navegación para cambiar.
+- La preferencia se **guarda** (`localStorage`) y se aplica automáticamente al volver a abrir la app.
+- Si nunca lo cambiaste, la app respeta el **tema de tu sistema** (claro u oscuro).
+
+---
+
 ## 📱 Instalar la PWA (app instalable)
 
 La aplicación es una **PWA**: se puede instalar como si fuera una app, en PC y celular.
