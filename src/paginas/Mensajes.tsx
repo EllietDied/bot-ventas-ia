@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import { useSesion } from '../contexto/SesionContext'
 import { useProductos } from '../contexto/ProductosContext'
 import { useMensajeria } from '../contexto/MensajeriaContext'
@@ -19,7 +20,10 @@ function VistaComprador() {
   const { mensajesDe, enviarMensaje, marcarLeido } = useMensajeria()
   const correo = usuarioActual!.correo
 
-  const [idProducto, setIdProducto] = useState<number>(productos[0]?.id ?? 0)
+  // Si llegamos desde el Asistente ("Consultar vendedor"), preseleccionamos el producto.
+  const location = useLocation()
+  const idDesdeChat = (location.state as { idProducto?: number } | null)?.idProducto
+  const [idProducto, setIdProducto] = useState<number>(idDesdeChat ?? productos[0]?.id ?? 0)
   const [contenido, setContenido] = useState('')
   const [error, setError] = useState('')
   const [exito, setExito] = useState('')

@@ -15,7 +15,7 @@ export function Carrito() {
         <div className="vacio">
           <p>Tu carrito está vacío.</p>
           <Link to="/" className="btn btn-primario">
-            Ir al catálogo
+            Pedir recomendaciones al asistente
           </Link>
         </div>
       </div>

@@ -51,8 +51,8 @@ export function Catalogo() {
   return (
     <div className="pagina">
       <header className="pagina-cabecera">
-        <h1>Catálogo de productos</h1>
-        <p>Explora nuestros productos tecnológicos.</p>
+        <h1>Explorar catálogo</h1>
+        <p>¿Prefieres buscar por tu cuenta? También puedes pedirle recomendaciones al Asistente IA en el inicio.</p>
       </header>
 
       {/* Buscador */}

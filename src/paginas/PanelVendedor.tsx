@@ -1,11 +1,17 @@
 import { useState } from 'react'
 import { useProductos } from '../contexto/ProductosContext'
 import { useSesion } from '../contexto/SesionContext'
+import { useConsultas } from '../contexto/ConsultasContext'
+import { useMensajeria } from '../contexto/MensajeriaContext'
+import { usePedidos } from '../contexto/PedidosContext'
 
 // Pantalla del vendedor: publicar productos y actualizar stock.
 export function PanelVendedor() {
   const { productos, publicarProducto, actualizarStock } = useProductos()
   const { usuarioActual } = useSesion()
+  const { consultasRecientes } = useConsultas()
+  const { mensajes } = useMensajeria()
+  const { pedidosPendientes } = usePedidos()
 
   const [nombre, setNombre] = useState('')
   const [descripcion, setDescripcion] = useState('')
@@ -19,6 +25,23 @@ export function PanelVendedor() {
 
   // Productos publicados por este vendedor.
   const misProductos = productos.filter((p) => p.idVendedor === usuarioActual.idUsuario)
+
+  // ----- Datos para las "Sugerencias del asistente IA" -----
+  const bajoStock = misProductos.filter((p) => p.stock <= 5)
+  const masConsultados = misProductos
+    .map((p) => ({
+      p,
+      veces: consultasRecientes.filter(
+        (c) =>
+          c.categoria === p.categoria || c.termino.toLowerCase().includes(p.nombre.toLowerCase()),
+      ).length,
+    }))
+    .filter((x) => x.veces > 0)
+    .sort((a, b) => b.veces - a.veces)
+    .slice(0, 3)
+  const mensajesPendientes = mensajes.filter(
+    (m) => m.destinatario === usuarioActual.correo && !m.leido && m.tipoMensaje === 'consulta',
+  )
 
   function publicar(e: React.FormEvent) {
     e.preventDefault()
@@ -55,6 +78,51 @@ export function PanelVendedor() {
   return (
     <div className="pagina">
       <h1>Panel del vendedor</h1>
+
+      {/* Sugerencias del asistente IA */}
+      <section className="panel sugerencias-ia">
+        <h2>🤖 Sugerencias del asistente IA</h2>
+        <div className="sugerencias-grid">
+          <div className="sugerencia">
+            <span className="sugerencia-num">{bajoStock.length}</span>
+            <div>
+              <strong>Bajo stock</strong>
+              <p className="texto-tenue">
+                {bajoStock.length === 0 ? 'Todo en orden.' : bajoStock.map((p) => p.nombre).join(', ')}
+              </p>
+            </div>
+          </div>
+          <div className="sugerencia">
+            <span className="sugerencia-num">{masConsultados.length}</span>
+            <div>
+              <strong>Más consultados</strong>
+              <p className="texto-tenue">
+                {masConsultados.length === 0
+                  ? 'Sin consultas aún.'
+                  : masConsultados.map((x) => `${x.p.nombre} (${x.veces})`).join(', ')}
+              </p>
+            </div>
+          </div>
+          <div className="sugerencia">
+            <span className="sugerencia-num">{mensajesPendientes.length}</span>
+            <div>
+              <strong>Mensajes pendientes</strong>
+              <p className="texto-tenue">
+                {mensajesPendientes.length === 0 ? 'Sin mensajes nuevos.' : 'Consultas por responder.'}
+              </p>
+            </div>
+          </div>
+          <div className="sugerencia">
+            <span className="sugerencia-num">{pedidosPendientes.length}</span>
+            <div>
+              <strong>Pedidos pendientes</strong>
+              <p className="texto-tenue">
+                {pedidosPendientes.length === 0 ? 'Sin pedidos por atender.' : 'Pedidos por atender.'}
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
 
       <div className="vendedor-layout">
         {/* Formulario de publicación */}

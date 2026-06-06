@@ -30,23 +30,26 @@ Tiempo estimado: **10 – 12 minutos**.
 - Inicia sesión con `comprador@demo.com` / `123456`.
 - Explica el algoritmo `IniciarSesion` (`AuthService.ts`) y las **rutas protegidas**.
 
-## 4. Catálogo, buscador y recomendaciones (1.5 min)
+## 4. Asistente IA de Ventas — pantalla principal (2.5 min) — **lo más importante**
 
-- Recorre el **catálogo** y usa el **buscador** y el **filtro por categoría**.
+- Al iniciar sesión, lo primero que aparece es el **Asistente IA** (el chatbot es el centro de la app).
+- Usa los **botones rápidos**: “Recomiéndame una laptop”, “Busco algo económico”, “Armar una PC básica”, “Ver productos gamer”.
+- Escribe una consulta con presupuesto, por ejemplo **“laptop hasta 2000”**, y muestra que el asistente **filtra por precio**.
+- Señala que las recomendaciones aparecen como **tarjetas dentro del chat**, con acciones: *ver detalle, agregar, comparar y consultar al vendedor*.
+- Pulsa **Comparar** en dos productos para mostrar la **tabla comparativa** dentro del chat.
+- Explica que cada consulta entra a la **Pila LIFO** (“Consultas recientes”) y alimenta las recomendaciones (`recomendarPorConsulta`).
+
+## 5. Explorar catálogo (0.5 min)
+
+- Muestra la sección secundaria **“Explorar catálogo”** con buscador y filtro, para quien prefiera buscar por su cuenta.
 - Explica el algoritmo `ConsultarProducto` (`CatalogoService.ts`).
-- Señala la sección **"Recomendado para ti"** y explica que usa las **categorías consultadas** (`recomendarProducto`).
-
-## 5. Chatbot simulado + Pila LIFO (1.5 min)
-
-- Entra al **Chatbot** y escribe consultas: "hola", "¿precio del Teclado Mecánico?", "¿qué categorías tienen?".
-- Explica que `responderConsulta` usa **reglas por palabras clave** (IA simulada).
-- Muestra el panel **"Consultas recientes"** y explica que es una **Pila LIFO** (la última consulta aparece primero).
 
 ## 6. Carrito, cálculo y pago simulado (1.5 min)
 
 - Agrega productos al **carrito** e intenta superar el **stock** (el botón "+" se bloquea → validación).
 - Muestra el **cálculo de subtotal, descuento y total** (explica la regla de descuento).
 - Ve a **pagar**, elige un método y confirma. Recalca que el **pago es simulado**.
+- Al confirmar, el **asistente guía el cierre**: “Validé el stock”, “Calculé tu subtotal, descuento y total” y “Tu pedido fue registrado correctamente”.
 
 ## 7. Pedidos + Cola FIFO (1 min)
 
@@ -56,6 +59,7 @@ Tiempo estimado: **10 – 12 minutos**.
 ## 8. Panel del vendedor (1 min)
 
 - Cierra sesión e ingresa como `vendedor@demo.com` / `123456`.
+- Muestra el bloque **“Sugerencias del asistente IA”** (bajo stock, más consultados, mensajes y pedidos pendientes).
 - **Publica un producto** (muestra una validación: precio 0 o campos vacíos).
 - **Actualiza el stock** de un producto y verifica el cambio en el catálogo.
 

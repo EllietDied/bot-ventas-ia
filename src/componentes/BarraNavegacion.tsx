@@ -29,8 +29,8 @@ export function BarraNavegacion() {
       <div className="navbar-links">
         {usuarioActual && (
           <>
-            <Link to="/">Catálogo</Link>
-            <Link to="/chat">Chatbot</Link>
+            <Link to="/">Asistente IA</Link>
+            <Link to="/catalogo">Explorar catálogo</Link>
 
             {/* Solo el comprador ve el carrito */}
             {!esVendedor(usuarioActual) && (

@@ -16,6 +16,9 @@ export const PRODUCTOS_INICIALES: Producto[] = [
   { id: 10, nombre: 'Silla Gamer', descripcion: 'Silla ergonómica reclinable con soporte lumbar.', categoria: 'Mobiliario', precio: 690.0, stock: 8, estado: 'disponible', imagen: '🪑', idVendedor: 'U-002' },
   { id: 11, nombre: 'Webcam Full HD', descripcion: 'Cámara web 1080p con micrófono integrado.', categoria: 'Periféricos', precio: 130.0, stock: 16, estado: 'disponible', imagen: '📷', idVendedor: 'U-002' },
   { id: 12, nombre: 'Placa Madre B650', descripcion: 'Motherboard compatible con DDR5 y PCIe 4.0.', categoria: 'Componentes', precio: 780.0, stock: 9, estado: 'disponible', imagen: '🔧', idVendedor: 'U-002' },
+  { id: 13, nombre: 'Laptop HP 15', descripcion: 'Laptop para estudio y oficina, 8GB RAM y SSD de 256GB.', categoria: 'Laptops', precio: 2200.0, stock: 7, estado: 'disponible', imagen: '💻', idVendedor: 'U-002' },
+  { id: 14, nombre: 'Laptop Gamer Lenovo', descripcion: 'Laptop gamer con tarjeta dedicada y pantalla de 144Hz.', categoria: 'Laptops', precio: 3990.0, stock: 4, estado: 'disponible', imagen: '💻', idVendedor: 'U-002' },
+  { id: 15, nombre: 'Laptop Económica Asus', descripcion: 'Laptop básica para tareas diarias y navegación.', categoria: 'Laptops', precio: 1450.0, stock: 9, estado: 'disponible', imagen: '💻', idVendedor: 'U-002' },
 ]
 
 // Usuarios de ejemplo para iniciar sesión rápidamente en la demo.

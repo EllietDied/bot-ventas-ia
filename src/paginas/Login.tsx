@@ -32,8 +32,8 @@ export function Login() {
   return (
     <div className="auth-contenedor">
       <div className="auth-tarjeta">
-        <h1 className="auth-titulo">🤖 Bot de Ventas IA</h1>
-        <p className="auth-subtitulo">Inicia sesión para continuar</p>
+        <h1 className="auth-titulo">🤖 Asistente IA de Ventas</h1>
+        <p className="auth-subtitulo">Inicia sesión y habla con tu asistente de ventas</p>
 
         <form onSubmit={enviar} className="formulario">
           <label className="campo">

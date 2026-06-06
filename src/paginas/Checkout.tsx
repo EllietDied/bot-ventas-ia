@@ -6,7 +6,7 @@ import { useProductos } from '../contexto/ProductosContext'
 import { useSesion } from '../contexto/SesionContext'
 import { MetodoPago } from '../core/modelos/Pago'
 
-// Pantalla de pago (simulado) y confirmación del pedido.
+// Pantalla de pago (simulado), guiada por el asistente IA.
 export function Checkout() {
   const { items, subtotal, descuento, total, vaciarCarrito } = useCarrito()
   const { registrarPedido } = usePedidos()
@@ -16,8 +16,30 @@ export function Checkout() {
 
   const [metodoPago, setMetodoPago] = useState<MetodoPago>('tarjeta')
   const [error, setError] = useState('')
+  const [pagado, setPagado] = useState(false)
+  const [totalPagado, setTotalPagado] = useState(0)
 
-  // Si no hay productos en el carrito, no hay nada que pagar.
+  // ----- Confirmación guiada por el asistente (después de pagar) -----
+  if (pagado) {
+    return (
+      <div className="pagina">
+        <h1>Pago</h1>
+        <div className="checkout-confirmacion">
+          <h2>🤖 ¡Listo! Procesé tu compra</h2>
+          <p className="paso-ia">✅ Validé el stock disponible.</p>
+          <p className="paso-ia">
+            ✅ Calculé tu subtotal, descuento y total: <strong>S/ {totalPagado.toFixed(2)}</strong>.
+          </p>
+          <p className="paso-ia">✅ Tu pedido fue registrado correctamente.</p>
+          <button className="btn btn-primario btn-bloque" onClick={() => navegar('/pedidos')}>
+            Ver mis pedidos
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  // ----- Carrito vacío -----
   if (items.length === 0) {
     return (
       <div className="pagina">
@@ -25,7 +47,7 @@ export function Checkout() {
         <div className="vacio">
           <p>No tienes productos para pagar.</p>
           <Link to="/" className="btn btn-primario">
-            Ir al catálogo
+            Volver al asistente
           </Link>
         </div>
       </div>
@@ -36,7 +58,7 @@ export function Checkout() {
     if (!usuarioActual) return
     setError('')
 
-    // 0) Revalidamos que haya stock suficiente para cada producto.
+    // 0) El asistente revalida que haya stock suficiente.
     for (const item of items) {
       const actual = productos.find((p) => p.id === item.producto.id)
       if (!actual || actual.stock < item.cantidad) {
@@ -44,15 +66,11 @@ export function Checkout() {
         return
       }
     }
-
-    // 1) Descontamos el stock de cada producto comprado.
+    // 1) Descontamos el stock de cada producto.
     for (const item of items) {
       const actual = productos.find((p) => p.id === item.producto.id)
-      if (actual) {
-        actualizarStock(actual.id, actual.stock - item.cantidad)
-      }
+      if (actual) actualizarStock(actual.id, actual.stock - item.cantidad)
     }
-
     // 2) Registramos el pedido (incluye el pago simulado).
     registrarPedido({
       correoComprador: usuarioActual.correo,
@@ -62,15 +80,18 @@ export function Checkout() {
       total,
       metodoPago,
     })
-
-    // 3) Vaciamos el carrito y vamos al historial de pedidos.
+    // 3) Mostramos la confirmación guiada por el asistente.
+    setTotalPagado(total)
+    setPagado(true)
     vaciarCarrito()
-    navegar('/pedidos')
   }
 
   return (
     <div className="pagina">
       <h1>Pago</h1>
+      <p className="texto-tenue">
+        🤖 El asistente validará tu stock, calculará tu total y registrará tu pedido.
+      </p>
 
       <div className="checkout-layout">
         {/* Resumen de productos */}

@@ -7,7 +7,7 @@ import { Catalogo } from './paginas/Catalogo'
 import { Carrito } from './paginas/Carrito'
 import { Checkout } from './paginas/Checkout'
 import { Pedidos } from './paginas/Pedidos'
-import { Chat } from './paginas/Chat'
+import { Asistente } from './paginas/Asistente'
 import { PanelVendedor } from './paginas/PanelVendedor'
 import { Evidencia } from './paginas/Evidencia'
 import { Mensajes } from './paginas/Mensajes'
@@ -28,15 +28,15 @@ export default function App() {
             path="/"
             element={
               <RutaProtegida>
-                <Catalogo />
+                <Asistente />
               </RutaProtegida>
             }
           />
           <Route
-            path="/chat"
+            path="/catalogo"
             element={
               <RutaProtegida>
-                <Chat />
+                <Catalogo />
               </RutaProtegida>
             }
           />

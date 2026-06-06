@@ -606,10 +606,12 @@ a:hover {
   gap: 0.6rem;
 }
 .burbuja {
-  max-width: 75%;
+  max-width: 80%;
   padding: 0.6rem 0.9rem;
   border-radius: 14px;
   font-size: 0.92rem;
+  line-height: 1.4;
+  white-space: pre-line;
 }
 .burbuja.bot {
   background: #eef2ff;
@@ -695,6 +697,194 @@ a:hover {
   border: 1px solid var(--borde);
   border-radius: 8px;
   padding: 0.35rem 0.5rem;
+}
+
+/* ---------- Asistente IA (pantalla principal) ---------- */
+.asistente-cabecera h1 {
+  margin-bottom: 0.2rem;
+}
+.asistente-cabecera p {
+  color: var(--texto-tenue);
+}
+.asistente-layout {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 1.4rem;
+  align-items: start;
+  margin-top: 1rem;
+}
+.asistente-chat {
+  background: var(--tarjeta);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  display: flex;
+  flex-direction: column;
+  height: 72vh;
+  box-shadow: var(--sombra);
+}
+.asistente-mensajes {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+.asistente-fila {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.chat-recomendaciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+.tarjeta-chat {
+  border: 1px solid var(--borde);
+  border-radius: 12px;
+  padding: 0.7rem;
+  width: 205px;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.tarjeta-chat-top {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.tarjeta-chat-img {
+  font-size: 1.6rem;
+}
+.tarjeta-chat-nombre {
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+.tarjeta-chat-cat {
+  font-size: 0.72rem;
+  color: var(--primario);
+  text-transform: uppercase;
+  font-weight: 600;
+}
+.tarjeta-chat-precio {
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+.tarjeta-chat-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-top: 0.2rem;
+}
+.btn-mini {
+  border: 1px solid var(--borde);
+  background: #fff;
+  border-radius: 7px;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+.btn-mini:hover:not(:disabled) {
+  border-color: var(--primario);
+}
+.btn-mini:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.btn-mini.primario {
+  background: var(--primario);
+  color: #fff;
+  border-color: var(--primario);
+}
+.chat-comparacion {
+  margin-top: 0.3rem;
+}
+.asistente-rapidos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  padding: 0.7rem 1rem;
+  border-top: 1px solid var(--borde);
+}
+.asistente-entrada {
+  display: flex;
+  gap: 0.6rem;
+  padding: 0.8rem 1rem;
+  border-top: 1px solid var(--borde);
+}
+.asistente-entrada input {
+  flex: 1;
+  border: 1px solid var(--borde);
+  border-radius: 10px;
+  padding: 0.65rem 0.9rem;
+  font-size: 0.95rem;
+}
+.asistente-entrada input:focus {
+  outline: 2px solid var(--primario);
+}
+.asistente-panel {
+  background: var(--tarjeta);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  padding: 1.1rem;
+  position: sticky;
+  top: 80px;
+}
+.asistente-tip {
+  margin-top: 1rem;
+  background: #eef2ff;
+  border-radius: 10px;
+  padding: 0.7rem;
+  font-size: 0.85rem;
+}
+
+/* ---------- Sugerencias del asistente IA (panel vendedor) ---------- */
+.sugerencias-ia {
+  margin-bottom: 1.2rem;
+  background: #eef2ff;
+}
+.sugerencias-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.9rem;
+  margin-top: 0.6rem;
+}
+.sugerencia {
+  display: flex;
+  gap: 0.7rem;
+  align-items: flex-start;
+  background: #fff;
+  border-radius: 10px;
+  padding: 0.7rem 0.8rem;
+}
+.sugerencia-num {
+  background: var(--primario);
+  color: #fff;
+  min-width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+
+/* ---------- Confirmación de pago (asistente) ---------- */
+.checkout-confirmacion {
+  background: var(--tarjeta);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  padding: 1.6rem;
+  max-width: 480px;
+}
+.paso-ia {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+  padding: 0.6rem 0.8rem;
+  margin-bottom: 0.5rem;
 }
 
 /* ---------- Mensajería (RF10) ---------- */
@@ -827,14 +1017,22 @@ a:hover {
   .carrito-layout,
   .checkout-layout,
   .chat-layout,
-  .vendedor-layout {
+  .vendedor-layout,
+  .asistente-layout {
     grid-template-columns: 1fr;
   }
-  .resumen {
+  .resumen,
+  .asistente-panel {
     position: static;
   }
   .chat-ventana {
     height: 60vh;
+  }
+  .asistente-chat {
+    height: 68vh;
+  }
+  .tarjeta-chat {
+    width: 100%;
   }
 }
 @media (max-width: 640px) {

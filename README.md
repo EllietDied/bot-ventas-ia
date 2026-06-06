@@ -4,6 +4,10 @@ Aplicación web desarrollada en **React + TypeScript (Vite)** para el curso **Ta
 (Universidad Señor de Sipán – Ciclo IV). Implementa el diseño del **RA1**: arquitectura por capas,
 clases del UML y estructuras de datos (Lista, Cola **FIFO** y Pila **LIFO**). Es una **PWA instalable** y **responsive** (PC y celular).
 
+La experiencia gira en torno a un **Asistente IA de Ventas**: el comprador conversa con el asistente,
+que le recomienda productos (por categoría, uso o presupuesto) y lo **guía desde la consulta hasta el pedido**.
+No es una tienda con un chatbot agregado, sino un asistente de ventas con un catálogo de apoyo.
+
 > La **inteligencia artificial** del chatbot y los **pagos** están **simulados** (no usan servicios
 > externos). Todo funciona **sin backend**, guardando los datos en `localStorage`.
 
@@ -126,13 +130,15 @@ Todo esto se visualiza en la pantalla **Evidencia académica** (`/evidencia`).
 
 ## ✅ Funcionalidades
 
+- **Asistente IA de Ventas (pantalla principal):** el comprador conversa con el asistente, que recomienda
+  productos según el **texto**, la **categoría**, el **presupuesto**, el **historial** y los **populares**.
+  Las recomendaciones aparecen como **tarjetas dentro del chat** con acciones (*ver detalle, agregar,
+  comparar, consultar vendedor*) y hay **botones rápidos**.
+- **Explorar catálogo** (sección secundaria) con buscador y filtro por categoría.
 - Registro e inicio de sesión con selección de rol (comprador / vendedor).
-- Catálogo de productos tecnológicos con buscador y filtro por categoría.
-- Chatbot con respuestas simuladas (por palabras clave).
-- Recomendación de productos según las categorías consultadas.
-- Carrito de compras con cálculo de **subtotal, descuento y total** (respeta el stock).
+- Carrito y **pago guiado por el asistente** con cálculo de **subtotal, descuento y total** (respeta el stock).
 - Registro simulado de pedidos y pagos.
-- Panel del vendedor: publicar productos y actualizar stock (con validaciones).
+- Panel del vendedor: publicar productos, actualizar stock y **“Sugerencias del asistente IA”** (bajo stock, más consultados, mensajes y pedidos pendientes).
 - **Mensajería** entre comprador y vendedor sobre un producto, con estado leído/no leído (**RF10**).
 - Historial de pedidos y de consultas.
 - Pantalla **Evidencia académica** con las listas, la cola FIFO y la pila LIFO.
@@ -163,9 +169,11 @@ Se ejecutan con `npm run test`.
 ## 🔄 Flujo de la aplicación
 
 1. El usuario **inicia sesión** o se **registra** eligiendo su rol.
-2. **Comprador:** explora el **catálogo**, consulta el **chatbot**, agrega productos al **carrito**,
-   realiza el **pago simulado**, **envía consultas al vendedor** (Mensajes) y revisa su **historial de pedidos**.
-3. **Vendedor:** entra a su **panel**, **publica productos**, **actualiza el stock** y **responde los mensajes** de los compradores.
+2. **Comprador:** conversa con el **Asistente IA** (pantalla principal), que le recomienda productos y los
+   agrega al **carrito**; realiza el **pago guiado por el asistente**, **envía consultas al vendedor** (Mensajes)
+   y revisa su **historial de pedidos**. También puede **Explorar catálogo** por su cuenta.
+3. **Vendedor:** entra a su **panel** (con las **Sugerencias del asistente IA**), **publica productos**,
+   **actualiza el stock** y **responde los mensajes** de los compradores.
 4. Cada pedido entra a la **cola FIFO** de pendientes; con **"Atender siguiente"** se procesa el más antiguo.
 5. Cada búsqueda o consulta al bot entra a la **pila LIFO** de consultas recientes, que alimenta las **recomendaciones**.
 6. La pantalla **Evidencia académica** muestra todo lo anterior de forma visible.
