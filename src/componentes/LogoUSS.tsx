@@ -11,8 +11,8 @@ interface Props {
 // Altura del logo (px) según el tamaño elegido.
 const ALTURAS: Record<'small' | 'medium' | 'large', number> = {
   small: 26,
-  medium: 52,
-  large: 84,
+  medium: 46,
+  large: 72,
 }
 
 export function LogoUSS({ size = 'medium', showText = false }: Props) {

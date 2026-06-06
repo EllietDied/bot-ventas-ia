@@ -234,13 +234,17 @@ a:hover {
   gap: 0.6rem;
 }
 .logo-uss-caja {
-  background: #ffffff;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  border-radius: 8px;
-  padding: 4px 8px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  border-radius: 10px;
+}
+/* En modo CLARO el logo va directo sobre la superficie (más integrado).
+   En modo OSCURO se coloca sobre una placa clara para que se vea bien. */
+[data-theme='dark'] .logo-uss-caja {
+  background: #ffffff;
+  padding: 6px 11px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
 }
 .logo-uss-img {
   display: block;
