@@ -175,6 +175,9 @@ a:hover {
   z-index: 10;
 }
 .navbar-marca {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
   font-weight: 700;
   font-size: 1.15rem;
   color: var(--texto);
@@ -220,6 +223,75 @@ a:hover {
 }
 .btn-tema:hover {
   border-color: var(--primario);
+}
+
+/* ---------- Logo institucional USS ---------- */
+/* La caja es siempre blanca para que el logo (oscuro) se vea bien
+   también en modo oscuro. El logo mantiene su proporción (object-fit: contain). */
+.logo-uss {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.logo-uss-caja {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 8px;
+  padding: 4px 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.logo-uss-img {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+}
+.logo-uss-texto {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--texto);
+}
+
+/* Logo arriba del título (login / registro) */
+.auth-logo {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.1rem;
+}
+
+/* Bloque institucional discreto (Asistente) */
+.bloque-institucional {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  font-size: 0.85rem;
+  color: var(--texto-tenue);
+}
+
+/* Encabezado de Evidencia con logo a la derecha */
+.evidencia-cabecera {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+/* Pie de página institucional (global) */
+.pie-institucional {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+  padding: 1.6rem 1rem;
+  margin-top: 1rem;
+  border-top: 1px solid var(--borde);
+  color: var(--texto-tenue);
+  font-size: 0.85rem;
+  text-align: center;
 }
 
 /* ---------- Botones ---------- */

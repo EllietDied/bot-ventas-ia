@@ -5,6 +5,7 @@ import { useCarrito } from '../contexto/CarritoContext'
 import { useConsultas } from '../contexto/ConsultasContext'
 import { useSesion } from '../contexto/SesionContext'
 import { esComprador } from '../core/modelos/Comprador'
+import { LogoUSS } from '../componentes/LogoUSS'
 import { ChatBotIA } from '../core/modelos/ChatBotIA'
 import { Producto } from '../core/modelos/Producto'
 import { cargar, guardar } from '../core/datos/almacenamiento'
@@ -162,6 +163,12 @@ export function Asistente() {
         <h1>🤖 Asistente IA de Ventas</h1>
         <p>Tu asistente te guía desde la consulta hasta el pedido.</p>
       </header>
+
+      {/* Bloque institucional discreto */}
+      <div className="bloque-institucional">
+        <LogoUSS size="small" />
+        <span>Universidad Señor de Sipán · Taller de Aplicaciones</span>
+      </div>
 
       <div className="asistente-layout">
         {/* ===== Chat principal (protagonista) ===== */}

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useSesion, DatosRegistro } from '../contexto/SesionContext'
 import { Rol } from '../core/modelos/Usuario'
+import { LogoUSS } from '../componentes/LogoUSS'
 
 // Estado inicial del formulario.
 const FORM_INICIAL: DatosRegistro = {
@@ -46,6 +47,9 @@ export function Registro() {
   return (
     <div className="auth-contenedor">
       <div className="auth-tarjeta ancha">
+        <div className="auth-logo">
+          <LogoUSS size="medium" />
+        </div>
         <h1 className="auth-titulo">Crear cuenta</h1>
         <p className="auth-subtitulo">Regístrate como comprador o vendedor</p>
 

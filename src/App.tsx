@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { BarraNavegacion } from './componentes/BarraNavegacion'
+import { PieInstitucional } from './componentes/PieInstitucional'
 import { RutaProtegida } from './componentes/RutaProtegida'
 import { Login } from './paginas/Login'
 import { Registro } from './paginas/Registro'
@@ -93,6 +94,7 @@ export default function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
+      <PieInstitucional />
     </>
   )
 }

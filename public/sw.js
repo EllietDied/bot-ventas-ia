@@ -3,7 +3,7 @@
 // cargue rápido y pueda abrirse incluso sin conexión.
 // (No toca la lógica de negocio: solo es la capa de entrega.)
 
-const CACHE = 'bot-ventas-v1'
+const CACHE = 'bot-ventas-v2'
 
 // Archivos base de la app (con nombres estables).
 const ARCHIVOS_BASE = [
@@ -12,6 +12,7 @@ const ARCHIVOS_BASE = [
   '/manifest.webmanifest',
   '/icon-192.png',
   '/icon-512.png',
+  '/logo-uss.png',
 ]
 
 // Al INSTALAR: guardamos los archivos base en la caché.

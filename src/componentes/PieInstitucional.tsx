@@ -1,0 +1,11 @@
+import { LogoUSS } from './LogoUSS'
+
+// Pie de página institucional (aparece en toda la app).
+export function PieInstitucional() {
+  return (
+    <footer className="pie-institucional">
+      <LogoUSS size="small" />
+      <span>Universidad Señor de Sipán · Taller de Aplicaciones · 2026</span>
+    </footer>
+  )
+}

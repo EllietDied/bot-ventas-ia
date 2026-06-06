@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useSesion } from '../contexto/SesionContext'
+import { LogoUSS } from '../componentes/LogoUSS'
 
 // Pantalla de inicio de sesión.
 export function Login() {
@@ -32,6 +33,9 @@ export function Login() {
   return (
     <div className="auth-contenedor">
       <div className="auth-tarjeta">
+        <div className="auth-logo">
+          <LogoUSS size="medium" />
+        </div>
         <h1 className="auth-titulo">🤖 Asistente IA de Ventas</h1>
         <p className="auth-subtitulo">Inicia sesión y habla con tu asistente de ventas</p>
 

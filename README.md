@@ -144,6 +144,7 @@ Todo esto se visualiza en la pantalla **Evidencia académica** (`/evidencia`).
 - Pantalla **Evidencia académica** con las listas, la cola FIFO y la pila LIFO.
 - Formularios con validaciones y mensajes de error.
 - **Modo claro y oscuro** con un switch en la barra de navegación (recuerda tu preferencia).
+- **Identidad institucional USS**: el logo oficial de la Universidad Señor de Sipán aparece en el login, el registro, la barra de navegación, el asistente, la evidencia y el pie de página; también en los iconos de la PWA.
 
 ### Validaciones incluidas
 

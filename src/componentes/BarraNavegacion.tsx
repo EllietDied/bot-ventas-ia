@@ -5,6 +5,7 @@ import { useMensajeria } from '../contexto/MensajeriaContext'
 import { esVendedor } from '../core/modelos/Vendedor'
 import { BotonInstalar } from './BotonInstalar'
 import { BotonTema } from './BotonTema'
+import { LogoUSS } from './LogoUSS'
 
 // Barra superior de navegación. Muestra opciones según el rol del usuario.
 export function BarraNavegacion() {
@@ -24,7 +25,8 @@ export function BarraNavegacion() {
   return (
     <nav className="navbar">
       <Link to="/" className="navbar-marca">
-        🤖 <span>Bot de Ventas IA</span>
+        <LogoUSS size="small" />
+        <span>Bot de Ventas IA</span>
       </Link>
 
       <div className="navbar-links">

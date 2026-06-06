@@ -4,6 +4,7 @@ import { usePedidos } from '../contexto/PedidosContext'
 import { useConsultas } from '../contexto/ConsultasContext'
 import { useCarrito } from '../contexto/CarritoContext'
 import { useMensajeria } from '../contexto/MensajeriaContext'
+import { LogoUSS } from '../componentes/LogoUSS'
 
 // Pantalla de EVIDENCIA ACADÉMICA.
 // Muestra de forma visible las estructuras de datos y los cálculos del RA1:
@@ -18,9 +19,12 @@ export function Evidencia() {
 
   return (
     <div className="pagina">
-      <header className="pagina-cabecera">
-        <h1>📊 Evidencia académica</h1>
-        <p>Visualización de las estructuras de datos y los cálculos del sistema (RA1).</p>
+      <header className="pagina-cabecera evidencia-cabecera">
+        <div>
+          <h1>📊 Evidencia académica</h1>
+          <p>Visualización de las estructuras de datos y los cálculos del sistema (RA1).</p>
+        </div>
+        <LogoUSS size="medium" />
       </header>
 
       {/* ============ LISTAS (arreglos) ============ */}
