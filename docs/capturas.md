@@ -21,14 +21,10 @@ Sugerencia: guárdalas en `docs/capturas/` con el nombre indicado.
 | 14 | `14-mensaje-comprador.png`    | Comprador enviando una **consulta** al vendedor (pantalla Mensajes). |
 | 15 | `15-mensaje-vendedor.png`     | Vendedor viendo la consulta con el aviso **"nuevo"** y respondiéndola. |
 | 16 | `16-mensaje-respuesta.png`    | Comprador viendo la **respuesta** del vendedor marcada como leída.   |
-| 17 | `17-evidencia-listas.png`     | Evidencia académica: **Listas** de productos, usuarios y pedidos.    |
-| 18 | `18-evidencia-fifo-lifo.png`  | Evidencia académica: **Cola FIFO** y **Pila LIFO**.                  |
-| 19 | `19-evidencia-mensajes.png`   | Evidencia académica: tabla de **Mensajes** (`Mensaje[]`).            |
-| 20 | `20-evidencia-calculo.png`    | Evidencia académica: **cálculo** de subtotal, descuento y total.     |
-| 21 | `21-responsive-movil.png`     | La app vista en **celular** (vista responsive).                      |
-| 22 | `22-estructura-carpetas.png`  | Estructura de carpetas del proyecto en el editor (VS Code).          |
-| 23 | `23-codigo-cola-pila.png`     | Código de `ColaPedidos.ts` y `PilaConsultas.ts`.                     |
-| 24 | `24-npm-run-build.png`        | Consola con `npm run build` exitoso (sin errores).                  |
+| 17 | `17-responsive-movil.png`     | La app vista en **celular** (vista responsive).                      |
+| 18 | `18-estructura-carpetas.png`  | Estructura de carpetas del proyecto en el editor (VS Code).          |
+| 19 | `19-codigo-cola-pila.png`     | Código de `ColaPedidos.ts` y `PilaConsultas.ts`.                     |
+| 20 | `20-npm-run-build.png`        | Consola con `npm run build` exitoso (sin errores).                  |
 
-> **Tip:** para la captura responsive (#21), abre las herramientas del navegador (F12) y activa el
+> **Tip:** para la captura responsive (#17), abre las herramientas del navegador (F12) y activa el
 > modo dispositivo (Ctrl+Shift+M), eligiendo un tamaño de celular.

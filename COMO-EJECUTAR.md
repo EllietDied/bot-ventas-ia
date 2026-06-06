@@ -42,7 +42,7 @@ npm run preview    # sirve esa versión en http://localhost:4173
 ## 🎓 Identidad institucional
 
 La aplicación incluye el **logo oficial de la Universidad Señor de Sipán** (`public/logo-uss.png`) en la
-barra de navegación, el login, el registro, el asistente, la evidencia académica y el pie de página,
+barra de navegación, el login, el registro, el asistente y el pie de página,
 así como en los **iconos de la PWA**. *(Si necesitas otra versión del logo, reemplaza `public/logo-uss.png`).*
 
 ---

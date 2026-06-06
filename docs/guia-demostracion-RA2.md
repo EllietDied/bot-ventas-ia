@@ -72,12 +72,12 @@ Tiempo estimado: **10 – 12 minutos**.
 - Explica que las conversaciones se guardan en una lista **`Mensaje[]`** (con remitente, destinatario,
   producto relacionado, fecha y estado leído/no leído).
 
-## 10. Evidencia académica (1 min) — **clave para el RA2**
+## 10. Estructuras de datos y pruebas (1 min) — **clave para el RA2**
 
-- Abre la pantalla **Evidencia académica** escribiendo la ruta **`/evidencia`** en el navegador
-  (no está en el menú: es una vista de apoyo para la demostración).
-- Muestra las **Listas** (productos, usuarios, pedidos y **mensajes**), la **Cola FIFO**, la **Pila LIFO** y el **cálculo** de totales.
-- Aquí se ven, en un solo lugar, todas las estructuras de datos del RA1 funcionando con datos reales de la demo.
+- Recuerda dónde se ven las estructuras del RA1: la **Cola FIFO** en **Pedidos** (“Atender siguiente”),
+  la **Pila LIFO** en el **Asistente** (“Consultas recientes”) y los **cálculos** (subtotal/descuento/total) en el **Carrito**.
+- En el editor, muestra el código de `src/core/estructuras/ColaPedidos.ts` y `PilaConsultas.ts`.
+- Ejecuta **`npm run test`**: **34 pruebas automatizadas** verifican las estructuras y los cálculos.
 
 ## 11. Cierre (30 s)
 

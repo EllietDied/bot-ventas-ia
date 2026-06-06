@@ -302,15 +302,6 @@ a:hover {
   color: var(--texto-tenue);
 }
 
-/* Encabezado de Evidencia con logo a la derecha */
-.evidencia-cabecera {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 1rem;
-}
-
 /* Pie de página institucional (global) */
 .pie-institucional {
   display: flex;
@@ -1180,13 +1171,7 @@ a:hover {
   outline: 2px solid var(--primario);
 }
 
-/* ---------- Evidencia académica (tablas) ---------- */
-.evidencia-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1.2rem;
-  margin-bottom: 1rem;
-}
+/* ---------- Tablas ---------- */
 .panel h3 {
   font-size: 1rem;
   margin: 0.9rem 0 0.45rem;
@@ -1219,23 +1204,8 @@ a:hover {
 .tabla tbody tr:last-child td {
   border-bottom: none;
 }
-.evidencia-calculo {
-  display: grid;
-  grid-template-columns: 1fr 280px;
-  gap: 1.2rem;
-  align-items: start;
-}
-.evidencia-calculo .resumen {
-  position: static;
-}
 
 /* ---------- Responsive ---------- */
-@media (max-width: 900px) {
-  .evidencia-grid,
-  .evidencia-calculo {
-    grid-template-columns: 1fr;
-  }
-}
 @media (max-width: 820px) {
   .carrito-layout,
   .checkout-layout,

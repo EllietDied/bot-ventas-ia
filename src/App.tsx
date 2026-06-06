@@ -10,7 +10,6 @@ import { Checkout } from './paginas/Checkout'
 import { Pedidos } from './paginas/Pedidos'
 import { Asistente } from './paginas/Asistente'
 import { PanelVendedor } from './paginas/PanelVendedor'
-import { Evidencia } from './paginas/Evidencia'
 import { Mensajes } from './paginas/Mensajes'
 
 // Define las rutas (pantallas) de la aplicación.
@@ -81,15 +80,6 @@ export default function App() {
               </RutaProtegida>
             }
           />
-          <Route
-            path="/evidencia"
-            element={
-              <RutaProtegida>
-                <Evidencia />
-              </RutaProtegida>
-            }
-          />
-
           {/* Cualquier otra ruta vuelve al inicio */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

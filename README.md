@@ -78,7 +78,7 @@ src/
 │  └─ datos/              localStorage y datos de ejemplo (seed)
 ├─ contexto/              Estado global con React Context
 ├─ componentes/           UI reutilizable (navbar, tarjeta, ruta protegida)
-└─ paginas/               Pantallas (login, catálogo, carrito, chat, evidencia...)
+└─ paginas/               Pantallas (login, catálogo, carrito, asistente, mensajes...)
 ```
 
 ---
@@ -112,7 +112,7 @@ Herencia: **Persona → Usuario → Comprador / Vendedor** (en TypeScript con `e
 | **Cola (FIFO)** | `ColaPedidos` (`src/core/estructuras`)  | Pedidos pendientes: primero en llegar, primero en atender |
 | **Pila (LIFO)** | `PilaConsultas` (`src/core/estructuras`)| Consultas recientes: la última se muestra primero |
 
-Todo esto se visualiza en la pantalla **Evidencia académica** (`/evidencia`).
+Estas estructuras se usan en las pantallas: la **cola FIFO** en Pedidos, la **pila LIFO** en el Asistente (consultas recientes) y los **cálculos** en el Carrito.
 
 ---
 
@@ -141,10 +141,9 @@ Todo esto se visualiza en la pantalla **Evidencia académica** (`/evidencia`).
 - Panel del vendedor: publicar productos, actualizar stock y **“Sugerencias del asistente IA”** (bajo stock, más consultados, mensajes y pedidos pendientes).
 - **Mensajería** entre comprador y vendedor sobre un producto, con estado leído/no leído (**RF10**).
 - Historial de pedidos y de consultas.
-- Pantalla **Evidencia académica** con las listas, la cola FIFO y la pila LIFO.
 - Formularios con validaciones y mensajes de error.
 - **Modo claro y oscuro** con un switch en la barra de navegación (recuerda tu preferencia).
-- **Identidad institucional USS**: el logo oficial de la Universidad Señor de Sipán aparece en el login, el registro, la barra de navegación, el asistente, la evidencia y el pie de página; también en los iconos de la PWA.
+- **Identidad institucional USS**: el logo oficial de la Universidad Señor de Sipán aparece en el login, el registro, la barra de navegación, el asistente y el pie de página; también en los iconos de la PWA.
 
 ### Validaciones incluidas
 
@@ -178,7 +177,6 @@ Se ejecutan con `npm run test`.
    **actualiza el stock** y **responde los mensajes** de los compradores.
 4. Cada pedido entra a la **cola FIFO** de pendientes; con **"Atender siguiente"** se procesa el más antiguo.
 5. Cada búsqueda o consulta al bot entra a la **pila LIFO** de consultas recientes, que alimenta las **recomendaciones**.
-6. La pantalla **Evidencia académica** muestra todo lo anterior de forma visible.
 
 ---
 
@@ -235,7 +233,7 @@ git push -u origin main
 4. Pulsa **Deploy**. En ~1 minuto tendrás una **URL pública** (`https://...vercel.app`).
 5. Cada `git push` a `main` vuelve a desplegar **automáticamente**.
 
-> El archivo `vercel.json` ya está incluido para que las rutas (`/carrito`, `/chat`, `/evidencia`…)
+> El archivo `vercel.json` ya está incluido para que las rutas (`/carrito`, `/mensajes`, `/pedidos`…)
 > funcionen correctamente al refrescar la página.
 
 ---
@@ -246,9 +244,9 @@ Con la URL de Vercel en línea, verifica:
 
 1. **Carga:** la página abre y muestra el inicio de sesión.
 2. **Login:** entra con `comprador@demo.com` / `123456`.
-3. **Rutas al refrescar:** entra a `/evidencia` y presiona **F5** → debe cargar (no “404”).
-4. **Flujos principales:** catálogo y buscador, chatbot, carrito + pago simulado, pedidos (cola FIFO),
-   mensajes (comprador↔vendedor) y Evidencia académica.
+3. **Rutas al refrescar:** entra a `/pedidos` y presiona **F5** → debe cargar (no “404”).
+4. **Flujos principales:** asistente IA, catálogo y buscador, carrito + pago simulado, pedidos (cola FIFO)
+   y mensajes (comprador↔vendedor).
 5. **PWA instalable:** aparece el botón **“Instalar aplicación”** (o el ícono en la barra de
    direcciones); instálala en la PC y compruébala en su propia ventana.
 6. **Móvil:** abre la URL en un celular → diseño responsive; en Android instálala desde el menú del navegador.
