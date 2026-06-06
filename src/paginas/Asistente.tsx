@@ -175,8 +175,15 @@ export function Asistente() {
   return (
     <div className="pagina">
       <header className="asistente-cabecera">
-        <h1>🤖 IA InkaShop</h1>
-        <p>Compra con respaldo, vende con innovación.</p>
+        <img
+          src="/assistant-inkashop.svg"
+          alt="Asistente IA de InkaShop"
+          className="mascota-inkashop mascota-cabecera"
+        />
+        <div>
+          <h1>IA InkaShop</h1>
+          <p>Compra con respaldo, vende con innovación.</p>
+        </div>
       </header>
 
       {/* Bloque institucional discreto */}

@@ -915,7 +915,27 @@ a:hover {
   padding: 0.35rem 0.5rem;
 }
 
+/* ---------- Mascota "Asistente InkaShop" ---------- */
+.mascota-inkashop {
+  display: block;
+  object-fit: contain;
+  height: auto;
+}
+.auth-mascota {
+  width: 130px;
+  margin: 0 auto 0.4rem;
+}
+.mascota-cabecera {
+  width: 62px;
+  flex-shrink: 0;
+}
+
 /* ---------- Asistente IA (pantalla principal) ---------- */
+.asistente-cabecera {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+}
 .asistente-cabecera h1 {
   margin-bottom: 0.2rem;
   color: var(--acento-ia);

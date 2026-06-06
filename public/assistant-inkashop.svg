@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 264" role="img" aria-label="Asistente IA de InkaShop">
+  <title>Asistente IA de InkaShop</title>
+  <defs>
+    <linearGradient id="ink-cuerpo" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f6fafe"/>
+      <stop offset="1" stop-color="#d6e2f0"/>
+    </linearGradient>
+    <linearGradient id="ink-visor" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1e2a45"/>
+      <stop offset="1" stop-color="#0f1830"/>
+    </linearGradient>
+    <linearGradient id="ink-bolsa" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3b82f6"/>
+      <stop offset="1" stop-color="#2563eb"/>
+    </linearGradient>
+    <radialGradient id="ink-halo" cx="0.5" cy="0.45" r="0.62">
+      <stop offset="0" stop-color="#2dd4bf" stop-opacity="0.20"/>
+      <stop offset="0.62" stop-color="#3b82f6" stop-opacity="0.09"/>
+      <stop offset="1" stop-color="#3b82f6" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Halo suave (se ve bien en claro y oscuro) -->
+  <circle cx="120" cy="130" r="118" fill="url(#ink-halo)"/>
+
+  <!-- Antena con remate dorado (guiño andino) -->
+  <line x1="120" y1="46" x2="120" y2="30" stroke="#9aa8bd" stroke-width="4" stroke-linecap="round"/>
+  <path d="M120 12 l9 9 -9 9 -9 -9 z" fill="#e3b24e"/>
+  <circle cx="120" cy="21" r="2.6" fill="#fff3d6"/>
+
+  <!-- Sensores laterales (turquesa) -->
+  <rect x="51" y="76" width="13" height="34" rx="6.5" fill="#14b8a6"/>
+  <rect x="176" y="76" width="13" height="34" rx="6.5" fill="#14b8a6"/>
+
+  <!-- Cabeza -->
+  <rect x="60" y="48" width="120" height="96" rx="32" fill="url(#ink-cuerpo)" stroke="#9aa8bd" stroke-width="2.5"/>
+
+  <!-- Visor / rostro -->
+  <rect x="78" y="66" width="84" height="58" rx="24" fill="url(#ink-visor)"/>
+  <circle cx="101" cy="93" r="9.5" fill="#2dd4bf"/>
+  <circle cx="139" cy="93" r="9.5" fill="#2dd4bf"/>
+  <circle cx="97.6" cy="89.6" r="3" fill="#eafffb"/>
+  <circle cx="135.6" cy="89.6" r="3" fill="#eafffb"/>
+  <path d="M106 106 q14 10 28 0" fill="none" stroke="#2dd4bf" stroke-width="3.4" stroke-linecap="round"/>
+
+  <!-- Cuello -->
+  <rect x="108" y="142" width="24" height="12" fill="#9aa8bd"/>
+
+  <!-- Cuerpo -->
+  <rect x="62" y="152" width="116" height="92" rx="30" fill="url(#ink-cuerpo)" stroke="#9aa8bd" stroke-width="2.5"/>
+
+  <!-- Greca andina (escalonado inca) sutil -->
+  <path d="M88 168 h9 v-7 h9 v7 h9 v-7 h9 v7 h9 v-7 h9 v7 h9" fill="none" stroke="#e3b24e" stroke-width="3" stroke-linejoin="miter" opacity="0.75"/>
+
+  <!-- Panel de pecho con núcleo IA y marco andino -->
+  <rect x="86" y="178" width="68" height="40" rx="11" fill="#14233f"/>
+  <circle cx="120" cy="198" r="9" fill="#2dd4bf"/>
+  <circle cx="120" cy="198" r="9" fill="none" stroke="#e3b24e" stroke-width="2.4"/>
+  <circle cx="116.8" cy="194.8" r="2.4" fill="#eafffb"/>
+  <g fill="#e3b24e">
+    <rect x="118.5" y="182" width="3" height="5"/>
+    <rect x="118.5" y="209" width="3" height="5"/>
+    <rect x="101" y="196.5" width="5" height="3"/>
+    <rect x="134" y="196.5" width="5" height="3"/>
+  </g>
+
+  <!-- Brazos (capsulas) que sostienen la bolsa -->
+  <path d="M73 170 L104 207" stroke="#9aa8bd" stroke-width="19" stroke-linecap="round"/>
+  <path d="M167 170 L136 207" stroke="#9aa8bd" stroke-width="19" stroke-linecap="round"/>
+  <path d="M73 170 L104 207" stroke="#eef3f9" stroke-width="14" stroke-linecap="round"/>
+  <path d="M167 170 L136 207" stroke="#eef3f9" stroke-width="14" stroke-linecap="round"/>
+
+  <!-- Bolsa de compras -->
+  <path d="M99 212 h42 l3 30 a7 7 0 0 1 -7 7 h-34 a7 7 0 0 1 -7 -7 z" fill="url(#ink-bolsa)" stroke="#1d4ed8" stroke-width="2"/>
+  <path d="M108 213 q12 -18 24 0" fill="none" stroke="#e3b24e" stroke-width="3.4" stroke-linecap="round"/>
+  <rect x="115" y="225" width="10" height="10" rx="1.5" fill="#2dd4bf" transform="rotate(45 120 230)"/>
+
+  <!-- Manos sujetando la bolsa -->
+  <circle cx="106" cy="211" r="8.5" fill="url(#ink-cuerpo)" stroke="#9aa8bd" stroke-width="2"/>
+  <circle cx="134" cy="211" r="8.5" fill="url(#ink-cuerpo)" stroke="#9aa8bd" stroke-width="2"/>
+</svg>

@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useSesion } from '../contexto/SesionContext'
-import { LogoUSS } from '../componentes/LogoUSS'
 
 // Pantalla de inicio de sesión.
 export function Login() {
@@ -33,10 +32,12 @@ export function Login() {
   return (
     <div className="auth-contenedor">
       <div className="auth-tarjeta">
-        <div className="auth-logo">
-          <LogoUSS size="medium" />
-        </div>
-        <h1 className="auth-titulo">🤖 IA InkaShop</h1>
+        <img
+          src="/assistant-inkashop.svg"
+          alt="Asistente IA de InkaShop"
+          className="mascota-inkashop auth-mascota"
+        />
+        <h1 className="auth-titulo">IA InkaShop</h1>
         <p className="auth-subtitulo">Compra con respaldo, vende con innovación.</p>
 
         <form onSubmit={enviar} className="formulario">

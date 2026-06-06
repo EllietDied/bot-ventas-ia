@@ -145,7 +145,8 @@ Estas estructuras se usan en las pantallas: la **cola FIFO** en Pedidos, la **pi
 - Historial de pedidos y de consultas.
 - Formularios con validaciones y mensajes de error.
 - **Modo claro y oscuro** con un switch en la barra de navegación (recuerda tu preferencia).
-- **Identidad institucional USS**: el logo oficial de la Universidad Señor de Sipán aparece en el login, el registro, la barra de navegación, el asistente y el pie de página; también en los iconos de la PWA.
+- **Identidad institucional USS**: el logo oficial de la Universidad Señor de Sipán aparece en la barra de navegación, el registro, el asistente y el pie de página; también en los iconos de la PWA.
+- **Mascota "Asistente InkaShop"** (`public/assistant-inkashop.svg`): ilustración vectorial de un robot IA moderno con detalles geométricos andinos sutiles (greca inca, remate dorado) y una bolsa de compras. Se muestra en el **login** y en la **pantalla principal del Asistente IA**, y se adapta a modo claro y oscuro.
 
 ### Validaciones incluidas
 
