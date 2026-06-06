@@ -38,7 +38,12 @@ export function BarraNavegacion() {
             {/* Solo el comprador ve el carrito */}
             {!esVendedor(usuarioActual) && (
               <Link to="/carrito">
-                Carrito {cantidadTotal > 0 && <span className="badge">{cantidadTotal}</span>}
+                Carrito{' '}
+                {cantidadTotal > 0 && (
+                  <span className="badge" key={cantidadTotal}>
+                    {cantidadTotal}
+                  </span>
+                )}
               </Link>
             )}
 
@@ -46,7 +51,12 @@ export function BarraNavegacion() {
             {esVendedor(usuarioActual) && <Link to="/vendedor">Panel Vendedor</Link>}
 
             <Link to="/mensajes">
-              Mensajes {noLeidos > 0 && <span className="badge">{noLeidos}</span>}
+              Mensajes{' '}
+              {noLeidos > 0 && (
+                <span className="badge" key={noLeidos}>
+                  {noLeidos}
+                </span>
+              )}
             </Link>
             <Link to="/pedidos">Pedidos</Link>
 

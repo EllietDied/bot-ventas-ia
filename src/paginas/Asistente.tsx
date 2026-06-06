@@ -28,20 +28,15 @@ interface MensajeAsistente {
   texto: string
   productos?: Producto[]
   comparacion?: Producto[]
+  pensando?: boolean // mientras el asistente "procesa" la consulta
 }
 
-const BIENVENIDA: MensajeAsistente = {
-  id: 'A-0',
-  emisor: 'bot',
-  texto:
-    '¡Hola! Soy tu Asistente IA de Ventas 🤖. Cuéntame qué buscas (por categoría, uso o presupuesto) y te recomendaré las mejores opciones. También puedes usar los botones rápidos de abajo.',
-}
-
-const BOTONES_RAPIDOS = [
-  'Recomiéndame una laptop',
-  'Busco algo económico',
-  'Armar una PC básica',
-  'Ver productos gamer',
+// Botones rápidos: lo que se muestra (label) y lo que se le envía al bot (query).
+const BOTONES_RAPIDOS: { label: string; query: string }[] = [
+  { label: '🎮 Quiero algo gamer', query: 'Quiero algo gamer' },
+  { label: '💰 Busco algo económico', query: 'Busco algo económico' },
+  { label: '🖥️ Armar una PC básica', query: 'Armar una PC básica' },
+  { label: '🔥 Ver ofertas', query: 'Ver ofertas económicas' },
 ]
 
 // PANTALLA PRINCIPAL: el Asistente IA es el centro de la aplicación.
@@ -54,20 +49,34 @@ export function Asistente() {
 
   const puedeComprar = usuarioActual ? esComprador(usuarioActual) : false
 
+  // Saludo personalizado con el nombre del usuario.
+  const primerNombre = usuarioActual ? usuarioActual.nombre.split(' ')[0] : ''
+  const bienvenida: MensajeAsistente = {
+    id: 'A-0',
+    emisor: 'bot',
+    texto: `¡Hola${primerNombre ? ', ' + primerNombre : ''}! 👋 Soy tu Asistente IA de Ventas 🤖. Cuéntame qué buscas (por categoría, uso o presupuesto) y te recomendaré las mejores opciones. También puedes usar los botones rápidos de abajo.`,
+  }
+
   const [mensajes, setMensajes] = useState<MensajeAsistente[]>(() =>
-    cargar<MensajeAsistente[]>('asistente_chat', [BIENVENIDA]),
+    cargar<MensajeAsistente[]>('asistente_chat', [bienvenida]),
   )
   const [texto, setTexto] = useState('')
   const [comparar, setComparar] = useState<Producto[]>([])
   const finRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    guardar('asistente_chat', mensajes)
+    // No guardamos los mensajes "pensando" (son temporales).
+    guardar('asistente_chat', mensajes.filter((m) => !m.pensando))
     finRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [mensajes])
 
   function agregarMensaje(m: MensajeAsistente) {
     setMensajes((prev) => [...prev, m])
+  }
+
+  // Reemplaza el contenido de un mensaje ya existente (por su id).
+  function actualizarMensaje(id: string, cambios: Partial<MensajeAsistente>) {
+    setMensajes((prev) => prev.map((m) => (m.id === id ? { ...m, ...cambios } : m)))
   }
 
   // Intenta deducir la categoría a partir del texto (para el historial / recomendaciones).
@@ -89,19 +98,25 @@ export function Asistente() {
 
     // 2) Registramos la consulta en la PILA LIFO (para historial y recomendaciones).
     registrarConsulta(limpio, detectarCategoria(limpio))
-
-    // 3) Respuesta del asistente + productos recomendados.
-    const respuesta = bot.responderConsulta(limpio, productos)
-    const recomendados = limpio.toLowerCase().includes('gracias')
-      ? []
-      : bot.recomendarPorConsulta(limpio, productos, categoriasConsultadas)
-    agregarMensaje({
-      id: idUnico(),
-      emisor: 'bot',
-      texto: respuesta,
-      productos: recomendados,
-    })
     setTexto('')
+
+    // 3) Efecto "IA trabajando": mostramos pasos antes de la respuesta final.
+    const idBot = idUnico()
+    agregarMensaje({ id: idBot, emisor: 'bot', texto: 'Analizando tu consulta', pensando: true })
+
+    // Paso intermedio: "buscando productos".
+    setTimeout(() => {
+      actualizarMensaje(idBot, { texto: 'Buscando productos relacionados' })
+    }, 700)
+
+    // Respuesta final: texto del bot + tarjetas de productos recomendados.
+    setTimeout(() => {
+      const respuesta = bot.responderConsulta(limpio, productos)
+      const recomendados = limpio.toLowerCase().includes('gracias')
+        ? []
+        : bot.recomendarPorConsulta(limpio, productos, categoriasConsultadas)
+      actualizarMensaje(idBot, { texto: respuesta, productos: recomendados, pensando: false })
+    }, 1600)
   }
 
   function enviar(e: React.FormEvent) {
@@ -176,7 +191,22 @@ export function Asistente() {
           <div className="asistente-mensajes">
             {mensajes.map((m) => (
               <div key={m.id} className="asistente-fila">
-                <div className={m.emisor === 'bot' ? 'burbuja bot' : 'burbuja usuario'}>{m.texto}</div>
+                <div
+                  className={
+                    m.emisor === 'bot'
+                      ? 'burbuja bot' + (m.pensando ? ' pensando' : '')
+                      : 'burbuja usuario'
+                  }
+                >
+                  {m.texto}
+                  {m.pensando && (
+                    <span className="puntos-pensando">
+                      <span>.</span>
+                      <span>.</span>
+                      <span>.</span>
+                    </span>
+                  )}
+                </div>
 
                 {/* Productos recomendados dentro del chat */}
                 {m.productos && m.productos.length > 0 && (
@@ -205,8 +235,8 @@ export function Asistente() {
           {/* Botones rápidos */}
           <div className="asistente-rapidos">
             {BOTONES_RAPIDOS.map((b) => (
-              <button key={b} className="chip" onClick={() => enviarTexto(b)}>
-                {b}
+              <button key={b.label} className="chip" onClick={() => enviarTexto(b.query)}>
+                {b.label}
               </button>
             ))}
             {puedeComprar && (

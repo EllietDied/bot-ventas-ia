@@ -3,6 +3,7 @@ import { useProductos } from '../contexto/ProductosContext'
 import { useCarrito } from '../contexto/CarritoContext'
 import { useConsultas } from '../contexto/ConsultasContext'
 import { useSesion } from '../contexto/SesionContext'
+import { useToast } from '../contexto/ToastContext'
 import { TarjetaProducto } from '../componentes/TarjetaProducto'
 import { ChatBotIA } from '../core/modelos/ChatBotIA'
 import { Producto } from '../core/modelos/Producto'
@@ -17,6 +18,7 @@ export function Catalogo() {
   const { agregarAlCarrito } = useCarrito()
   const { registrarConsulta, categoriasConsultadas } = useConsultas()
   const { usuarioActual } = useSesion()
+  const toast = useToast()
 
   const [termino, setTermino] = useState('')
   const [categoria, setCategoria] = useState('')
@@ -46,6 +48,7 @@ export function Catalogo() {
   function agregar(producto: Producto) {
     agregarAlCarrito(producto)
     registrarConsulta(producto.nombre, producto.categoria)
+    toast.exito(`${producto.nombre} agregado al carrito 🛒`)
   }
 
   return (

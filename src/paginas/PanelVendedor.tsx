@@ -4,6 +4,7 @@ import { useSesion } from '../contexto/SesionContext'
 import { useConsultas } from '../contexto/ConsultasContext'
 import { useMensajeria } from '../contexto/MensajeriaContext'
 import { usePedidos } from '../contexto/PedidosContext'
+import { useToast } from '../contexto/ToastContext'
 
 // Pantalla del vendedor: publicar productos y actualizar stock.
 export function PanelVendedor() {
@@ -12,6 +13,7 @@ export function PanelVendedor() {
   const { consultasRecientes } = useConsultas()
   const { mensajes } = useMensajeria()
   const { pedidosPendientes } = usePedidos()
+  const toast = useToast()
 
   const [nombre, setNombre] = useState('')
   const [descripcion, setDescripcion] = useState('')
@@ -73,6 +75,7 @@ export function PanelVendedor() {
     setPrecio('')
     setStock('')
     setExito('Producto publicado correctamente.')
+    toast.exito('Producto publicado correctamente 🎉')
   }
 
   return (

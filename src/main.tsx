@@ -11,6 +11,7 @@ import { ConsultasProvider } from './contexto/ConsultasContext'
 import { CarritoProvider } from './contexto/CarritoContext'
 import { PedidosProvider } from './contexto/PedidosContext'
 import { MensajeriaProvider } from './contexto/MensajeriaContext'
+import { ToastProvider } from './contexto/ToastContext'
 
 // Punto de entrada: montamos la App envuelta en todos los contextos.
 ReactDOM.createRoot(document.getElementById('root')!).render(
@@ -22,7 +23,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
             <CarritoProvider>
               <PedidosProvider>
                 <MensajeriaProvider>
-                  <App />
+                  <ToastProvider>
+                    <App />
+                  </ToastProvider>
                 </MensajeriaProvider>
               </PedidosProvider>
             </CarritoProvider>
