@@ -272,6 +272,7 @@ function TarjetaChat({
   onConsultar: () => void
 }) {
   const agotado = producto.stock <= 0
+  const bajoStock = producto.stock > 0 && producto.stock <= 5
   return (
     <div className="tarjeta-chat">
       <div className="tarjeta-chat-top">
@@ -283,7 +284,11 @@ function TarjetaChat({
       </div>
       <div className="tarjeta-chat-precio">
         S/ {producto.precio.toFixed(2)}{' '}
-        <span className={agotado ? 'tarjeta-stock agotado' : 'tarjeta-stock'}>
+        <span
+          className={
+            agotado ? 'tarjeta-stock agotado' : bajoStock ? 'tarjeta-stock bajo' : 'tarjeta-stock'
+          }
+        >
           {agotado ? 'Agotado' : `Stock: ${producto.stock}`}
         </span>
       </div>

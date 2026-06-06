@@ -8,21 +8,25 @@
 :root {
   color-scheme: light;
 
-  /* Acento */
-  --primario: #6366f1;
-  --primario-oscuro: #4f46e5;
-  --acento-suave: #eef2ff; /* superficie tintada de acento (chips, recomendaciones, burbuja del bot) */
-  --acento-texto: #4f46e5; /* texto sobre la superficie de acento */
+  /* Color principal (azul) */
+  --primario: #2563eb;
+  --primario-oscuro: #1d4ed8;
+  --acento-suave: #eff6ff; /* superficie azul muy clara (chips, etiquetas) */
+  --acento-texto: #1d4ed8;
+
+  /* Acento IA (turquesa) — identifica al Asistente */
+  --acento-ia: #14b8a6;
+  --acento-ia-suave: #f0fdfa; /* superficie turquesa muy clara (asistente) */
 
   /* Superficies */
-  --fondo: #f1f5f9; /* fondo general */
+  --fondo: #f8fafc; /* fondo general */
   --tarjeta: #ffffff; /* fondo de tarjetas */
-  --superficie: #f8fafc; /* superficie sutil (filas, cabecera de tabla) */
+  --superficie: #f1f5f9; /* superficie sutil (filas, cabecera de tabla) */
   --input-bg: #ffffff; /* fondo de inputs */
   --navbar-bg: #ffffff; /* fondo de la navbar */
 
   /* Texto */
-  --texto: #1e293b; /* texto principal */
+  --texto: #0f172a; /* texto principal */
   --texto-tenue: #64748b; /* texto secundario */
 
   /* Bordes */
@@ -32,19 +36,29 @@
   --boton-sec-bg: #e2e8f0;
   --boton-sec-hover: #cbd5e1;
 
-  /* Mensajes y estados */
-  --exito: #16a34a;
+  /* Éxito (verde) */
+  --exito: #22c55e;
   --exito-bg: #f0fdf4;
   --exito-borde: #bbf7d0;
-  --error: #dc2626;
+
+  /* Advertencia / stock bajo (ámbar) */
+  --advertencia: #f59e0b;
+  --advertencia-bg: #fffbeb;
+  --advertencia-borde: #fde68a;
+  --advertencia-texto: #b45309;
+
+  /* Error (rojo) */
+  --error: #ef4444;
   --error-bg: #fef2f2;
   --error-borde: #fecaca;
-  --pendiente-bg: #fef9c3;
-  --pendiente-texto: #a16207;
-  --atendido-bg: #dcfce7;
-  --atendido-texto: #166534;
 
-  --sombra: 0 4px 14px rgba(15, 23, 42, 0.08);
+  /* Estados de pedido */
+  --pendiente-bg: #fffbeb;
+  --pendiente-texto: #b45309;
+  --atendido-bg: #f0fdf4;
+  --atendido-texto: #15803d;
+
+  --sombra: 0 4px 16px rgba(15, 23, 42, 0.06);
   --radio: 14px;
 }
 
@@ -52,18 +66,22 @@
 [data-theme='dark'] {
   color-scheme: dark;
 
-  /* Acento */
-  --primario: #6366f1;
-  --primario-oscuro: #4f46e5;
-  --acento-suave: #243049;
-  --acento-texto: #c7d2fe;
+  /* Color principal (azul) */
+  --primario: #60a5fa;
+  --primario-oscuro: #3b82f6;
+  --acento-suave: #1e293b; /* superficie azul/slate (chips, etiquetas) */
+  --acento-texto: #93c5fd;
+
+  /* Acento IA (turquesa) */
+  --acento-ia: #2dd4bf;
+  --acento-ia-suave: #123f3a; /* superficie turquesa oscura (asistente) */
 
   /* Superficies */
-  --fondo: #0f172a;
-  --tarjeta: #1e293b;
-  --superficie: #172033;
-  --input-bg: #0f172a;
-  --navbar-bg: #1e293b;
+  --fondo: #0b1220; /* fondo general */
+  --tarjeta: #111827; /* fondo de tarjetas */
+  --superficie: #1e293b; /* tarjetas secundarias / superficie sutil */
+  --input-bg: #0b1220;
+  --navbar-bg: #111827;
 
   /* Texto */
   --texto: #f8fafc;
@@ -76,19 +94,29 @@
   --boton-sec-bg: #334155;
   --boton-sec-hover: #475569;
 
-  /* Mensajes y estados */
+  /* Éxito */
   --exito: #4ade80;
   --exito-bg: #14271c;
   --exito-borde: #166534;
+
+  /* Advertencia / stock bajo */
+  --advertencia: #fbbf24;
+  --advertencia-bg: #2e2310;
+  --advertencia-borde: #92400e;
+  --advertencia-texto: #fcd34d;
+
+  /* Error */
   --error: #f87171;
   --error-bg: #2a1518;
   --error-borde: #7f1d1d;
-  --pendiente-bg: #3a2f0a;
-  --pendiente-texto: #fde047;
+
+  /* Estados de pedido */
+  --pendiente-bg: #2e2310;
+  --pendiente-texto: #fcd34d;
   --atendido-bg: #14271c;
   --atendido-texto: #86efac;
 
-  --sombra: 0 4px 14px rgba(0, 0, 0, 0.45);
+  --sombra: 0 4px 16px rgba(0, 0, 0, 0.5);
 }
 
 * {
@@ -484,7 +512,8 @@ a:hover {
 
 /* ---------- Recomendados ---------- */
 .seccion-recomendados {
-  background: var(--acento-suave);
+  background: var(--acento-ia-suave);
+  border: 1px solid var(--borde);
   border-radius: var(--radio);
   padding: 1.2rem;
 }
@@ -547,6 +576,9 @@ a:hover {
 }
 .tarjeta-stock.agotado {
   color: var(--error);
+}
+.tarjeta-stock.bajo {
+  color: var(--advertencia);
 }
 
 /* ---------- Carrito ---------- */
@@ -798,7 +830,7 @@ a:hover {
   white-space: pre-line;
 }
 .burbuja.bot {
-  background: var(--acento-suave);
+  background: var(--acento-ia-suave);
   color: var(--texto);
   align-self: flex-start;
   border-bottom-left-radius: 4px;
@@ -886,6 +918,7 @@ a:hover {
 /* ---------- Asistente IA (pantalla principal) ---------- */
 .asistente-cabecera h1 {
   margin-bottom: 0.2rem;
+  color: var(--acento-ia);
 }
 .asistente-cabecera p {
   color: var(--texto-tenue);
@@ -1019,7 +1052,8 @@ a:hover {
 }
 .asistente-tip {
   margin-top: 1rem;
-  background: var(--acento-suave);
+  background: var(--acento-ia-suave);
+  border: 1px solid var(--borde);
   border-radius: 10px;
   padding: 0.7rem;
   font-size: 0.85rem;
@@ -1028,7 +1062,7 @@ a:hover {
 /* ---------- Sugerencias del asistente IA (panel vendedor) ---------- */
 .sugerencias-ia {
   margin-bottom: 1.2rem;
-  background: var(--acento-suave);
+  background: var(--acento-ia-suave);
 }
 .sugerencias-grid {
   display: grid;
@@ -1054,6 +1088,10 @@ a:hover {
   align-items: center;
   justify-content: center;
   font-weight: 700;
+}
+/* La sugerencia de "Bajo stock" (la primera) usa ámbar de alerta */
+.sugerencias-grid .sugerencia:first-child .sugerencia-num {
+  background: var(--advertencia);
 }
 
 /* ---------- Confirmación de pago (asistente) ---------- */

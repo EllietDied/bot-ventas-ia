@@ -9,6 +9,7 @@ interface Props {
 // Tarjeta visual de un producto del catálogo.
 export function TarjetaProducto({ producto, alAgregar }: Props) {
   const agotado = producto.stock <= 0
+  const bajoStock = producto.stock > 0 && producto.stock <= 5
 
   return (
     <div className="tarjeta-producto">
@@ -19,7 +20,11 @@ export function TarjetaProducto({ producto, alAgregar }: Props) {
 
       <div className="tarjeta-pie">
         <span className="tarjeta-precio">S/ {producto.precio.toFixed(2)}</span>
-        <span className={agotado ? 'tarjeta-stock agotado' : 'tarjeta-stock'}>
+        <span
+          className={
+            agotado ? 'tarjeta-stock agotado' : bajoStock ? 'tarjeta-stock bajo' : 'tarjeta-stock'
+          }
+        >
           {agotado ? 'Agotado' : `Stock: ${producto.stock}`}
         </span>
       </div>
