@@ -484,10 +484,14 @@ a:hover {
     opacity: 0;
   } /* vuelve suavemente a blanco */
 }
-/* En celular: menos figuras (no saturar); el tamaño ya es relativo a la celda */
+/* En celular: menos figuras (no saturar) y al DOBLE de tamaño (scale 2),
+   manteniéndolas centradas en su punto. Solo afecta al móvil. */
 @media (max-width: 600px) {
   .inka-fig.solo-pc {
     display: none;
+  }
+  .inka-fig {
+    transform: translate(-50%, -50%) scale(2);
   }
 }
 @media (prefers-reduced-motion: reduce) {
