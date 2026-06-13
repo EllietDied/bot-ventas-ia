@@ -515,7 +515,7 @@ interface FiguraInka {
 const TIPOS = Object.keys(FORMAS)
 const TOTAL = 150
 const ACTIVAS = 25 // cuántas se marcan en dorado al mismo tiempo
-const MIN_DIST = 5.6 // separación mínima entre centros (% del ancho)
+const MIN_DIST = 5.7 // separación mínima entre centros (% del ancho)
 const ASPECTO_Y = 0.62 // el alto del contenedor ≈ 0.62 del ancho
 
 // Genera 100 figuras en posiciones AL AZAR (desordenadas, sin rejilla), pero
@@ -562,7 +562,7 @@ function generarFiguras(): FiguraInka[] {
   }
   return puntos.map((p, i) => {
     // Tamaño relativo al ancho (menor que la separación → no se solapan)
-    const width = (4.3 + Math.random() * 1.2).toFixed(2) + '%' // 4.3–5.5 % (caben 150 sin solaparse)
+    const width = (4.8 + Math.random() * 0.9).toFixed(2) + '%' // 4.8–5.7 % (más grandes, casi tocándose)
     return {
       tipo: tipos[i],
       estilo: { left: p.x.toFixed(2) + '%', top: p.y.toFixed(2) + '%', width },
