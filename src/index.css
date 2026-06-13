@@ -435,6 +435,22 @@ a:hover {
 [data-theme='light'] #root:has(.inka-auth-bg) .navbar {
   background: #f7f0e2;
 }
+/* El footer (y el body) también toman el tono del hero, sin línea ni gap. */
+#root:has(.inka-auth-bg) .pie-institucional {
+  margin-top: 0;
+  border-top: none;
+}
+[data-theme='dark'] body:has(.inka-auth-bg),
+[data-theme='dark'] #root:has(.inka-auth-bg) .pie-institucional {
+  background: #0b1220;
+}
+[data-theme='light'] body:has(.inka-auth-bg),
+[data-theme='light'] #root:has(.inka-auth-bg) .pie-institucional {
+  background: #e6dcc4;
+}
+[data-theme='light'] #root:has(.inka-auth-bg) .pie-institucional {
+  color: #6b5a42;
+}
 /* Fondo animado de figuras inka (contorno blanco; una se "dibuja" en dorado) */
 .inka-bg {
   position: absolute;
