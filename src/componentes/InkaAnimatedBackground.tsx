@@ -100,6 +100,102 @@ const FORMAS: Record<string, () => JSX.Element> = {
       <path pathLength={1} d="M38 72 H62" />
     </>
   ),
+  // Greca / patrón geométrico andino (espiral escalonada)
+  greca: () => (
+    <>
+      <path pathLength={1} d="M20 82 L20 22 L80 22 L80 74 L38 74 L38 42 L64 42 L64 60 L50 60" />
+    </>
+  ),
+  llama: () => (
+    <>
+      <path
+        pathLength={1}
+        d="M36 82 L36 48 C36 42 30 38 30 30 C30 20 32 12 39 10 L39 5 L44 4 L45 11 C51 11 53 18 53 26 L53 44 C53 48 57 50 62 50 L76 50 C82 50 85 54 85 60 L85 82 L78 82 L78 56 L44 56 L44 82 Z"
+      />
+      <path pathLength={1} d="M85 54 Q91 52 91 46" />
+    </>
+  ),
+  chullo: () => (
+    <>
+      <circle pathLength={1} cx="50" cy="12" r="5" />
+      <path pathLength={1} d="M50 17 V24" />
+      <path pathLength={1} d="M22 70 Q22 24 50 24 Q78 24 78 70 Z" />
+      <path pathLength={1} d="M22 70 L15 76 L21 90 L30 78 M78 70 L85 76 L79 90 L70 78" />
+      <path pathLength={1} d="M24 80 L21 94 M28 82 V95 M32 80 L35 94 M76 80 L79 94 M72 82 V95 M68 80 L65 94" />
+      <path pathLength={1} d="M26 40 H74 M26 54 H74" />
+      <path pathLength={1} d="M28 35 l8 -6 l8 6 l8 -6 l8 6 l8 -6" />
+      <path pathLength={1} d="M30 49 l6 5 l6 -5 M48 49 l6 5 l6 -5" />
+    </>
+  ),
+  ceramica: () => (
+    <>
+      <path
+        pathLength={1}
+        d="M36 18 H64 L60 28 Q78 38 78 58 Q78 84 50 84 Q22 84 22 58 Q22 38 40 28 Z"
+      />
+      <path pathLength={1} d="M27 50 H73 M30 62 H70" />
+      <path pathLength={1} d="M34 56 l5 -5 l5 5 l5 -5 l5 5 l5 -5 l5 5" />
+    </>
+  ),
+  colibri: () => (
+    <>
+      <path pathLength={1} d="M46 48 L22 44" />
+      <circle pathLength={1} cx="48" cy="48" r="3.5" />
+      <path pathLength={1} d="M50 50 Q47 64 50 80 L46 75 M50 80 L54 75" />
+      <path pathLength={1} d="M50 50 Q40 40 26 42 Q40 46 48 54" />
+      <path pathLength={1} d="M50 50 Q60 40 74 42 Q60 46 52 54" />
+    </>
+  ),
+  chaska: () => (
+    <>
+      <path pathLength={1} d="M50 12 L58 42 L88 50 L58 58 L50 88 L42 58 L12 50 L42 42 Z" />
+      <path pathLength={1} d="M30 30 L46 46 M70 30 L54 46 M30 70 L46 54 M70 70 L54 54" />
+      <circle pathLength={1} cx="50" cy="50" r="5" />
+    </>
+  ),
+  maiz: () => (
+    <>
+      <path pathLength={1} d="M50 20 Q34 26 34 50 Q34 76 50 82 Q66 76 66 50 Q66 26 50 20 Z" />
+      <path pathLength={1} d="M40 30 L60 30 M37 40 L63 40 M37 50 L63 50 M37 60 L63 60 M40 70 L60 70" />
+      <path pathLength={1} d="M44 24 L44 78 M50 22 L50 80 M56 24 L56 78" />
+      <path pathLength={1} d="M50 20 Q44 10 38 8 M50 20 Q56 10 62 8" />
+    </>
+  ),
+  rana: () => (
+    <>
+      <path pathLength={1} d="M32 42 Q32 30 42 30 L58 30 Q68 30 68 42 Q68 60 50 60 Q32 60 32 42 Z" />
+      <circle pathLength={1} cx="41" cy="34" r="4" />
+      <circle pathLength={1} cx="59" cy="34" r="4" />
+      <path pathLength={1} d="M44 52 Q50 56 56 52" />
+      <path pathLength={1} d="M32 46 Q18 46 16 58 Q15 68 23 67 M34 54 Q24 62 26 72" />
+      <path pathLength={1} d="M68 46 Q82 46 84 58 Q85 68 77 67 M66 54 Q76 62 74 72" />
+    </>
+  ),
+  flor: () => (
+    <>
+      <circle pathLength={1} cx="50" cy="50" r="6" />
+      <path pathLength={1} d="M50 44 C45 34 45 25 50 19 C55 25 55 34 50 44 Z" />
+      <path pathLength={1} d="M50 44 C45 34 45 25 50 19 C55 25 55 34 50 44 Z" transform="rotate(60 50 50)" />
+      <path pathLength={1} d="M50 44 C45 34 45 25 50 19 C55 25 55 34 50 44 Z" transform="rotate(120 50 50)" />
+      <path pathLength={1} d="M50 44 C45 34 45 25 50 19 C55 25 55 34 50 44 Z" transform="rotate(180 50 50)" />
+      <path pathLength={1} d="M50 44 C45 34 45 25 50 19 C55 25 55 34 50 44 Z" transform="rotate(240 50 50)" />
+      <path pathLength={1} d="M50 44 C45 34 45 25 50 19 C55 25 55 34 50 44 Z" transform="rotate(300 50 50)" />
+    </>
+  ),
+  pez: () => (
+    <>
+      <path pathLength={1} d="M22 50 Q40 36 64 44 Q76 48 82 50 Q76 52 64 56 Q40 64 22 50 Z" />
+      <path pathLength={1} d="M82 50 L94 42 L90 50 L94 58 Z" />
+      <circle pathLength={1} cx="34" cy="48" r="2" />
+      <path pathLength={1} d="M46 44 Q52 50 46 56 M56 45 Q62 50 56 55" />
+    </>
+  ),
+  terrazas: () => (
+    <>
+      <path pathLength={1} d="M16 82 H84" />
+      <path pathLength={1} d="M22 82 V70 H78 V82 M30 70 V58 H70 V70 M38 58 V46 H62 V58 M46 46 V36 H54 V46" />
+    </>
+  ),
 }
 
 interface FiguraInka {
