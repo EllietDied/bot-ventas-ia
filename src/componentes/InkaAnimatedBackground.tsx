@@ -280,7 +280,7 @@ export function InkaAnimatedBackground() {
       return nuevas
     }
     setActivos((prev) => elegir(prev))
-    const id = setInterval(() => setActivos((prev) => elegir(prev)), 3400)
+    const id = setInterval(() => setActivos((prev) => elegir(prev)), 4400)
     return () => clearInterval(id)
   }, [figuras.length])
 
