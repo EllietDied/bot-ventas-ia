@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { memo, useEffect, useState } from 'react'
 
 // Fondo animado premium con estética incaica para IA InkaShop.
 // Cada figura es un SVG de líneas blancas (contorno, sin relleno). Cada cierto
@@ -196,6 +196,208 @@ const FORMAS: Record<string, () => JSX.Element> = {
       <path pathLength={1} d="M22 82 V70 H78 V82 M30 70 V58 H70 V70 M38 58 V46 H62 V58 M46 46 V36 H54 V46" />
     </>
   ),
+  deidad: () => (
+    <>
+      <rect pathLength={1} x="42" y="34" width="16" height="22" rx="2" fill="none" />
+      <circle pathLength={1} cx="50" cy="24" r="9" />
+      <path pathLength={1} d="M50 15 V8 M41 17 L36 11 M59 17 L64 11 M38 24 H31 M62 24 H69 M41 31 L36 37 M59 31 L64 37" />
+      <path pathLength={1} d="M42 41 H32 M58 41 H68" />
+      <rect pathLength={1} x="26" y="30" width="5" height="34" rx="1.5" fill="none" />
+      <rect pathLength={1} x="69" y="30" width="5" height="34" rx="1.5" fill="none" />
+      <path pathLength={1} d="M45 56 L43 84 M55 56 L57 84" />
+    </>
+  ),
+  nawi: () => (
+    <>
+      <path pathLength={1} d="M18 50 Q50 26 82 50 Q50 74 18 50 Z" />
+      <circle pathLength={1} cx="50" cy="50" r="12" />
+      <circle pathLength={1} cx="50" cy="50" r="4" />
+      <path pathLength={1} d="M28 36 L23 28 M50 26 V17 M72 36 L77 28" />
+      <path pathLength={1} d="M28 64 L23 72 M50 74 V83 M72 64 L77 72" />
+    </>
+  ),
+  arcoiris: () => (
+    <>
+      <path pathLength={1} d="M14 80 A36 36 0 0 1 86 80" />
+      <path pathLength={1} d="M22 80 A28 28 0 0 1 78 80" />
+      <path pathLength={1} d="M30 80 A20 20 0 0 1 70 80" />
+      <path pathLength={1} d="M38 80 A12 12 0 0 1 62 80" />
+      <path pathLength={1} d="M14 80 H86" />
+    </>
+  ),
+  estrella8: () => (
+    <>
+      <path pathLength={1} d="M50 10 L58 32 L80 24 L72 46 L90 50 L72 54 L80 76 L58 68 L50 90 L42 68 L20 76 L28 54 L10 50 L28 46 L20 24 L42 32 Z" />
+      <circle pathLength={1} cx="50" cy="50" r="10" />
+      <circle pathLength={1} cx="50" cy="50" r="4" />
+    </>
+  ),
+  alpaca: () => (
+    <>
+      <path pathLength={1} d="M30 60 Q22 56 24 47 Q27 40 35 41 Q40 30 47 31 Q53 27 56 33 Q63 32 64 41 Q73 42 74 51 Q76 60 68 62 Q70 70 62 71 Q60 76 53 74 Q47 76 45 71 Q37 71 38 63 Q33 64 30 60 Z" />
+      <path pathLength={1} d="M52 32 Q53 22 51 16 Q49 22 50 31" />
+      <path pathLength={1} d="M51 16 L47 12 M51 16 L55 12" />
+      <circle pathLength={1} cx="48" cy="24" r="1.8" />
+      <path pathLength={1} d="M44 73 L43 84 M53 75 L53 86 M62 71 L64 84" />
+      <path pathLength={1} d="M45 27 Q49 30 53 27" />
+    </>
+  ),
+  buho: () => (
+    <>
+      <path pathLength={1} d="M50 18 Q30 18 26 38 Q22 60 34 76 Q42 86 50 86 Q58 86 66 76 Q78 60 74 38 Q70 18 50 18 Z" />
+      <path pathLength={1} d="M30 24 L24 12 L37 21 M70 24 L76 12 L63 21" />
+      <circle pathLength={1} cx="40" cy="42" r="9" />
+      <circle pathLength={1} cx="60" cy="42" r="9" />
+      <circle pathLength={1} cx="40" cy="42" r="2.4" />
+      <circle pathLength={1} cx="60" cy="42" r="2.4" />
+      <path pathLength={1} d="M50 48 L46 56 Q50 60 54 56 Z" />
+      <path pathLength={1} d="M34 60 Q42 70 50 70 Q58 70 66 60" />
+    </>
+  ),
+  mono: () => (
+    <>
+      <circle pathLength={1} cx="34" cy="30" r="9" />
+      <path pathLength={1} d="M40 36 Q50 44 50 56 L50 74 Q50 80 44 80 L30 80" />
+      <path pathLength={1} d="M44 40 Q56 36 62 28 L62 16 M56 14 L62 16 L60 22" />
+      <path pathLength={1} d="M46 60 Q40 54 30 56 M30 56 L25 52 M30 56 L26 60 M30 56 L33 51" />
+      <path pathLength={1} d="M50 70 Q62 70 70 62 Q80 52 76 40 Q72 32 64 36 Q58 40 61 47 Q63 52 69 50" />
+      <path pathLength={1} d="M30 80 L28 88 M40 80 L40 88" />
+    </>
+  ),
+  lagarto: () => (
+    <>
+      <path pathLength={1} d="M50 12 Q44 12 44 22 Q40 34 42 48 Q43 60 47 70 Q49 78 50 90 Q51 78 53 70 Q57 60 58 48 Q60 34 56 22 Q56 12 50 12 Z" />
+      <circle pathLength={1} cx="47" cy="19" r="1.4" />
+      <circle pathLength={1} cx="53" cy="19" r="1.4" />
+      <path pathLength={1} d="M44 30 Q30 24 20 16 M20 16 L16 13 M20 16 L17 21 M20 16 L23 12" />
+      <path pathLength={1} d="M56 30 Q70 24 80 16 M80 16 L84 13 M80 16 L83 21 M80 16 L77 12" />
+      <path pathLength={1} d="M44 55 Q30 60 20 70 M20 70 L15 72 M20 70 L18 75 M20 70 L24 73" />
+      <path pathLength={1} d="M56 55 Q70 60 80 70 M80 70 L85 72 M80 70 L82 75 M80 70 L76 73" />
+      <path pathLength={1} d="M50 40 L48 36 M50 50 L52 46 M50 60 L48 56" />
+    </>
+  ),
+  coca: () => (
+    <>
+      <path pathLength={1} d="M50 12 C66 30 70 50 50 84 C30 50 34 30 50 12 Z" />
+      <path pathLength={1} d="M50 16 L50 80" />
+      <path pathLength={1} d="M50 34 L62 28" />
+      <path pathLength={1} d="M50 34 L38 28" />
+      <path pathLength={1} d="M50 52 L64 47" />
+      <path pathLength={1} d="M50 52 L36 47" />
+      <path pathLength={1} d="M50 84 L50 90" />
+    </>
+  ),
+  papa: () => (
+    <>
+      <path pathLength={1} d="M28 48 C24 30 42 18 58 22 C80 26 88 46 82 62 C76 82 50 86 36 76 C24 68 31 60 28 48 Z" />
+      <path pathLength={1} d="M40 44 A4 4 0 0 1 48 44" />
+      <path pathLength={1} d="M58 36 A4 4 0 0 1 66 36" />
+      <path pathLength={1} d="M64 56 A4 4 0 0 1 72 56" />
+      <path pathLength={1} d="M46 64 A4 4 0 0 1 54 64" />
+    </>
+  ),
+  aji: () => (
+    <>
+      <path pathLength={1} d="M42 28 C68 28 80 48 72 66 C66 84 44 90 38 76 C34 66 44 64 48 54 C52 42 36 36 42 28 Z" />
+      <path pathLength={1} d="M42 28 L46 16" />
+      <path pathLength={1} d="M46 16 L38 12" />
+      <path pathLength={1} d="M46 16 C56 14 62 18 64 24" />
+    </>
+  ),
+  hoja: () => (
+    <>
+      <path pathLength={1} d="M50 88 L50 24" />
+      <path pathLength={1} d="M50 58 C36 56 26 46 28 36 C42 38 50 48 50 58 Z" />
+      <path pathLength={1} d="M50 50 C64 48 74 38 72 28 C58 30 50 40 50 50 Z" />
+      <path pathLength={1} d="M50 28 C46 22 48 16 54 14 C56 20 54 26 50 28 Z" />
+      <path pathLength={1} d="M50 88 L44 84" />
+      <path pathLength={1} d="M50 88 L56 84" />
+    </>
+  ),
+  quena: () => (
+    <>
+      <rect pathLength={1} x="44" y="12" width="12" height="76" rx="5" fill="none" />
+      <path pathLength={1} d="M44 22 H56" />
+      <circle pathLength={1} cx="50" cy="34" r="2.5" />
+      <circle pathLength={1} cx="50" cy="44" r="2.5" />
+      <circle pathLength={1} cx="50" cy="54" r="2.5" />
+      <circle pathLength={1} cx="50" cy="64" r="2.5" />
+      <circle pathLength={1} cx="50" cy="74" r="2.5" />
+    </>
+  ),
+  charango: () => (
+    <>
+      <circle pathLength={1} cx="50" cy="68" r="20" fill="none" />
+      <circle pathLength={1} cx="50" cy="68" r="6" />
+      <rect pathLength={1} x="45" y="22" width="10" height="30" rx="2" fill="none" />
+      <path pathLength={1} d="M42 16 H58 A3 3 0 0 1 58 24 H42 A3 3 0 0 1 42 16 Z" />
+      <path pathLength={1} d="M47 26 V60" />
+      <path pathLength={1} d="M50 26 V60" />
+      <path pathLength={1} d="M53 26 V60" />
+    </>
+  ),
+  aribalo: () => (
+    <>
+      <path pathLength={1} d="M50 88 L36 56 A18 22 0 0 1 64 56 Z" />
+      <path pathLength={1} d="M42 44 L44 22" />
+      <path pathLength={1} d="M58 44 L56 22" />
+      <path pathLength={1} d="M40 18 H60" />
+      <path pathLength={1} d="M40 50 A9 7 0 0 0 32 62" />
+      <path pathLength={1} d="M60 50 A9 7 0 0 1 68 62" />
+    </>
+  ),
+  kero: () => (
+    <>
+      <path pathLength={1} d="M34 18 L40 84 H60 L66 18 Z" />
+      <path pathLength={1} d="M35 32 H65" />
+      <path pathLength={1} d="M37 50 H63" />
+      <path pathLength={1} d="M39 50 L43 32" />
+      <path pathLength={1} d="M47 50 L49 32" />
+      <path pathLength={1} d="M55 50 L51 32" />
+      <path pathLength={1} d="M61 50 L57 32" />
+      <path pathLength={1} d="M38 68 H62" />
+    </>
+  ),
+  pukara: () => (
+    <>
+      <rect pathLength={1} x="12" y="20" width="76" height="60" rx="2" fill="none" />
+      <path pathLength={1} d="M12 42 L40 42 L48 20" />
+      <path pathLength={1} d="M40 42 L60 50 L88 46" />
+      <path pathLength={1} d="M12 62 L36 58 L60 50" />
+      <path pathLength={1} d="M36 58 L44 80" />
+      <path pathLength={1} d="M60 50 L66 80" />
+      <path pathLength={1} d="M66 64 L88 64" />
+    </>
+  ),
+  intihuatana: () => (
+    <>
+      <path pathLength={1} d="M30 82 L30 56 L42 56 L42 44 L54 44 L54 32 L66 32 L66 56 L78 56 L78 82 Z" />
+      <rect pathLength={1} x="54" y="18" width="12" height="14" rx="1" fill="none" />
+      <path pathLength={1} d="M22 82 H86" />
+      <path pathLength={1} d="M42 56 H66" />
+      <circle pathLength={1} cx="60" cy="25" r="3" />
+    </>
+  ),
+  wiphala: () => (
+    <>
+      <rect pathLength={1} x="18" y="18" width="64" height="64" rx="2" fill="none" />
+      <path pathLength={1} d="M18 39.3 H82" />
+      <path pathLength={1} d="M18 60.7 H82" />
+      <path pathLength={1} d="M39.3 18 V82" />
+      <path pathLength={1} d="M60.7 18 V82" />
+      <path pathLength={1} d="M18 82 L82 18" />
+    </>
+  ),
+  rombos: () => (
+    <>
+      <path pathLength={1} d="M12 50 L30 30 L48 50 L30 70 Z" />
+      <path pathLength={1} d="M30 41 L39 50 L30 59 L21 50 Z" />
+      <path pathLength={1} d="M52 50 L70 30 L88 50 L70 70 Z" />
+      <path pathLength={1} d="M70 41 L79 50 L70 59 L61 50 Z" />
+      <circle pathLength={1} cx="30" cy="50" r="2.5" />
+      <circle pathLength={1} cx="70" cy="50" r="2.5" />
+    </>
+  ),
 }
 
 interface FiguraInka {
@@ -263,45 +465,65 @@ function generarFiguras(): FiguraInka[] {
   })
 }
 
+// Una figura del fondo. Está memoizada: solo se vuelve a dibujar cuando cambia
+// su estado activo, así el desfase (que ocurre cada 0.3 s) no recarga las 120.
+interface FiguraProps {
+  tipo: string
+  estilo: React.CSSProperties
+  soloPC?: boolean
+  activa: boolean
+}
+const FiguraSVG = memo(function FiguraSVG({ tipo, estilo, soloPC, activa }: FiguraProps) {
+  return (
+    <svg
+      viewBox="0 0 100 100"
+      className={'inka-fig' + (soloPC ? ' solo-pc' : '') + (activa ? ' is-drawing' : '')}
+      style={estilo}
+    >
+      {/* Contorno blanco permanente */}
+      <g className="inka-fig-base">{FORMAS[tipo]()}</g>
+      {/* Contorno dorado que se dibuja encima cuando está activa */}
+      <g className="inka-fig-gold">{FORMAS[tipo]()}</g>
+      {/* Chispa (punta de la varita mágica) que recorre el trazo al dibujarlo */}
+      {activa && <g className="inka-fig-spark">{FORMAS[tipo]()}</g>}
+    </svg>
+  )
+})
+
 export function InkaAnimatedBackground() {
   // Las figuras se generan una sola vez (posiciones al azar estables).
   const [figuras] = useState(generarFiguras)
-  // Índices de las figuras que la energía dorada dibuja ahora (5 a la vez).
+  // Figuras que se están dibujando ahora. En vez de cambiar las 15 a la vez,
+  // cada ~0.3 s entra UNA nueva (al azar) y sale la más antigua: así cada figura
+  // empieza su trazo en un momento distinto → animaciones DESINCRONIZADAS.
   const [activos, setActivos] = useState<number[]>([])
 
   useEffect(() => {
-    // Cada ~2.4 s elegimos otras 5 figuras al azar (distintas a las anteriores).
-    function elegir(previas: number[]): number[] {
-      const nuevas: number[] = []
-      while (nuevas.length < ACTIVAS && nuevas.length < figuras.length) {
-        const n = Math.floor(Math.random() * figuras.length)
-        if (!nuevas.includes(n) && !previas.includes(n)) nuevas.push(n)
+    let cola: number[] = []
+    const id = setInterval(() => {
+      let n = Math.floor(Math.random() * figuras.length)
+      let intentos = 0
+      while (cola.includes(n) && intentos < 40) {
+        n = Math.floor(Math.random() * figuras.length)
+        intentos++
       }
-      return nuevas
-    }
-    setActivos((prev) => elegir(prev))
-    const id = setInterval(() => setActivos((prev) => elegir(prev)), 4400)
+      cola = cola.concat(n)
+      if (cola.length > ACTIVAS) cola = cola.slice(cola.length - ACTIVAS)
+      setActivos(cola)
+    }, 300)
     return () => clearInterval(id)
   }, [figuras.length])
 
   return (
     <div className="inka-bg" aria-hidden="true">
       {figuras.map((f, i) => (
-        <svg
+        <FiguraSVG
           key={i}
-          viewBox="0 0 100 100"
-          className={
-            'inka-fig' + (f.soloPC ? ' solo-pc' : '') + (activos.includes(i) ? ' is-drawing' : '')
-          }
-          style={f.estilo}
-        >
-          {/* Contorno blanco permanente */}
-          <g className="inka-fig-base">{FORMAS[f.tipo]()}</g>
-          {/* Contorno dorado que se dibuja encima cuando está activa */}
-          <g className="inka-fig-gold">{FORMAS[f.tipo]()}</g>
-          {/* Chispa (punta de la varita mágica) que recorre el trazo al dibujarlo */}
-          {activos.includes(i) && <g className="inka-fig-spark">{FORMAS[f.tipo]()}</g>}
-        </svg>
+          tipo={f.tipo}
+          estilo={f.estilo}
+          soloPC={f.soloPC}
+          activa={activos.includes(i)}
+        />
       ))}
     </div>
   )
