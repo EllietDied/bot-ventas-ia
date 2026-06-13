@@ -398,6 +398,112 @@ const FORMAS: Record<string, () => JSX.Element> = {
       <circle pathLength={1} cx="70" cy="50" r="2.5" />
     </>
   ),
+  luna: () => (
+    <>
+      <path pathLength={1} d="M60 16 A34 34 0 1 0 60 84 A27 27 0 1 1 60 16 Z" />
+      <circle pathLength={1} cx="44" cy="42" r="2.5" />
+      <circle pathLength={1} cx="44" cy="58" r="2.5" />
+      <path pathLength={1} d="M40 68 Q47 73 54 68" />
+      <path pathLength={1} d="M81 28 L83 33 L88 35 L83 37 L81 42 L79 37 L74 35 L79 33 Z" />
+      <circle pathLength={1} cx="84" cy="64" r="2" />
+    </>
+  ),
+  cruzdelsur: () => (
+    <>
+      <path pathLength={1} d="M50 16 L24 50 L50 84 L76 50 Z" />
+      <path pathLength={1} d="M50 16 L50 84" />
+      <path pathLength={1} d="M24 50 L76 50" />
+      <circle pathLength={1} cx="50" cy="16" r="4.5" />
+      <circle pathLength={1} cx="50" cy="84" r="4.5" />
+      <circle pathLength={1} cx="24" cy="50" r="4.5" />
+      <circle pathLength={1} cx="76" cy="50" r="4.5" />
+      <circle pathLength={1} cx="50" cy="50" r="3.5" />
+    </>
+  ),
+  rayo: () => (
+    <>
+      <path pathLength={1} d="M58 12 L34 50 L50 50 L30 88 L70 44 L52 44 L72 12 Z" />
+      <path pathLength={1} d="M24 22 L18 28" />
+      <path pathLength={1} d="M82 24 L88 30" />
+      <path pathLength={1} d="M78 70 L86 74" />
+    </>
+  ),
+  olas: () => (
+    <>
+      <path pathLength={1} d="M12 38 H30 V26 H48 V38 H66 V26 H84 V38" />
+      <path pathLength={1} d="M12 60 Q24 48 36 60 T60 60 T84 60" />
+      <path pathLength={1} d="M12 76 H30 V64 H48 V76 H66 V64 H84 V76" />
+      <circle pathLength={1} cx="24" cy="54" r="1.5" />
+      <circle pathLength={1} cx="72" cy="54" r="1.5" />
+    </>
+  ),
+  cactus: () => (
+    <>
+      <path pathLength={1} d="M44 86 L44 34 A6 6 0 0 1 56 34 L56 86 Z" />
+      <path pathLength={1} d="M44 62 L30 62 A5 5 0 0 0 25 57 L25 44" />
+      <path pathLength={1} d="M56 54 L70 54 A5 5 0 0 1 75 49 L75 38" />
+      <rect pathLength={1} x="40" y="86" width="20" height="6" rx="1" fill="none" />
+      <path pathLength={1} d="M50 34 L50 24" />
+      <path pathLength={1} d="M25 44 L25 36" />
+      <path pathLength={1} d="M75 38 L75 30" />
+    </>
+  ),
+  arana: () => (
+    <>
+      <circle pathLength={1} cx="50" cy="50" r="9" />
+      <circle pathLength={1} cx="50" cy="38" r="5" />
+      <path pathLength={1} d="M44 46 C32 44 24 38 16 28" />
+      <path pathLength={1} d="M44 50 C30 50 22 50 14 46" />
+      <path pathLength={1} d="M45 55 C32 58 24 64 18 74" />
+      <path pathLength={1} d="M47 58 C40 70 38 78 38 88" />
+      <path pathLength={1} d="M56 46 C68 44 76 38 84 28" />
+      <path pathLength={1} d="M56 50 C70 50 78 50 86 46" />
+      <path pathLength={1} d="M55 55 C68 58 76 64 82 74" />
+      <path pathLength={1} d="M53 58 C60 70 62 78 62 88" />
+    </>
+  ),
+  zorro: () => (
+    <>
+      <path pathLength={1} d="M22 36 L30 18 L40 32" />
+      <path pathLength={1} d="M40 32 L52 22 L58 36" />
+      <path pathLength={1} d="M22 36 C16 44 14 56 22 64 L20 78" />
+      <path pathLength={1} d="M58 36 C70 38 78 48 78 60 L78 78" />
+      <path pathLength={1} d="M22 64 C36 74 60 74 78 60" />
+      <path pathLength={1} d="M78 50 C88 46 92 56 88 66 C86 72 80 70 78 62" />
+      <circle pathLength={1} cx="30" cy="40" r="2.5" />
+      <path pathLength={1} d="M20 78 L16 88" />
+    </>
+  ),
+  caracol: () => (
+    <>
+      <path pathLength={1} d="M50 50 C50 44 56 42 60 46 C66 52 64 62 56 66 C44 72 34 62 36 50 C38 34 54 28 70 32 C86 36 90 56 80 70" />
+      <circle pathLength={1} cx="51" cy="50" r="2.5" />
+      <path pathLength={1} d="M36 50 C28 52 22 58 18 66" />
+      <path pathLength={1} d="M44 71 C40 78 38 84 38 90" />
+      <path pathLength={1} d="M80 70 C82 78 80 84 74 88" />
+      <path pathLength={1} d="M70 32 C76 26 84 24 90 26" />
+    </>
+  ),
+  balsa: () => (
+    <>
+      <path pathLength={1} d="M14 56 C24 70 60 72 78 60 C86 42 88 30 80 22 C72 28 70 40 70 52" />
+      <path pathLength={1} d="M18 58 C30 68 58 68 74 58" />
+      <path pathLength={1} d="M22 60 C34 66 54 66 70 60" />
+      <path pathLength={1} d="M76 30 C72 36 70 44 70 52" />
+      <path pathLength={1} d="M10 78 C18 72 26 84 34 78 C42 72 50 84 58 78 C66 72 74 84 82 78" />
+      <path pathLength={1} d="M50 56 L50 36" />
+    </>
+  ),
+  tambor: () => (
+    <>
+      <path pathLength={1} d="M22 42 C22 32 74 32 74 42 C74 52 22 52 22 42 Z" />
+      <path pathLength={1} d="M22 42 L22 58 C22 68 74 68 74 58 L74 42" />
+      <path pathLength={1} d="M24 44 L32 60 L40 44 L48 60 L56 44 L64 60 L72 44" />
+      <circle pathLength={1} cx="48" cy="42" r="4" />
+      <path pathLength={1} d="M62 18 L82 38" />
+      <circle pathLength={1} cx="84" cy="40" r="4" />
+    </>
+  ),
 }
 
 interface FiguraInka {
@@ -407,9 +513,9 @@ interface FiguraInka {
 }
 
 const TIPOS = Object.keys(FORMAS)
-const TOTAL = 120
+const TOTAL = 150
 const ACTIVAS = 25 // cuántas se marcan en dorado al mismo tiempo
-const MIN_DIST = 6.3 // separación mínima entre centros (% del ancho)
+const MIN_DIST = 5.6 // separación mínima entre centros (% del ancho)
 const ASPECTO_Y = 0.62 // el alto del contenedor ≈ 0.62 del ancho
 
 // Genera 100 figuras en posiciones AL AZAR (desordenadas, sin rejilla), pero
@@ -456,11 +562,11 @@ function generarFiguras(): FiguraInka[] {
   }
   return puntos.map((p, i) => {
     // Tamaño relativo al ancho (menor que la separación → no se solapan)
-    const width = (4.6 + Math.random() * 1.4).toFixed(2) + '%' // 4.6–6.0 %
+    const width = (4.3 + Math.random() * 1.2).toFixed(2) + '%' // 4.3–5.5 % (caben 150 sin solaparse)
     return {
       tipo: tipos[i],
       estilo: { left: p.x.toFixed(2) + '%', top: p.y.toFixed(2) + '%', width },
-      soloPC: Math.random() < 0.85, // en celular se ven ~15
+      soloPC: Math.random() < 0.88, // en celular se ven ~18
     }
   })
 }
