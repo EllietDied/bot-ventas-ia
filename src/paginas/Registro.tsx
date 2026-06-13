@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useSesion, DatosRegistro } from '../contexto/SesionContext'
 import { Rol } from '../core/modelos/Usuario'
 import { LogoUSS } from '../componentes/LogoUSS'
+import { InkaAnimatedBackground } from '../componentes/InkaAnimatedBackground'
 
 // Estado inicial del formulario.
 const FORM_INICIAL: DatosRegistro = {
@@ -45,7 +46,8 @@ export function Registro() {
   }
 
   return (
-    <div className="auth-contenedor">
+    <div className="auth-contenedor inka-auth-bg">
+      <InkaAnimatedBackground />
       <div className="auth-tarjeta ancha">
         <div className="auth-logo">
           <LogoUSS size="medium" />

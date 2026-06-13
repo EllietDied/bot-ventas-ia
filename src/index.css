@@ -408,6 +408,153 @@ a:hover {
   text-align: center;
 }
 
+/* ============================================================
+   Fondo premium de autenticacion — patron de iconografia inka
+   ORIGINAL (Machu Picchu, llama, jaguar, chullo, mate, zampona,
+   manta). Estatico, en linea blanca sutil. Login/Registro.
+   ============================================================ */
+.inka-auth-bg {
+  position: relative;
+  overflow: hidden;
+  background: #0b1220;
+}
+/* Fondo animado de figuras inka (contorno blanco; una se "dibuja" en dorado) */
+.inka-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.inka-fig {
+  position: absolute;
+  overflow: visible;
+  aspect-ratio: 1 / 1;
+  transform: translate(-50%, -50%); /* se centra en el punto de su celda */
+}
+.inka-fig-base path,
+.inka-fig-base circle,
+.inka-fig-base rect {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.25);
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.inka-fig-gold path,
+.inka-fig-gold circle,
+.inka-fig-gold rect {
+  fill: none;
+  stroke: #ffd700;
+  stroke-width: 1.9;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1; /* oculto: nada dibujado */
+  opacity: 0;
+}
+/* Figura activa: la energía dorada dibuja su contorno, con brillo */
+.inka-fig.is-drawing .inka-fig-gold {
+  filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.85))
+    drop-shadow(0 0 12px rgba(246, 196, 83, 0.4));
+}
+.inka-fig.is-drawing .inka-fig-gold path,
+.inka-fig.is-drawing .inka-fig-gold circle,
+.inka-fig.is-drawing .inka-fig-gold rect {
+  animation: inka-trazo 2.4s ease-in-out forwards;
+}
+@keyframes inka-trazo {
+  0% {
+    stroke-dashoffset: 1;
+    opacity: 1;
+  }
+  46% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  } /* contorno dibujado (~1.1 s) */
+  83% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  } /* permanece dorada (~1 s) */
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 0;
+  } /* vuelve suavemente a blanco */
+}
+/* En celular: menos figuras (no saturar); el tamaño ya es relativo a la celda */
+@media (max-width: 600px) {
+  .inka-fig.solo-pc {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .inka-fig.is-drawing .inka-fig-gold path,
+  .inka-fig.is-drawing .inka-fig-gold circle,
+  .inka-fig.is-drawing .inka-fig-gold rect {
+    animation: none;
+  }
+}
+/* Overlay oscuro radial para mejorar el contraste detras de la tarjeta */
+.inka-auth-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: radial-gradient(
+    58% 60% at 50% 50%,
+    rgba(7, 12, 22, 0.82),
+    rgba(7, 12, 22, 0.3) 68%,
+    transparent 88%
+  );
+}
+
+/* Tarjeta glass oscura por encima del fondo (en claro y oscuro) */
+.inka-auth-bg .auth-tarjeta {
+  position: relative;
+  z-index: 2;
+  background: rgba(30, 30, 30, 0.66);
+  backdrop-filter: blur(16px) saturate(120%);
+  -webkit-backdrop-filter: blur(16px) saturate(120%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+/* Texto e inputs legibles sobre la tarjeta oscura (independiente del tema) */
+.inka-auth-bg .auth-titulo {
+  color: #f5f7fa;
+}
+.inka-auth-bg .auth-subtitulo {
+  color: #2dd4bf;
+}
+.inka-auth-bg .campo {
+  color: #e7ebf2;
+}
+.inka-auth-bg .auth-pie {
+  color: #cbd3df;
+}
+.inka-auth-bg .auth-pie a {
+  color: #2dd4bf;
+}
+.inka-auth-bg .campo input,
+.inka-auth-bg .campo select {
+  background: rgba(255, 255, 255, 0.06);
+  color: #f5f7fa;
+  border-color: rgba(255, 255, 255, 0.16);
+}
+.inka-auth-bg .campo input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+.inka-auth-bg .auth-demo {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.18);
+  color: #cbd3df;
+}
+
+
 /* ---------- Formularios ---------- */
 .formulario {
   display: flex;

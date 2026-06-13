@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useSesion } from '../contexto/SesionContext'
+import { InkaAnimatedBackground } from '../componentes/InkaAnimatedBackground'
 
 // Pantalla de inicio de sesión.
 export function Login() {
@@ -30,7 +31,8 @@ export function Login() {
   }
 
   return (
-    <div className="auth-contenedor">
+    <div className="auth-contenedor inka-auth-bg">
+      <InkaAnimatedBackground />
       <div className="auth-tarjeta">
         <img
           src="/assistant-inkashop.svg"
