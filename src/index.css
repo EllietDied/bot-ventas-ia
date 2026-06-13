@@ -662,7 +662,7 @@ a:hover {
 }
 /* Tarjeta glass CLARA con texto oscuro */
 [data-theme='light'] .inka-auth-bg .auth-tarjeta {
-  background: rgba(255, 255, 255, 0.55);
+  background: rgba(255, 255, 255, 0.35);
   border: 1px solid rgba(122, 92, 52, 0.18);
   box-shadow: 0 24px 70px rgba(120, 90, 40, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
