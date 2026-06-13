@@ -280,7 +280,7 @@ export function InkaAnimatedBackground() {
       return nuevas
     }
     setActivos((prev) => elegir(prev))
-    const id = setInterval(() => setActivos((prev) => elegir(prev)), 2600)
+    const id = setInterval(() => setActivos((prev) => elegir(prev)), 3400)
     return () => clearInterval(id)
   }, [figuras.length])
 
@@ -299,6 +299,8 @@ export function InkaAnimatedBackground() {
           <g className="inka-fig-base">{FORMAS[f.tipo]()}</g>
           {/* Contorno dorado que se dibuja encima cuando está activa */}
           <g className="inka-fig-gold">{FORMAS[f.tipo]()}</g>
+          {/* Chispa (punta de la varita mágica) que recorre el trazo al dibujarlo */}
+          {activos.includes(i) && <g className="inka-fig-spark">{FORMAS[f.tipo]()}</g>}
         </svg>
       ))}
     </div>
