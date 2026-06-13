@@ -465,7 +465,7 @@ a:hover {
 .inka-fig.is-drawing .inka-fig-gold path,
 .inka-fig.is-drawing .inka-fig-gold circle,
 .inka-fig.is-drawing .inka-fig-gold rect {
-  animation: inka-trazo 5s ease-in-out forwards;
+  animation: inka-trazo 6.5s ease-in-out forwards;
 }
 @keyframes inka-trazo {
   0% {
@@ -491,18 +491,18 @@ a:hover {
 .inka-fig-spark circle,
 .inka-fig-spark rect {
   fill: none;
-  stroke: #fff8e0;
-  stroke-width: 3.4;
+  stroke: #fffbe8;
+  stroke-width: 4.4;
   stroke-linecap: round;
   stroke-linejoin: round;
-  stroke-dasharray: 0.07 0.93; /* una chispa que viaja por el trazo */
+  stroke-dasharray: 0.09 0.91; /* una chispa más grande que viaja por el trazo */
   stroke-dashoffset: 1;
   opacity: 0;
-  animation: inka-chispa 5s ease-in-out forwards;
+  animation: inka-chispa 6.5s ease-in-out forwards;
 }
 .inka-fig-spark {
-  filter: drop-shadow(0 0 5px #fff6d8) drop-shadow(0 0 13px rgba(255, 216, 100, 0.95))
-    drop-shadow(0 0 24px rgba(255, 196, 55, 0.5));
+  filter: drop-shadow(0 0 7px #fff8d4) drop-shadow(0 0 18px rgba(255, 222, 115, 1))
+    drop-shadow(0 0 34px rgba(255, 200, 60, 0.7));
 }
 @keyframes inka-chispa {
   0% {

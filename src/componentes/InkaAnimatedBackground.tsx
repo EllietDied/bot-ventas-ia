@@ -616,7 +616,7 @@ export function InkaAnimatedBackground() {
       cola = cola.concat(n)
       if (cola.length > ACTIVAS) cola = cola.slice(cola.length - ACTIVAS)
       setActivos(cola)
-    }, 210)
+    }, 270)
     return () => clearInterval(id)
   }, [figuras.length])
 
