@@ -205,9 +205,9 @@ interface FiguraInka {
 }
 
 const TIPOS = Object.keys(FORMAS)
-const TOTAL = 100
-const ACTIVAS = 10 // cuántas se marcan en dorado al mismo tiempo
-const MIN_DIST = 6.6 // separación mínima entre centros (% del ancho)
+const TOTAL = 120
+const ACTIVAS = 15 // cuántas se marcan en dorado al mismo tiempo
+const MIN_DIST = 6.3 // separación mínima entre centros (% del ancho)
 const ASPECTO_Y = 0.62 // el alto del contenedor ≈ 0.62 del ancho
 
 // Genera 100 figuras en posiciones AL AZAR (desordenadas, sin rejilla), pero
