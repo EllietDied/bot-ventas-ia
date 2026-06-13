@@ -424,6 +424,17 @@ a:hover {
   max-width: 100%;
   padding: 0;
 }
+/* En login/registro la navbar toma el tono del hero (sin sombra) para que la
+   transición sea fluida y no quede una franja blanca encima del fondo. */
+#root:has(.inka-auth-bg) .navbar {
+  box-shadow: none;
+}
+[data-theme='dark'] #root:has(.inka-auth-bg) .navbar {
+  background: #0b1220;
+}
+[data-theme='light'] #root:has(.inka-auth-bg) .navbar {
+  background: #f7f0e2;
+}
 /* Fondo animado de figuras inka (contorno blanco; una se "dibuja" en dorado) */
 .inka-bg {
   position: absolute;
