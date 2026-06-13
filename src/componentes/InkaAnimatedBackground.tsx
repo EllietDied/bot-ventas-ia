@@ -408,7 +408,7 @@ interface FiguraInka {
 
 const TIPOS = Object.keys(FORMAS)
 const TOTAL = 120
-const ACTIVAS = 15 // cuántas se marcan en dorado al mismo tiempo
+const ACTIVAS = 25 // cuántas se marcan en dorado al mismo tiempo
 const MIN_DIST = 6.3 // separación mínima entre centros (% del ancho)
 const ASPECTO_Y = 0.62 // el alto del contenedor ≈ 0.62 del ancho
 
@@ -510,7 +510,7 @@ export function InkaAnimatedBackground() {
       cola = cola.concat(n)
       if (cola.length > ACTIVAS) cola = cola.slice(cola.length - ACTIVAS)
       setActivos(cola)
-    }, 300)
+    }, 210)
     return () => clearInterval(id)
   }, [figuras.length])
 
