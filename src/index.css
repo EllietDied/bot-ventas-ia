@@ -687,6 +687,17 @@ a:hover {
   filter: drop-shadow(0 0 5px rgba(240, 180, 60, 0.9))
     drop-shadow(0 0 13px rgba(214, 150, 30, 0.7)) drop-shadow(0 0 26px rgba(190, 125, 20, 0.4));
 }
+/* En móvil + claro las figuras son chicas y la terracota tenue casi no se ve
+   sobre el crema: las reforzamos (más opacas, más oscuras y un pelín gruesas).
+   Va después de las reglas de figuras claras para ganar por orden de cascada. */
+@media (max-width: 600px) {
+  [data-theme='light'] .inka-fig-base path,
+  [data-theme='light'] .inka-fig-base circle,
+  [data-theme='light'] .inka-fig-base rect {
+    stroke: rgba(96, 54, 24, 0.38);
+    stroke-width: 1.9;
+  }
+}
 /* Tarjeta glass CLARA con texto oscuro */
 [data-theme='light'] .inka-auth-bg .auth-tarjeta {
   background: rgba(255, 255, 255, 0.35);
