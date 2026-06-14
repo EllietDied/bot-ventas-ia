@@ -565,14 +565,14 @@ a:hover {
     display: block;
   }
   .inka-auth-bg .auth-tarjeta {
-    max-width: 320px;
-    background: rgba(28, 28, 30, 0.24);
+    max-width: 288px;
+    background: rgba(28, 28, 30, 0.15);
   }
   .inka-auth-bg::after {
     background: radial-gradient(58% 52% at 50% 50%, rgba(7, 12, 22, 0.32), transparent 80%);
   }
   [data-theme='light'] .inka-auth-bg .auth-tarjeta {
-    background: rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.18);
   }
   [data-theme='light'] .inka-auth-bg::after {
     background: radial-gradient(58% 52% at 50% 50%, rgba(255, 251, 240, 0.46), transparent 80%);
