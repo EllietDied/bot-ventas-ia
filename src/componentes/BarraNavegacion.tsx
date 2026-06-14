@@ -26,7 +26,9 @@ export function BarraNavegacion() {
     <nav className="navbar">
       <Link to="/" className="navbar-marca">
         <LogoUSS size="small" />
-        <span>IA InkaShop</span>
+        <span className="navbar-marca-texto">
+          <span className="marca-ia">IA</span> <span className="marca-shop">InkaShop</span>
+        </span>
       </Link>
 
       <div className="navbar-links">
