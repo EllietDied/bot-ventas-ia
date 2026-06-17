@@ -1,218 +1,347 @@
-# 🤖 IA InkaShop
+# IA InkaShop
 
-**Asistente inteligente de ventas multiplataforma** — _Compra con respaldo, vende con innovación._ (demo académica)
+## Asistente inteligente de ventas multiplataforma
 
-Aplicación web desarrollada en **React + TypeScript (Vite)** para el curso **Taller de Aplicaciones**
-(Universidad Señor de Sipán – Ciclo IV). Implementa el diseño del **RA1**: arquitectura por capas,
-clases del UML y estructuras de datos (Lista, Cola **FIFO** y Pila **LIFO**). Es una **PWA instalable** y **responsive** (PC y celular).
+**Lema:** *Compra con respaldo, vende con innovación.*
 
-La experiencia gira en torno a **IA InkaShop**, un asistente inteligente de ventas: el comprador conversa con el asistente,
-que le recomienda productos (por categoría, uso o presupuesto) y lo **guía desde la consulta hasta el pedido**.
-No es una tienda con un chatbot agregado, sino un asistente de ventas con un catálogo de apoyo.
+IA InkaShop es una aplicación web académica desarrollada con **React, TypeScript y Vite** para el curso **Taller de Aplicaciones** de la **Universidad Señor de Sipán**, correspondiente al cuarto ciclo.
 
-> La **inteligencia artificial** del chatbot y los **pagos** están **simulados** (no usan servicios
-> externos). Todo funciona **sin backend**, guardando los datos en `localStorage`.
+El proyecto implementa los principales componentes definidos en el RA1, entre ellos la arquitectura por capas, las clases representadas en el modelo UML y el uso de estructuras de datos como listas, colas FIFO y pilas LIFO. Asimismo, se presenta como una **Progressive Web App (PWA)** instalable y adaptable a computadoras y dispositivos móviles.
 
-**Autores:** Beryher Agip · Andherson Mendoza · Fabricio Salazar · Andrea Odar
+La aplicación está orientada a la asistencia inteligente en procesos de compra y venta. El comprador puede interactuar con un asistente que recomienda productos según categorías, necesidades de uso, presupuesto e historial de consultas. El sistema acompaña al usuario desde la búsqueda inicial hasta el registro del pedido.
+
+A diferencia de una tienda electrónica convencional con un chatbot complementario, IA InkaShop plantea al asistente inteligente como el componente principal de interacción, mientras que el catálogo funciona como soporte para la toma de decisiones.
+
+> La inteligencia artificial, el procesamiento de pagos y las operaciones comerciales se encuentran simulados con fines académicos. La aplicación no utiliza servicios externos ni backend; la persistencia de datos se realiza mediante `localStorage`.
+
+**Autores:**
+
+- Beryher Agip
+- Andherson Mendoza
+- Fabricio Salazar
+- Andrea Odar
 
 ---
 
-## 🚀 Instalación y ejecución
+## 1. Requisitos del sistema
 
-Requisitos: tener **Node.js 18+** instalado.
+Para ejecutar el proyecto se requiere:
+
+- Node.js versión 18 o superior.
+- npm, incluido con la instalación de Node.js.
+- Un navegador web actualizado.
+
+---
+
+## 2. Instalación y ejecución
+
+Desde la carpeta raíz del proyecto, ejecutar los siguientes comandos:
 
 ```bash
-npm install      # instala las dependencias (solo la primera vez)
-npm run dev      # inicia la app en modo desarrollo
+npm install
+npm run dev
 ```
 
-Abre la dirección que muestra la consola (normalmente **http://localhost:5173**).
+El primer comando instala las dependencias del proyecto. El segundo inicia el servidor de desarrollo.
 
-Otros comandos:
+Una vez iniciado el entorno, se debe abrir en el navegador la dirección indicada en la consola. De forma predeterminada, Vite suele utilizar:
+
+```text
+http://localhost:5173
+```
+
+### Comandos disponibles
 
 ```bash
-npm run build    # compila y verifica TypeScript (genera la carpeta dist/)
-npm run preview  # sirve la versión compilada
-npm run test     # ejecuta las pruebas automatizadas (Vitest)
+npm run dev
 ```
 
-### Cuentas de prueba
+Inicia la aplicación en modo de desarrollo.
 
-| Rol       | Correo               | Contraseña |
-|-----------|----------------------|------------|
-| Comprador | comprador@demo.com   | 123456     |
-| Vendedor  | vendedor@demo.com    | 123456     |
+```bash
+npm run build
+```
 
-> Para reiniciar los datos: F12 → **Application** → **Local Storage** → **Clear**.
+Compila el proyecto, verifica TypeScript y genera la carpeta `dist/`.
+
+```bash
+npm run preview
+```
+
+Permite visualizar localmente la versión compilada.
+
+```bash
+npm run test
+```
+
+Ejecuta las pruebas automatizadas mediante Vitest.
 
 ---
 
-## 📱 PWA y multiplataforma
+## 3. Cuentas de prueba
 
-- **Actualmente es una PWA (Progressive Web App) responsive e instalable** en PC y celular: se puede
-  agregar a la pantalla de inicio y abrir en su propia ventana (modo *standalone*), como una app.
-- **Telegram, WhatsApp y otras plataformas son integraciones futuras** (contempladas en el RA1 como
-  mejoras), **no** implementadas en esta versión.
-- **No es una aplicación móvil nativa** (no es un APK ni una app de tienda): es una aplicación web
-  instalable que funciona en cualquier dispositivo con navegador.
+| Rol | Correo electrónico | Contraseña |
+|---|---|---|
+| Comprador | `comprador@demo.com` | `123456` |
+| Vendedor | `vendedor@demo.com` | `123456` |
 
-Cómo instalarla: ver [COMO-EJECUTAR.md](COMO-EJECUTAR.md).
+Para restablecer los datos almacenados localmente:
+
+1. Abrir las herramientas de desarrollo del navegador.
+2. Ingresar a **Application**.
+3. Seleccionar **Local Storage**.
+4. Eliminar los datos almacenados para la aplicación.
 
 ---
 
-## 🧱 Arquitectura por capas
+## 4. Alcance multiplataforma y PWA
 
-El proyecto respeta la **arquitectura de 3 capas** del RA1:
+IA InkaShop se encuentra implementada como una **Progressive Web App** adaptable e instalable en computadoras y dispositivos móviles.
 
-| Capa del RA1            | Carpeta                              | Responsabilidad                          |
-|-------------------------|--------------------------------------|------------------------------------------|
-| Presentación (UI)       | `src/paginas`, `src/componentes`     | Pantallas y componentes de React         |
-| Lógica de negocio       | `src/contexto`, `src/core/servicios` | Estado global y algoritmos               |
-| Datos (persistencia)    | `src/core/datos`                     | `localStorage` y datos de ejemplo        |
-| Modelo + estructuras    | `src/core/modelos`, `src/core/estructuras` | Clases del UML, Cola y Pila        |
+La aplicación puede agregarse a la pantalla de inicio y ejecutarse en una ventana independiente mediante el modo `standalone`. Sin embargo, no corresponde a una aplicación móvil nativa, por lo que no se distribuye como archivo APK ni mediante una tienda de aplicaciones.
 
-```
+Las integraciones con Telegram, WhatsApp u otras plataformas se consideran mejoras futuras contempladas en la propuesta académica, pero no están implementadas en la versión actual.
+
+La guía de instalación de la PWA se encuentra disponible en [`COMO-EJECUTAR.md`](COMO-EJECUTAR.md).
+
+---
+
+## 5. Arquitectura del proyecto
+
+El proyecto aplica una arquitectura organizada por responsabilidades. Su estructura se distribuye de la siguiente manera:
+
+| Capa | Ubicación | Responsabilidad principal |
+|---|---|---|
+| Presentación | `src/paginas`, `src/componentes` | Interfaces, pantallas y componentes visuales desarrollados con React |
+| Lógica de negocio | `src/contexto`, `src/core/servicios` | Gestión del estado, reglas del sistema y algoritmos principales |
+| Persistencia de datos | `src/core/datos` | Almacenamiento local y carga de datos de ejemplo |
+| Modelos y estructuras | `src/core/modelos`, `src/core/estructuras` | Definición de entidades, clases, interfaces y estructuras de datos |
+
+### Estructura de directorios
+
+```text
 src/
-├─ core/                  ← CAPA CORE (modelo + lógica + datos)
-│  ├─ modelos/            Clases del UML (Usuario, Producto, Pedido, Carrito, ChatBotIA...)
-│  ├─ estructuras/        ColaPedidos (FIFO) y PilaConsultas (LIFO)
-│  ├─ servicios/          Algoritmos (login, búsqueda)
-│  └─ datos/              localStorage y datos de ejemplo (seed)
-├─ contexto/              Estado global con React Context
-├─ componentes/           UI reutilizable (navbar, tarjeta, ruta protegida)
-└─ paginas/               Pantallas (login, catálogo, carrito, asistente, mensajes...)
+├── core/
+│   ├── modelos/          Clases e interfaces del modelo UML
+│   ├── estructuras/      Implementaciones de ColaPedidos y PilaConsultas
+│   ├── servicios/        Servicios de autenticación, búsqueda y lógica asociada
+│   └── datos/            Persistencia mediante localStorage y datos iniciales
+├── contexto/             Gestión del estado global mediante React Context
+├── componentes/          Componentes reutilizables de la interfaz
+└── paginas/              Pantallas principales de la aplicación
 ```
 
 ---
 
-## 🧩 Clases del UML → `src/core/modelos`
+## 6. Modelo de clases UML
 
-Herencia: **Persona → Usuario → Comprador / Vendedor** (en TypeScript con `extends`).
+Las clases e interfaces principales se encuentran en `src/core/modelos`.
 
-| Clase           | Tipo       | Descripción                                              |
-|-----------------|------------|---------------------------------------------------------|
-| `Persona`       | interface  | Datos personales base (nombre, dni, teléfono...)        |
-| `Usuario`       | interface  | Hereda de Persona; añade correo, contraseña, rol        |
-| `Comprador`     | interface  | Hereda de Usuario (rol comprador)                       |
-| `Vendedor`      | interface  | Hereda de Usuario (rol vendedor)                        |
-| `Producto`      | interface  | Artículo del catálogo (precio, stock, categoría)        |
-| `Pedido`        | interface  | Pedido con detalles, totales y estado                   |
-| `DetallePedido` | interface  | Línea de un pedido (producto, cantidad, subtotal)       |
-| `Pago`          | interface  | Pago simulado de un pedido                              |
-| `Mensaje`       | interface  | Mensaje entre usuarios (comprador ↔ vendedor) — **RF10**  |
-| `MensajeBot`    | interface  | Mensaje del chat con el bot (IA simulada)               |
-| `Carrito`       | **clase**  | Lógica del carrito y cálculo de subtotal/descuento/total |
-| `ChatBotIA`     | **clase**  | IA simulada: responde consultas y recomienda productos  |
+La relación de herencia general se representa de la siguiente manera:
 
----
+```text
+Persona → Usuario → Comprador / Vendedor
+```
 
-## 🗂️ Estructuras de datos
+En TypeScript, estas relaciones se implementan mediante herencia entre interfaces y clases, según corresponda.
 
-| Estructura      | Implementación                          | Uso en el sistema                         |
-|-----------------|-----------------------------------------|-------------------------------------------|
-| **Lista**       | arreglos `Producto[]`, `Usuario[]`, `Pedido[]`, `Mensaje[]` | Almacenar las colecciones del sistema |
-| **Cola (FIFO)** | `ColaPedidos` (`src/core/estructuras`)  | Pedidos pendientes: primero en llegar, primero en atender |
-| **Pila (LIFO)** | `PilaConsultas` (`src/core/estructuras`)| Consultas recientes: la última se muestra primero |
-
-Estas estructuras se usan en las pantallas: la **cola FIFO** en Pedidos, la **pila LIFO** en el Asistente (consultas recientes) y los **cálculos** en el Carrito.
+| Entidad | Tipo | Descripción |
+|---|---|---|
+| `Persona` | Interface | Contiene los datos personales básicos del usuario |
+| `Usuario` | Interface | Extiende a `Persona` e incorpora correo, contraseña y rol |
+| `Comprador` | Interface | Especialización de `Usuario` con rol de comprador |
+| `Vendedor` | Interface | Especialización de `Usuario` con rol de vendedor |
+| `Producto` | Interface | Representa los artículos disponibles en el catálogo |
+| `Pedido` | Interface | Contiene los datos generales, estado y totales de una compra |
+| `DetallePedido` | Interface | Representa cada producto incluido en un pedido |
+| `Pago` | Interface | Registra la información simulada de pago |
+| `Mensaje` | Interface | Representa la comunicación entre comprador y vendedor correspondiente al RF10 |
+| `MensajeBot` | Interface | Representa los mensajes intercambiados con el asistente |
+| `Carrito` | Clase | Gestiona productos, cantidades, subtotal, descuento y total |
+| `ChatBotIA` | Clase | Procesa consultas simuladas y genera recomendaciones de productos |
 
 ---
 
-## ⚙️ Algoritmos del RA1 → código
+## 7. Estructuras de datos implementadas
 
-| Algoritmo (RA1)            | Dónde está                                   |
-|----------------------------|----------------------------------------------|
-| `IniciarSesion`            | `core/servicios/AuthService.ts` → `iniciarSesion` |
-| `ConsultarProducto`        | `core/servicios/CatalogoService.ts` → `buscarProductos` |
-| `RecomendarProducto`       | `core/modelos/ChatBotIA.ts` → `recomendarProducto` |
+El sistema utiliza las siguientes estructuras:
+
+| Estructura | Implementación | Aplicación en el sistema |
+|---|---|---|
+| Lista | Arreglos de tipo `Producto[]`, `Usuario[]`, `Pedido[]` y `Mensaje[]` | Almacenamiento y gestión de las colecciones principales |
+| Cola FIFO | `ColaPedidos` en `src/core/estructuras` | Atención de pedidos según el orden de llegada |
+| Pila LIFO | `PilaConsultas` en `src/core/estructuras` | Registro de consultas recientes, mostrando primero la última realizada |
+
+La cola FIFO se emplea en la gestión de pedidos pendientes. La pila LIFO se utiliza en el historial reciente del asistente. Las listas permiten administrar usuarios, productos, pedidos y mensajes.
+
+---
+
+## 8. Correspondencia entre algoritmos del RA1 y el código
+
+| Algoritmo definido en el RA1 | Implementación |
+|---|---|
+| `IniciarSesion` | `core/servicios/AuthService.ts` → `iniciarSesion` |
+| `ConsultarProducto` | `core/servicios/CatalogoService.ts` → `buscarProductos` |
+| `RecomendarProducto` | `core/modelos/ChatBotIA.ts` → `recomendarProducto` |
 | `RegistrarPedido` / `ProcesarPago` | `contexto/PedidosContext.tsx` → `registrarPedido` |
 | `ResponderConsultaChatBot` | `core/modelos/ChatBotIA.ts` → `responderConsulta` |
 
 ---
 
-## ✅ Funcionalidades
+## 9. Funcionalidades principales
 
-- **IA InkaShop — pantalla principal (asistente):** el comprador conversa con el asistente, que recomienda
-  productos según el **texto**, la **categoría**, el **presupuesto**, el **historial** y los **populares**.
-  Las recomendaciones aparecen como **tarjetas dentro del chat** con acciones (*ver detalle, agregar,
-  comparar, consultar vendedor*) y hay **botones rápidos**.
-- **Explorar catálogo** (sección secundaria) con buscador y filtro por categoría.
-- Registro e inicio de sesión con selección de rol (comprador / vendedor).
-- Carrito y **pago guiado por el asistente** con cálculo de **subtotal, descuento y total** (respeta el stock).
-- Registro simulado de pedidos y pagos.
-- Panel del vendedor: publicar productos, actualizar stock y **“Sugerencias del asistente IA”** (bajo stock, más consultados, mensajes y pedidos pendientes).
-- **Mensajería** entre comprador y vendedor sobre un producto, con estado leído/no leído (**RF10**).
-- Historial de pedidos y de consultas.
-- Formularios con validaciones y mensajes de error.
-- **Modo claro y oscuro** con un switch en la barra de navegación (recuerda tu preferencia).
-- **Identidad institucional USS**: el logo oficial de la Universidad Señor de Sipán aparece en la barra de navegación, el registro, el asistente y el pie de página; también en los iconos de la PWA.
-- **Mascota "Asistente InkaShop"** (`public/assistant-inkashop.svg`): ilustración vectorial de un robot IA moderno con detalles geométricos andinos sutiles (greca inca, remate dorado) y una bolsa de compras. Se muestra en el **login** y en la **pantalla principal del Asistente IA**, y se adapta a modo claro y oscuro.
+### 9.1. Asistente inteligente de ventas
 
-### Validaciones incluidas
+El comprador interactúa con el asistente desde la pantalla principal. Las recomendaciones se generan a partir de:
 
-- **Campos vacíos:** login, registro y publicación de productos.
-- **Correo:** formato válido en el registro; no se permite correo duplicado.
-- **Contraseña:** mínimo 6 caracteres y confirmación que coincida.
-- **Stock y cantidades:** no se puede agregar al carrito más de lo disponible; el pago revalida el stock.
-- **Precio / stock del vendedor:** precio mayor a 0 y stock no negativo.
-- **Roles:** el comprador no entra al panel del vendedor y viceversa (rutas protegidas).
-- **Carrito vacío:** no se puede ir al pago sin productos.
-- **Mensajes:** no se permiten mensajes ni respuestas vacíos.
+- Texto ingresado por el usuario.
+- Categoría del producto.
+- Presupuesto disponible.
+- Historial de consultas.
+- Productos populares.
 
-### 🧪 Pruebas automatizadas (Vitest)
-El proyecto incluye **34 pruebas** que verifican la lógica del `core` (sin tocar la interfaz):
-- **Cola FIFO** (`ColaPedidos`) y **Pila LIFO** (`PilaConsultas`).
-- **Cálculos del carrito**: subtotal, descuento (5% / 10%) y total.
-- **Validaciones** de inicio de sesión y registro.
-- **Búsqueda** de productos y **recomendación** del chatbot.
+Las recomendaciones se muestran mediante tarjetas integradas en la conversación, con opciones para consultar detalles, agregar productos al carrito, comparar alternativas o contactar al vendedor.
 
-Se ejecutan con `npm run test`.
+### 9.2. Catálogo de productos
 
----
+El sistema dispone de una sección complementaria para explorar el catálogo, realizar búsquedas y filtrar productos por categoría.
 
-## 🔄 Flujo de la aplicación
+### 9.3. Autenticación y gestión de roles
 
-1. El usuario **inicia sesión** o se **registra** eligiendo su rol.
-2. **Comprador:** conversa con el **Asistente IA** (pantalla principal), que le recomienda productos y los
-   agrega al **carrito**; realiza el **pago guiado por el asistente**, **envía consultas al vendedor** (Mensajes)
-   y revisa su **historial de pedidos**. También puede **Explorar catálogo** por su cuenta.
-3. **Vendedor:** entra a su **panel** (con las **Sugerencias del asistente IA**), **publica productos**,
-   **actualiza el stock** y **responde los mensajes** de los compradores.
-4. Cada pedido entra a la **cola FIFO** de pendientes; con **"Atender siguiente"** se procesa el más antiguo.
-5. Cada búsqueda o consulta al bot entra a la **pila LIFO** de consultas recientes, que alimenta las **recomendaciones**.
+La aplicación permite el registro e inicio de sesión de compradores y vendedores. Cada rol accede únicamente a las funciones que le corresponden mediante rutas protegidas.
 
----
+### 9.4. Carrito, pedidos y pagos simulados
 
-## 🛠️ Tecnologías
+El comprador puede agregar productos al carrito, modificar cantidades y completar un proceso de pago guiado. El sistema calcula:
 
-- React 18 + TypeScript (modo estricto)
-- Vite (entorno de desarrollo y build)
-- React Router (navegación entre pantallas)
-- React Context (estado global)
-- localStorage (persistencia local, sin backend)
-- PWA: *manifest* + *service worker* (instalable y con caché de los archivos principales)
-- **Tema claro/oscuro** con variables CSS (la preferencia se guarda en `localStorage`)
+- Subtotal.
+- Descuento aplicable.
+- Total de la compra.
 
----
+La disponibilidad de stock se valida tanto al agregar productos como al confirmar el pedido.
 
-## 📁 Documentación de la demo
+### 9.5. Panel del vendedor
 
-En la raíz: **[`COMO-EJECUTAR.md`](COMO-EJECUTAR.md)** — guía rápida de instalación, ejecución y cómo instalar la PWA.
+El vendedor puede:
 
-En la carpeta [`docs/`](docs) encontrarás:
+- Publicar productos.
+- Actualizar existencias.
+- Revisar pedidos pendientes.
+- Consultar mensajes recibidos.
+- Visualizar sugerencias generadas por el asistente.
 
-- **`guia-demostracion-RA2.md`** — guion paso a paso para sustentar el proyecto.
-- **`capturas.md`** — lista de capturas de pantalla que conviene tomar.
+Las sugerencias consideran productos con bajo stock, artículos más consultados, mensajes pendientes y pedidos por atender.
+
+### 9.6. Mensajería
+
+El sistema incorpora comunicación entre comprador y vendedor asociada a un producto específico. Los mensajes manejan estados de lectura y no lectura, de acuerdo con el requerimiento funcional RF10.
+
+### 9.7. Historiales
+
+Se registra el historial de pedidos y de consultas realizadas al asistente.
+
+### 9.8. Apariencia e identidad visual
+
+La interfaz incluye modo claro y modo oscuro. La preferencia seleccionada se almacena en `localStorage`.
+
+También se incorpora la identidad institucional de la Universidad Señor de Sipán en componentes como la barra de navegación, el registro, el asistente, el pie de página y los iconos de la PWA.
+
+La mascota visual del sistema se encuentra en:
+
+```text
+public/assistant-inkashop.svg
+```
+
+Esta ilustración representa un asistente tecnológico con elementos gráficos andinos y se adapta a los modos claro y oscuro.
 
 ---
 
-## ☁️ Despliegue: subir a GitHub y publicar en Vercel
+## 10. Validaciones implementadas
 
-> Requisito: tener **Git** instalado ([git-scm.com](https://git-scm.com)) y una cuenta en GitHub y en Vercel (ambas gratis).
+El sistema incorpora las siguientes validaciones:
 
-### 1. Subir el proyecto a GitHub
-Crea un repositorio **vacío** en [github.com](https://github.com) (por ejemplo `bot-ventas-ia`). Luego,
-desde la carpeta del proyecto, en la terminal:
+- Verificación de campos obligatorios en inicio de sesión, registro y publicación de productos.
+- Validación del formato del correo electrónico.
+- Prevención de correos duplicados.
+- Contraseña con una longitud mínima de seis caracteres.
+- Confirmación de contraseña coincidente.
+- Control de stock disponible en el carrito y antes de confirmar el pago.
+- Precio mayor que cero y stock no negativo para productos registrados por vendedores.
+- Restricción de acceso según el rol del usuario.
+- Prevención del proceso de pago cuando el carrito está vacío.
+- Prevención del envío de mensajes o respuestas vacías.
+
+---
+
+## 11. Pruebas automatizadas
+
+El proyecto incluye **34 pruebas automatizadas** desarrolladas con Vitest. Estas pruebas verifican la lógica del núcleo de la aplicación sin depender de la interfaz gráfica.
+
+Las pruebas cubren:
+
+- Comportamiento de la cola FIFO `ColaPedidos`.
+- Comportamiento de la pila LIFO `PilaConsultas`.
+- Cálculo de subtotal, descuento y total del carrito.
+- Descuentos del 5 % y 10 %.
+- Validaciones de inicio de sesión y registro.
+- Búsqueda de productos.
+- Recomendaciones generadas por el chatbot simulado.
+
+Para ejecutar las pruebas:
+
+```bash
+npm run test
+```
+
+---
+
+## 12. Flujo general de la aplicación
+
+1. El usuario inicia sesión o se registra seleccionando un rol.
+2. El comprador accede al asistente, solicita recomendaciones y agrega productos al carrito.
+3. El comprador puede completar el pago simulado, enviar consultas al vendedor y revisar su historial.
+4. El vendedor accede a su panel, publica productos, actualiza stock y responde mensajes.
+5. Cada pedido se incorpora a una cola FIFO de pendientes.
+6. La opción **Atender siguiente** procesa el pedido más antiguo.
+7. Cada búsqueda o consulta se registra en una pila LIFO de consultas recientes.
+8. El historial de consultas contribuye a generar nuevas recomendaciones.
+
+---
+
+## 13. Tecnologías utilizadas
+
+- React 18.
+- TypeScript en modo estricto.
+- Vite.
+- React Router.
+- React Context.
+- `localStorage`.
+- Vitest.
+- Progressive Web App mediante `manifest` y `service worker`.
+- Variables CSS para la implementación de los modos claro y oscuro.
+
+---
+
+## 14. Documentación complementaria
+
+En la raíz del proyecto se encuentra el archivo:
+
+- [`COMO-EJECUTAR.md`](COMO-EJECUTAR.md): guía de instalación, ejecución e instalación de la PWA.
+
+En la carpeta [`docs/`](docs) se encuentran:
+
+- `guia-demostracion-RA2.md`: guion de apoyo para la sustentación del proyecto.
+- `capturas.md`: relación de capturas de pantalla recomendadas para la presentación.
+
+---
+
+## 15. Despliegue en GitHub y Vercel
+
+### 15.1. Publicación del repositorio en GitHub
+
+Se requiere tener Git instalado y disponer de una cuenta en GitHub.
+
+Crear un repositorio vacío y ejecutar, desde la carpeta del proyecto:
 
 ```bash
 git init
@@ -223,35 +352,57 @@ git remote add origin https://github.com/USUARIO/bot-ventas-ia.git
 git push -u origin main
 ```
 
-> Reemplaza `USUARIO` por tu usuario de GitHub. El `.gitignore` ya evita subir `node_modules`, `dist`
-> y archivos locales, así que el repositorio queda limpio.
+Debe reemplazarse `USUARIO` por el nombre de usuario correspondiente en GitHub.
 
-### 2. Conectar con Vercel
-1. Entra a [vercel.com](https://vercel.com) e inicia sesión **con tu cuenta de GitHub**.
-2. **Add New → Project** e **importa** el repositorio `bot-ventas-ia`.
-3. Vercel detecta **Vite** automáticamente:
-   - Build Command: `npm run build`
-   - Output Directory: `dist`
-   - *No se necesitan variables de entorno.*
-4. Pulsa **Deploy**. En ~1 minuto tendrás una **URL pública** (`https://...vercel.app`).
-5. Cada `git push` a `main` vuelve a desplegar **automáticamente**.
+El archivo `.gitignore` evita la inclusión de directorios y archivos locales como `node_modules`, `dist` y otros recursos generados durante el desarrollo.
 
-> El archivo `vercel.json` ya está incluido para que las rutas (`/carrito`, `/mensajes`, `/pedidos`…)
-> funcionen correctamente al refrescar la página.
+### 15.2. Despliegue en Vercel
+
+1. Ingresar a Vercel utilizando una cuenta de GitHub.
+2. Seleccionar **Add New** y luego **Project**.
+3. Importar el repositorio `bot-ventas-ia`.
+4. Verificar la configuración detectada por Vercel:
+
+```text
+Build Command: npm run build
+Output Directory: dist
+```
+
+5. Ejecutar el despliegue.
+6. Utilizar la URL pública generada por Vercel.
+
+No se requieren variables de entorno para esta versión.
+
+Cada actualización enviada a la rama `main` mediante `git push` genera un nuevo despliegue automático.
+
+El archivo `vercel.json` se incluye para garantizar el funcionamiento correcto de rutas como `/carrito`, `/mensajes` y `/pedidos` después de actualizar el navegador.
 
 ---
 
-## 🧪 Pruebas después de publicar
+## 16. Verificación posterior al despliegue
 
-Con la URL de Vercel en línea, verifica:
+Después de publicar la aplicación, se recomienda comprobar lo siguiente:
 
-1. **Carga:** la página abre y muestra el inicio de sesión.
-2. **Login:** entra con `comprador@demo.com` / `123456`.
-3. **Rutas al refrescar:** entra a `/pedidos` y presiona **F5** → debe cargar (no “404”).
-4. **Flujos principales:** asistente IA, catálogo y buscador, carrito + pago simulado, pedidos (cola FIFO)
-   y mensajes (comprador↔vendedor).
-5. **PWA instalable:** aparece el botón **“Instalar aplicación”** (o el ícono en la barra de
-   direcciones); instálala en la PC y compruébala en su propia ventana.
-6. **Móvil:** abre la URL en un celular → diseño responsive; en Android instálala desde el menú del navegador.
-7. **Offline:** tras abrirla una vez, prueba sin conexión → debe seguir abriendo (gracias al service worker).
-8. **Datos por dispositivo:** cada navegador parte con los datos de ejemplo (su propio `localStorage`).
+1. La página de inicio de sesión carga correctamente.
+2. Las cuentas de prueba permiten acceder al sistema.
+3. Las rutas internas funcionan después de actualizar el navegador.
+4. El asistente, el catálogo, el carrito, los pedidos y la mensajería operan correctamente.
+5. La aplicación puede instalarse como PWA.
+6. La interfaz se adapta a dispositivos móviles.
+7. Los archivos principales permanecen disponibles después de una primera carga, de acuerdo con la configuración del `service worker`.
+8. Los datos se almacenan de manera independiente en el `localStorage` de cada navegador o dispositivo.
+
+---
+
+## 17. Limitaciones de la versión académica
+
+La versión actual presenta las siguientes limitaciones:
+
+- No utiliza backend ni base de datos remota.
+- No incorpora autenticación real mediante servicios externos.
+- La inteligencia artificial se encuentra simulada mediante reglas y lógica local.
+- Los pagos no se procesan a través de una pasarela real.
+- La información se almacena únicamente en el navegador del usuario.
+- Las integraciones con servicios de mensajería aún no están implementadas.
+
+Estas limitaciones responden al alcance académico definido para el proyecto y permiten demostrar la arquitectura, la lógica de negocio, las estructuras de datos y los flujos funcionales principales.
