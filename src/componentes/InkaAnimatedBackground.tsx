@@ -522,12 +522,12 @@ const ASPECTO_Y = 0.62 // el alto del contenedor ≈ 0.62 del ancho
 // con una separación mínima entre ellas (dardos con rechazo) para que NUNCA se
 // encimen. Si cuesta colocarlas, relaja un poco la separación. Tipos y tamaños
 // también al azar.
-function generarFiguras(): FiguraInka[] {
+function generarFiguras(total = TOTAL): FiguraInka[] {
   const puntos: { x: number; y: number }[] = []
   let minDist = MIN_DIST
   let fallos = 0
   let guarda = 0
-  while (puntos.length < TOTAL && guarda < 200000) {
+  while (puntos.length < total && guarda < 200000) {
     guarda++
     const x = 3 + Math.random() * 94
     const y = 3 + Math.random() * 94
@@ -596,9 +596,13 @@ const FiguraSVG = memo(function FiguraSVG({ tipo, estilo, soloPC, activa }: Figu
   )
 })
 
-export function InkaAnimatedBackground() {
+interface InkaBgProps {
+  total?: number // cuántas figuras generar (login=128; fondo global ambiental=menos)
+  activas?: number // cuántas se dibujan en dorado a la vez
+}
+export function InkaAnimatedBackground({ total = TOTAL, activas = ACTIVAS }: InkaBgProps = {}) {
   // Las figuras se generan una sola vez (posiciones al azar estables).
-  const [figuras] = useState(generarFiguras)
+  const [figuras] = useState(() => generarFiguras(total))
   // Figuras que se están dibujando ahora. En vez de cambiar las 15 a la vez,
   // cada ~0.3 s entra UNA nueva (al azar) y sale la más antigua: así cada figura
   // empieza su trazo en un momento distinto → animaciones DESINCRONIZADAS.
@@ -614,11 +618,11 @@ export function InkaAnimatedBackground() {
         intentos++
       }
       cola = cola.concat(n)
-      if (cola.length > ACTIVAS) cola = cola.slice(cola.length - ACTIVAS)
+      if (cola.length > activas) cola = cola.slice(cola.length - activas)
       setActivos(cola)
     }, 270)
     return () => clearInterval(id)
-  }, [figuras.length])
+  }, [figuras.length, activas])
 
   return (
     <div className="inka-bg" aria-hidden="true">

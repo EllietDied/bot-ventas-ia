@@ -762,6 +762,50 @@ a:hover {
   color: #5a4a36;
 }
 
+/* ============================================================
+   FONDO INKA GLOBAL (ambiental) — todas las páginas salvo auth.
+   Capa fija detrás de navbar/contenido/footer. Las tarjetas van
+   sólidas encima, así el fondo se ve en márgenes y huecos.
+   Solo capa visual; no toca la lógica.
+   ============================================================ */
+.inka-fondo-global {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  background: #0b1220; /* modo oscuro = navy, igual que el login (opción A) */
+}
+[data-theme='light'] .inka-fondo-global {
+  background: radial-gradient(135% 100% at 50% 0%, #faf6ec 0%, #f1e9d8 58%, #e6dcc4 100%);
+}
+/* Ambiental: las figuras se ven más tenues que en el login */
+.inka-fondo-global .inka-bg {
+  opacity: 0.5;
+}
+/* Velo suave: calma la zona central para que los textos fuera de tarjeta
+   se lean bien; se desvanece hacia los bordes. */
+.inka-fondo-global::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    72% 56% at 50% 40%,
+    rgba(11, 18, 32, 0.5),
+    rgba(11, 18, 32, 0.16) 75%,
+    transparent 100%
+  );
+}
+[data-theme='light'] .inka-fondo-global::after {
+  background: radial-gradient(
+    72% 56% at 50% 40%,
+    rgba(247, 240, 226, 0.55),
+    rgba(247, 240, 226, 0.18) 75%,
+    transparent 100%
+  );
+}
+
 
 /* ---------- Formularios ---------- */
 .formulario {
@@ -872,6 +916,15 @@ a:hover {
   border-radius: var(--radio);
   padding: 1.2rem;
 }
+/* En claro el panel de recomendados toma un piedra cálida (taupe) TRANSLÚCIDO que
+   deja asomar las figuras que brillan detrás (con un leve desenfoque para que el
+   texto siga legible). Solo modo claro. */
+[data-theme='light'] .seccion-recomendados {
+  background: rgba(150, 132, 104, 0.26);
+  border-color: rgba(120, 102, 76, 0.44);
+  backdrop-filter: blur(7px) saturate(115%);
+  -webkit-backdrop-filter: blur(7px) saturate(115%);
+}
 
 /* ---------- Grid y tarjetas de producto ---------- */
 .grid-productos {
@@ -898,6 +951,64 @@ a:hover {
   font-size: 2.6rem;
   text-align: center;
   padding: 0.6rem 0;
+}
+/* Foto del producto subida por el vendedor (si no hay foto, se ve el emoji).
+   Cada contexto le da su tamaño; .producto-foto es la imagen en sí. */
+.producto-foto {
+  display: block;
+  object-fit: cover;
+  border-radius: 8px;
+}
+.tarjeta-imagen .producto-foto {
+  width: 100%;
+  height: 132px;
+  border-radius: 10px;
+}
+.carrito-item-imagen .producto-foto {
+  width: 54px;
+  height: 54px;
+}
+.tarjeta-chat-img {
+  display: inline-flex;
+  align-items: center;
+}
+.tarjeta-chat-img .producto-foto {
+  width: 44px;
+  height: 44px;
+}
+.fila-imagen {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+}
+.fila-imagen:hover {
+  outline: 2px solid var(--acento-ia);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+.fila-imagen .producto-foto {
+  width: 38px;
+  height: 38px;
+}
+.producto-foto.foto-inline {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  vertical-align: -5px;
+}
+/* Vista previa de la foto elegida en el formulario de publicación. */
+.preview-imagen {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+.preview-imagen img {
+  width: 76px;
+  height: 76px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid var(--borde);
 }
 .tarjeta-categoria {
   font-size: 0.72rem;

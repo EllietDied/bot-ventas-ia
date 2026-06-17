@@ -1,7 +1,8 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { BarraNavegacion } from './componentes/BarraNavegacion'
 import { PieInstitucional } from './componentes/PieInstitucional'
 import { RutaProtegida } from './componentes/RutaProtegida'
+import { InkaAnimatedBackground } from './componentes/InkaAnimatedBackground'
 import { Login } from './paginas/Login'
 import { Registro } from './paginas/Registro'
 import { Catalogo } from './paginas/Catalogo'
@@ -14,8 +15,19 @@ import { Mensajes } from './paginas/Mensajes'
 
 // Define las rutas (pantallas) de la aplicación.
 export default function App() {
+  const ubicacion = useLocation()
+  // En login/registro NO va el fondo global: esas páginas tienen su propio
+  // hero a sangre (.inka-auth-bg). En el resto, una sola capa fija detrás de todo.
+  const esAuth =
+    ubicacion.pathname === '/login' || ubicacion.pathname === '/registro'
   return (
     <>
+      {!esAuth && (
+        <div className="inka-fondo-global" aria-hidden="true">
+          {/* Versión ambiental: menos figuras y menos dorado que el login */}
+          <InkaAnimatedBackground total={70} activas={10} />
+        </div>
+      )}
       <BarraNavegacion />
       <main className="contenedor">
         <Routes>
