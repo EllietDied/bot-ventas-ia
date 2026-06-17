@@ -1010,6 +1010,11 @@ a:hover {
   border-radius: 10px;
   border: 1px solid var(--borde);
 }
+.tarjeta-marca {
+  font-size: 0.78rem;
+  font-weight: 600;
+  margin: 0.1rem 0 0.3rem;
+}
 .tarjeta-categoria {
   font-size: 0.72rem;
   text-transform: uppercase;

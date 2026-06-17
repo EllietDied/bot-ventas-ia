@@ -19,6 +19,7 @@ export function TarjetaProducto({ producto, alAgregar }: Props) {
       </div>
       <span className="tarjeta-categoria">{producto.categoria}</span>
       <h3 className="tarjeta-nombre">{producto.nombre}</h3>
+      {producto.marca && <p className="tarjeta-marca texto-tenue">Marca: {producto.marca}</p>}
       <p className="tarjeta-descripcion">{producto.descripcion}</p>
 
       <div className="tarjeta-pie">

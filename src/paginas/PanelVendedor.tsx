@@ -18,6 +18,7 @@ export function PanelVendedor() {
   const toast = useToast()
 
   const [nombre, setNombre] = useState('')
+  const [marca, setMarca] = useState('')
   const [descripcion, setDescripcion] = useState('')
   const [categoria, setCategoria] = useState('')
   const [precio, setPrecio] = useState('')
@@ -64,6 +65,7 @@ export function PanelVendedor() {
 
     publicarProducto({
       nombre,
+      marca,
       descripcion,
       categoria,
       precio: precioNum,
@@ -74,6 +76,7 @@ export function PanelVendedor() {
 
     // Limpiamos el formulario y mostramos confirmación.
     setNombre('')
+    setMarca('')
     setDescripcion('')
     setCategoria('')
     setPrecio('')
@@ -164,6 +167,14 @@ export function PanelVendedor() {
             <label className="campo">
               <span>Nombre *</span>
               <input value={nombre} onChange={(e) => setNombre(e.target.value)} />
+            </label>
+            <label className="campo">
+              <span>Marca</span>
+              <input
+                value={marca}
+                onChange={(e) => setMarca(e.target.value)}
+                placeholder="Ej. Logitech, Asus..."
+              />
             </label>
             <label className="campo">
               <span>Descripción</span>

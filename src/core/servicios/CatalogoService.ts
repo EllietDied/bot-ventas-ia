@@ -7,7 +7,10 @@ export function buscarProductos(termino: string, productos: Producto[]): Product
   const t = termino.trim().toLowerCase()
   if (t === '') return productos
   return productos.filter(
-    (p) => p.nombre.toLowerCase().includes(t) || p.categoria.toLowerCase().includes(t),
+    (p) =>
+      p.nombre.toLowerCase().includes(t) ||
+      p.categoria.toLowerCase().includes(t) ||
+      (p.marca ?? '').toLowerCase().includes(t),
   )
 }
 

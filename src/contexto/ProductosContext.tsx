@@ -7,6 +7,7 @@ import { PRODUCTOS_INICIALES } from '../core/datos/seed'
 // Datos del formulario para publicar un producto.
 export interface NuevoProducto {
   nombre: string
+  marca?: string
   descripcion: string
   categoria: string
   precio: number
@@ -45,6 +46,7 @@ export function ProductosProvider({ children }: { children: ReactNode }) {
     const producto: Producto = {
       id: nuevoId,
       nombre: datos.nombre,
+      marca: datos.marca?.trim() || undefined,
       descripcion: datos.descripcion,
       categoria: datos.categoria,
       precio: datos.precio,

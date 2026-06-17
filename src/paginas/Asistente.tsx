@@ -183,6 +183,7 @@ export function Asistente() {
   function finalizarAgregar(b: Partial<Producto>) {
     publicarProducto({
       nombre: b.nombre || 'Producto',
+      marca: b.marca,
       descripcion: b.descripcion || '',
       categoria: b.categoria || 'General',
       precio: b.precio || 0,
@@ -193,6 +194,7 @@ export function Asistente() {
     const muestra: Producto = {
       id: -1,
       nombre: b.nombre || 'Producto',
+      marca: b.marca,
       descripcion: b.descripcion || '',
       categoria: b.categoria || 'General',
       precio: b.precio || 0,
@@ -258,10 +260,15 @@ export function Asistente() {
       const b: Partial<Producto> = { ...f.borrador }
       if (f.paso === 'nombre') {
         b.nombre = v
-        setFlujo({ ...f, paso: 'descripcion', borrador: b })
-        return responderVendedor(`Anotado: "${v}". ¿Una breve descripción?`, [
+        setFlujo({ ...f, paso: 'marca', borrador: b })
+        return responderVendedor(`Anotado: "${v}". ¿Cuál es la marca?`, [
           { label: 'Omitir', valor: 'omitir' },
         ])
+      }
+      if (f.paso === 'marca') {
+        if (t !== 'omitir') b.marca = v
+        setFlujo({ ...f, paso: 'descripcion', borrador: b })
+        return responderVendedor('¿Una breve descripción?', [{ label: 'Omitir', valor: 'omitir' }])
       }
       if (f.paso === 'descripcion') {
         if (t !== 'omitir') b.descripcion = v
@@ -315,6 +322,7 @@ export function Asistente() {
           { label: 'Precio', valor: 'precio' },
           { label: 'Stock', valor: 'stock' },
           { label: 'Nombre', valor: 'nombre' },
+          { label: 'Marca', valor: 'marca' },
           { label: 'Descripción', valor: 'descripcion' },
           { label: 'Categoría', valor: 'categoria' },
           { label: 'Foto', valor: 'foto' },
@@ -330,7 +338,7 @@ export function Asistente() {
           setFlujo({ ...f, paso: 'valor', campo: 'imagen' })
           return responderVendedor(`Sube la nueva foto de "${prod.nombre}".`, undefined, true)
         }
-        if (!['precio', 'stock', 'nombre', 'descripcion', 'categoria'].includes(t))
+        if (!['precio', 'stock', 'nombre', 'marca', 'descripcion', 'categoria'].includes(t))
           return responderVendedor('Elige un campo de la lista, por favor.')
         const actual =
           t === 'precio'
@@ -339,6 +347,8 @@ export function Asistente() {
             ? prod.stock
             : t === 'nombre'
             ? prod.nombre
+            : t === 'marca'
+            ? prod.marca || '(sin marca)'
             : t === 'descripcion'
             ? prod.descripcion || '(sin descripción)'
             : prod.categoria
@@ -358,6 +368,7 @@ export function Asistente() {
             return responderVendedor('El stock debe ser un entero ≥ 0.')
           cambios.stock = n
         } else if (campo === 'nombre') cambios.nombre = v
+        else if (campo === 'marca') cambios.marca = v
         else if (campo === 'descripcion') cambios.descripcion = v
         else if (campo === 'categoria') cambios.categoria = v
         else return responderVendedor('No sé qué campo cambiar. Empecemos de nuevo.', MENU_VENDEDOR)
@@ -426,9 +437,9 @@ export function Asistente() {
     agregarMensaje({
       id: idUnico(),
       emisor: 'bot',
-      texto: `📋 ${p.nombre} — ${p.categoria}\n${p.descripcion}\nPrecio: S/ ${p.precio.toFixed(
-        2,
-      )} · Stock: ${p.stock}`,
+      texto: `📋 ${p.nombre}${p.marca ? ' · ' + p.marca : ''} — ${p.categoria}\n${
+        p.descripcion
+      }\nPrecio: S/ ${p.precio.toFixed(2)} · Stock: ${p.stock}`,
     })
   }
 
@@ -666,7 +677,10 @@ function TarjetaChat({
         </span>
         <div>
           <div className="tarjeta-chat-nombre">{producto.nombre}</div>
-          <div className="tarjeta-chat-cat">{producto.categoria}</div>
+          <div className="tarjeta-chat-cat">
+            {producto.categoria}
+            {producto.marca ? ' · ' + producto.marca : ''}
+          </div>
         </div>
       </div>
       <div className="tarjeta-chat-precio">

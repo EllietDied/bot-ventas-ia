@@ -2,6 +2,7 @@
 export interface Producto {
   id: number
   nombre: string
+  marca?: string // marca del producto (ej. Logitech). Opcional.
   descripcion: string
   categoria: string
   precio: number
