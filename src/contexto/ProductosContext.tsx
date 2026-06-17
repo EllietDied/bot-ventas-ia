@@ -24,6 +24,7 @@ interface ProductosContextType {
   actualizarStock: (id: number, nuevoStock: number) => void
   actualizarImagen: (id: number, imagen: string) => void
   editarProducto: (id: number, cambios: Partial<Producto>) => void
+  eliminarProducto: (id: number) => void
 }
 
 const ProductosContext = createContext<ProductosContextType | undefined>(undefined)
@@ -61,6 +62,11 @@ export function ProductosProvider({ children }: { children: ReactNode }) {
   // El vendedor cambia la foto de un producto ya publicado.
   function actualizarImagen(id: number, imagen: string) {
     setProductos((prev) => prev.map((p) => (p.id === id ? { ...p, imagen } : p)))
+  }
+
+  // El vendedor elimina (da de baja) uno de sus productos del catálogo.
+  function eliminarProducto(id: number) {
+    setProductos((prev) => prev.filter((p) => p.id !== id))
   }
 
   // Editor general: aplica cambios parciales a un producto (nombre, precio,
@@ -101,6 +107,7 @@ export function ProductosProvider({ children }: { children: ReactNode }) {
         actualizarStock,
         actualizarImagen,
         editarProducto,
+        eliminarProducto,
       }}
     >
       {children}

@@ -48,12 +48,13 @@ const BOTONES_RAPIDOS: { label: string; query: string }[] = [
 const MENU_VENDEDOR: { label: string; valor: string }[] = [
   { label: '➕ Agregar producto', valor: 'agregar' },
   { label: '✏️ Modificar producto', valor: 'modificar' },
+  { label: '🗑️ Eliminar producto', valor: 'eliminar' },
   { label: '📦 Ver mis productos', valor: 'mis productos' },
 ]
 
 // Estado del flujo guiado del vendedor (máquina de pasos para agregar/modificar).
 interface FlujoVendedor {
-  modo: 'inactivo' | 'agregar' | 'modificar'
+  modo: 'inactivo' | 'agregar' | 'modificar' | 'eliminar'
   paso: string
   borrador: Partial<Producto> // datos que se van juntando al agregar
   prodId?: number // producto que se está modificando
@@ -63,7 +64,7 @@ const FLUJO_INICIAL: FlujoVendedor = { modo: 'inactivo', paso: '', borrador: {} 
 
 // PANTALLA PRINCIPAL: el Asistente IA es el centro de la aplicación.
 export function Asistente() {
-  const { productos, publicarProducto, editarProducto } = useProductos()
+  const { productos, publicarProducto, editarProducto, eliminarProducto } = useProductos()
   const { agregarAlCarrito, cantidadTotal } = useCarrito()
   const { registrarConsulta, consultasRecientes, categoriasConsultadas } = useConsultas()
   const { usuarioActual } = useSesion()
@@ -241,6 +242,15 @@ export function Asistente() {
           misProductos.map((p) => ({ label: p.nombre, valor: 'id:' + p.id })),
         )
       }
+      if (/eliminar|borrar|quitar/.test(t)) {
+        if (misProductos.length === 0)
+          return responderVendedor('No tienes productos para eliminar.')
+        setFlujo({ modo: 'eliminar', paso: 'elegir', borrador: {} })
+        return responderVendedor(
+          '¿Cuál producto quieres eliminar?',
+          misProductos.map((p) => ({ label: p.nombre, valor: 'id:' + p.id })),
+        )
+      }
       if (/mis productos|ver|lista/.test(t)) {
         if (misProductos.length === 0)
           return responderVendedor('Todavía no has publicado productos. Escribe "agregar" para empezar.')
@@ -385,6 +395,40 @@ export function Asistente() {
           productos: [actualizado],
           acciones: MENU_VENDEDOR,
         })
+      }
+    }
+
+    // --- Flujo ELIMINAR ---
+    if (f.modo === 'eliminar') {
+      if (f.paso === 'elegir') {
+        const prod = elegirProducto(v)
+        if (!prod)
+          return responderVendedor(
+            'No reconozco ese producto. Elige uno de la lista:',
+            misProductos.map((p) => ({ label: p.nombre, valor: 'id:' + p.id })),
+          )
+        setFlujo({ ...f, paso: 'confirmar', prodId: prod.id })
+        return responderVendedor(
+          `¿Seguro que quieres eliminar "${prod.nombre}"? Esta acción no se puede deshacer.`,
+          [
+            { label: '🗑️ Sí, eliminar', valor: 'confirmar' },
+            { label: 'Cancelar', valor: 'cancelar' },
+          ],
+        )
+      }
+      if (f.paso === 'confirmar') {
+        const prod = productos.find((p) => p.id === f.prodId)
+        setFlujo(FLUJO_INICIAL)
+        if (!prod) return responderVendedor('No encontré el producto.', MENU_VENDEDOR)
+        // Solo elimina si confirma; cualquier otra cosa lo deja como estaba.
+        if (t === 'confirmar' || t === 'si' || t === 'sí' || t.includes('eliminar')) {
+          eliminarProducto(prod.id)
+          return responderVendedor(
+            `🗑️ Eliminé "${prod.nombre}" de tu catálogo. ¿Algo más?`,
+            MENU_VENDEDOR,
+          )
+        }
+        return responderVendedor('Listo, no eliminé nada. ¿Qué deseas hacer?', MENU_VENDEDOR)
       }
     }
   }

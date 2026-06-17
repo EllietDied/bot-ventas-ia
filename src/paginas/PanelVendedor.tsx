@@ -10,7 +10,8 @@ import { comprimirImagen } from '../util/imagen'
 
 // Pantalla del vendedor: publicar productos y actualizar stock.
 export function PanelVendedor() {
-  const { productos, publicarProducto, actualizarStock, actualizarImagen } = useProductos()
+  const { productos, publicarProducto, actualizarStock, actualizarImagen, eliminarProducto } =
+    useProductos()
   const { usuarioActual } = useSesion()
   const { consultasRecientes } = useConsultas()
   const { mensajes } = useMensajeria()
@@ -260,6 +261,13 @@ export function PanelVendedor() {
                     stockActual={p.stock}
                     alActualizar={(nuevo) => actualizarStock(p.id, nuevo)}
                   />
+                  <BotonEliminar
+                    nombre={p.nombre}
+                    alEliminar={() => {
+                      eliminarProducto(p.id)
+                      toast.info(`"${p.nombre}" eliminado`)
+                    }}
+                  />
                 </div>
               ))}
             </div>
@@ -298,5 +306,32 @@ function ControlStock({
         Actualizar
       </button>
     </div>
+  )
+}
+
+// Botón de eliminar con confirmación en dos pasos (sin diálogo nativo del navegador).
+function BotonEliminar({ nombre, alEliminar }: { nombre: string; alEliminar: () => void }) {
+  const [confirmando, setConfirmando] = useState(false)
+  if (confirmando) {
+    return (
+      <span className="confirm-eliminar">
+        <button className="btn btn-peligro btn-pequeno" onClick={alEliminar}>
+          Eliminar
+        </button>
+        <button className="btn btn-secundario btn-pequeno" onClick={() => setConfirmando(false)}>
+          Cancelar
+        </button>
+      </span>
+    )
+  }
+  return (
+    <button
+      className="btn-eliminar"
+      title={`Eliminar ${nombre}`}
+      aria-label={`Eliminar ${nombre}`}
+      onClick={() => setConfirmando(true)}
+    >
+      🗑️
+    </button>
   )
 }
