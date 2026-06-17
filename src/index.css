@@ -524,34 +524,55 @@ a:hover {
   stroke-dashoffset: 1; /* oculto: nada dibujado */
   opacity: 0;
 }
-/* Figura activa: la energía dorada dibuja su contorno, con brillo premium */
+/* Figura activa: el dorado dibuja DESPACIO el contorno completo (~4.3 s), luego
+   brilla INTENSAMENTE ~1 s y se desvanece. El grupo anima su resplandor (inka-glow);
+   los trazos animan el dibujado (inka-trazo). Ambos duran 7 s. */
 .inka-fig.is-drawing .inka-fig-gold {
-  filter: drop-shadow(0 0 4px rgba(255, 240, 185, 0.95))
-    drop-shadow(0 0 11px rgba(255, 205, 75, 0.65))
-    drop-shadow(0 0 22px rgba(212, 175, 55, 0.42));
+  animation: inka-glow 7s ease-in-out forwards;
 }
 .inka-fig.is-drawing .inka-fig-gold path,
 .inka-fig.is-drawing .inka-fig-gold circle,
 .inka-fig.is-drawing .inka-fig-gold rect {
-  animation: inka-trazo 6.5s ease-in-out forwards;
+  animation: inka-trazo 7s ease-in-out forwards;
 }
 @keyframes inka-trazo {
   0% {
     stroke-dashoffset: 1;
     opacity: 1;
   }
-  58% {
+  62% {
     stroke-dashoffset: 0;
     opacity: 1;
-  } /* contorno dibujado aún más lento (~2.4 s) */
-  86% {
+  } /* contorno COMPLETO dibujado (~4.3 s, lento) */
+  76% {
     stroke-dashoffset: 0;
     opacity: 1;
-  } /* permanece dorada (~1.2 s) */
+  } /* se mantiene dorada y brillando ~1 s */
   100% {
     stroke-dashoffset: 0;
     opacity: 0;
-  } /* vuelve suavemente a blanco */
+  } /* se desvanece */
+}
+/* Resplandor del dorado: normal mientras dibuja, PICO intenso en el segundo de brillo. */
+@keyframes inka-glow {
+  0% {
+    filter: drop-shadow(0 0 3px rgba(255, 240, 185, 0.8)) drop-shadow(0 0 8px rgba(255, 205, 75, 0.5));
+  }
+  62% {
+    filter: drop-shadow(0 0 4px rgba(255, 240, 185, 0.95))
+      drop-shadow(0 0 12px rgba(255, 205, 75, 0.65)) drop-shadow(0 0 24px rgba(212, 175, 55, 0.45));
+  }
+  69% {
+    filter: drop-shadow(0 0 9px rgba(255, 250, 220, 1)) drop-shadow(0 0 22px rgba(255, 218, 95, 0.95))
+      drop-shadow(0 0 44px rgba(255, 190, 60, 0.7));
+  }
+  76% {
+    filter: drop-shadow(0 0 6px rgba(255, 246, 205, 0.95))
+      drop-shadow(0 0 16px rgba(255, 210, 85, 0.8)) drop-shadow(0 0 34px rgba(245, 185, 55, 0.5));
+  }
+  100% {
+    filter: drop-shadow(0 0 2px rgba(255, 240, 185, 0.25)) drop-shadow(0 0 6px rgba(255, 205, 75, 0.12));
+  }
 }
 
 /* Chispa: la "punta de la varita mágica" que recorre el contorno al dibujarlo */
@@ -566,7 +587,7 @@ a:hover {
   stroke-dasharray: 0.09 0.91; /* una chispa más grande que viaja por el trazo */
   stroke-dashoffset: 1;
   opacity: 0;
-  animation: inka-chispa 6.5s ease-in-out forwards;
+  animation: inka-chispa 7s ease-in-out forwards;
 }
 .inka-fig-spark {
   filter: drop-shadow(0 0 7px #fff8d4) drop-shadow(0 0 18px rgba(255, 222, 115, 1))
@@ -577,16 +598,16 @@ a:hover {
     stroke-dashoffset: 1;
     opacity: 0;
   }
-  6% {
+  5% {
     opacity: 1;
   }
-  52% {
+  56% {
     opacity: 1;
   }
-  58% {
+  62% {
     stroke-dashoffset: 0;
     opacity: 0;
-  } /* al terminar el contorno, la chispa se apaga */
+  } /* al completar el contorno, la chispa se apaga */
   100% {
     stroke-dashoffset: 0;
     opacity: 0;
@@ -614,6 +635,7 @@ a:hover {
   }
 }
 @media (prefers-reduced-motion: reduce) {
+  .inka-fig.is-drawing .inka-fig-gold,
   .inka-fig.is-drawing .inka-fig-gold path,
   .inka-fig.is-drawing .inka-fig-gold circle,
   .inka-fig.is-drawing .inka-fig-gold rect,
@@ -709,8 +731,27 @@ a:hover {
   stroke: #cc9012;
 }
 [data-theme='light'] .inka-fig.is-drawing .inka-fig-gold {
-  filter: drop-shadow(0 0 3px rgba(214, 150, 22, 0.6))
-    drop-shadow(0 0 9px rgba(206, 150, 30, 0.4)) drop-shadow(0 0 18px rgba(190, 130, 20, 0.25));
+  animation: inka-glow-claro 7s ease-in-out forwards;
+}
+@keyframes inka-glow-claro {
+  0% {
+    filter: drop-shadow(0 0 2px rgba(214, 150, 22, 0.5)) drop-shadow(0 0 7px rgba(206, 150, 30, 0.3));
+  }
+  62% {
+    filter: drop-shadow(0 0 3px rgba(214, 150, 22, 0.6)) drop-shadow(0 0 9px rgba(206, 150, 30, 0.4))
+      drop-shadow(0 0 18px rgba(190, 130, 20, 0.25));
+  }
+  69% {
+    filter: drop-shadow(0 0 6px rgba(230, 165, 35, 0.95)) drop-shadow(0 0 16px rgba(214, 150, 30, 0.7))
+      drop-shadow(0 0 30px rgba(190, 130, 20, 0.45));
+  }
+  76% {
+    filter: drop-shadow(0 0 4px rgba(220, 155, 28, 0.8)) drop-shadow(0 0 12px rgba(206, 150, 30, 0.55))
+      drop-shadow(0 0 24px rgba(190, 130, 20, 0.35));
+  }
+  100% {
+    filter: drop-shadow(0 0 2px rgba(214, 150, 22, 0.2)) drop-shadow(0 0 6px rgba(206, 150, 30, 0.1));
+  }
 }
 /* Chispa: oro brillante (no blanco, que se perdería sobre el claro) */
 [data-theme='light'] .inka-fig-spark path,
@@ -929,6 +970,14 @@ a:hover {
 [data-theme='light'] .seccion-recomendados {
   background: rgba(150, 132, 104, 0.26);
   border-color: rgba(120, 102, 76, 0.44);
+  backdrop-filter: blur(7px) saturate(115%);
+  -webkit-backdrop-filter: blur(7px) saturate(115%);
+}
+/* En oscuro el panel también es TRANSLÚCIDO: deja asomar las figuras y su brillo
+   dorado del fondo, con desenfoque para que el texto siga legible. */
+[data-theme='dark'] .seccion-recomendados {
+  background: rgba(52, 62, 76, 0.45);
+  border-color: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(7px) saturate(115%);
   -webkit-backdrop-filter: blur(7px) saturate(115%);
 }

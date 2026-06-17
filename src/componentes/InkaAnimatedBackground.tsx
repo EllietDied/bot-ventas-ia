@@ -599,8 +599,13 @@ const FiguraSVG = memo(function FiguraSVG({ tipo, estilo, soloPC, activa }: Figu
 interface InkaBgProps {
   total?: number // cuántas figuras generar (login=128; fondo global ambiental=menos)
   activas?: number // cuántas se dibujan en dorado a la vez
+  intervalo?: number // ms entre relevos; activas*intervalo = cuánto vive cada dorado
 }
-export function InkaAnimatedBackground({ total = TOTAL, activas = ACTIVAS }: InkaBgProps = {}) {
+export function InkaAnimatedBackground({
+  total = TOTAL,
+  activas = ACTIVAS,
+  intervalo = 300,
+}: InkaBgProps = {}) {
   // Las figuras se generan una sola vez (posiciones al azar estables).
   const [figuras] = useState(() => generarFiguras(total))
   // Figuras que se están dibujando ahora. En vez de cambiar las 15 a la vez,
@@ -620,9 +625,9 @@ export function InkaAnimatedBackground({ total = TOTAL, activas = ACTIVAS }: Ink
       cola = cola.concat(n)
       if (cola.length > activas) cola = cola.slice(cola.length - activas)
       setActivos(cola)
-    }, 270)
+    }, intervalo)
     return () => clearInterval(id)
-  }, [figuras.length, activas])
+  }, [figuras.length, activas, intervalo])
 
   return (
     <div className="inka-bg" aria-hidden="true">

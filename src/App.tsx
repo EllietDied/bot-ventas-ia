@@ -24,8 +24,9 @@ export default function App() {
     <>
       {!esAuth && (
         <div className="inka-fondo-global" aria-hidden="true">
-          {/* Versión ambiental: menos figuras y menos dorado que el login */}
-          <InkaAnimatedBackground total={70} activas={10} />
+          {/* Versión ambiental: menos figuras y menos dorado que el login. El
+              intervalo mayor da tiempo a que cada figura complete su dibujado de 7 s. */}
+          <InkaAnimatedBackground total={70} activas={10} intervalo={750} />
         </div>
       )}
       <BarraNavegacion />
