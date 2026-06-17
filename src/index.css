@@ -964,8 +964,9 @@ a:hover {
 }
 .tarjeta-imagen .producto-foto {
   width: 100%;
-  height: 150px;
+  aspect-ratio: 1 / 1; /* baldosa cuadrada estilo tienda */
   border-radius: 10px;
+  border: 1px solid var(--borde);
 }
 .carrito-item-imagen .producto-foto {
   width: 54px;
