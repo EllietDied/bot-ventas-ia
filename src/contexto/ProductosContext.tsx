@@ -22,6 +22,7 @@ interface ProductosContextType {
   publicarProducto: (datos: NuevoProducto) => void
   actualizarStock: (id: number, nuevoStock: number) => void
   actualizarImagen: (id: number, imagen: string) => void
+  editarProducto: (id: number, cambios: Partial<Producto>) => void
 }
 
 const ProductosContext = createContext<ProductosContextType | undefined>(undefined)
@@ -60,6 +61,21 @@ export function ProductosProvider({ children }: { children: ReactNode }) {
     setProductos((prev) => prev.map((p) => (p.id === id ? { ...p, imagen } : p)))
   }
 
+  // Editor general: aplica cambios parciales a un producto (nombre, precio,
+  // stock, etc.). Si cambia el stock, recalcula el estado disponible/agotado.
+  function editarProducto(id: number, cambios: Partial<Producto>) {
+    setProductos((prev) =>
+      prev.map((p) => {
+        if (p.id !== id) return p
+        const actualizado = { ...p, ...cambios }
+        if (cambios.stock !== undefined) {
+          actualizado.estado = cambios.stock > 0 ? 'disponible' : 'agotado'
+        }
+        return actualizado
+      }),
+    )
+  }
+
   // El vendedor (o una compra) actualiza el stock de un producto.
   function actualizarStock(id: number, nuevoStock: number) {
     setProductos((prev) =>
@@ -75,7 +91,15 @@ export function ProductosProvider({ children }: { children: ReactNode }) {
 
   return (
     <ProductosContext.Provider
-      value={{ productos, buscar, categorias, publicarProducto, actualizarStock, actualizarImagen }}
+      value={{
+        productos,
+        buscar,
+        categorias,
+        publicarProducto,
+        actualizarStock,
+        actualizarImagen,
+        editarProducto,
+      }}
     >
       {children}
     </ProductosContext.Provider>

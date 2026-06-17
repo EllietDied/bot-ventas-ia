@@ -9,6 +9,8 @@ import { LogoUSS } from '../componentes/LogoUSS'
 import { ImagenProducto } from '../componentes/ImagenProducto'
 import { ChatBotIA } from '../core/modelos/ChatBotIA'
 import { Producto } from '../core/modelos/Producto'
+import { esVendedor } from '../core/modelos/Vendedor'
+import { comprimirImagen } from '../util/imagen'
 import { cargar, guardar } from '../core/datos/almacenamiento'
 
 // Instancia del asistente (IA simulada).
@@ -29,6 +31,8 @@ interface MensajeAsistente {
   texto: string
   productos?: Producto[]
   comparacion?: Producto[]
+  acciones?: { label: string; valor: string }[] // botones de elección (flujo del vendedor)
+  pedirFoto?: boolean // muestra un selector de foto dentro del chat
   pensando?: boolean // mientras el asistente "procesa" la consulta
 }
 
@@ -40,36 +44,70 @@ const BOTONES_RAPIDOS: { label: string; query: string }[] = [
   { label: '🔥 Ver ofertas', query: 'Ver ofertas económicas' },
 ]
 
+// Menú (botones) del asistente de gestión del vendedor.
+const MENU_VENDEDOR: { label: string; valor: string }[] = [
+  { label: '➕ Agregar producto', valor: 'agregar' },
+  { label: '✏️ Modificar producto', valor: 'modificar' },
+  { label: '📦 Ver mis productos', valor: 'mis productos' },
+]
+
+// Estado del flujo guiado del vendedor (máquina de pasos para agregar/modificar).
+interface FlujoVendedor {
+  modo: 'inactivo' | 'agregar' | 'modificar'
+  paso: string
+  borrador: Partial<Producto> // datos que se van juntando al agregar
+  prodId?: number // producto que se está modificando
+  campo?: string // campo que se está modificando
+}
+const FLUJO_INICIAL: FlujoVendedor = { modo: 'inactivo', paso: '', borrador: {} }
+
 // PANTALLA PRINCIPAL: el Asistente IA es el centro de la aplicación.
 export function Asistente() {
-  const { productos } = useProductos()
+  const { productos, publicarProducto, editarProducto } = useProductos()
   const { agregarAlCarrito, cantidadTotal } = useCarrito()
   const { registrarConsulta, consultasRecientes, categoriasConsultadas } = useConsultas()
   const { usuarioActual } = useSesion()
   const navegar = useNavigate()
 
   const puedeComprar = usuarioActual ? esComprador(usuarioActual) : false
+  const esVendedorActual = usuarioActual ? esVendedor(usuarioActual) : false
+  // Productos publicados por este vendedor (para gestionarlos desde el chat).
+  const misProductos = usuarioActual
+    ? productos.filter((p) => p.idVendedor === usuarioActual.idUsuario)
+    : []
 
   // Saludo personalizado con el nombre del usuario.
   const primerNombre = usuarioActual ? usuarioActual.nombre.split(' ')[0] : ''
-  const bienvenida: MensajeAsistente = {
-    id: 'A-0',
-    emisor: 'bot',
-    texto: `¡Hola${primerNombre ? ', ' + primerNombre : ''}! 👋 Bienvenido a IA InkaShop 🤖. Soy tu asistente de ventas: cuéntame qué buscas (por categoría, uso o presupuesto) y te recomendaré las mejores opciones. También puedes usar los botones rápidos de abajo.`,
-  }
+  // El vendedor ve un asistente de GESTIÓN (agregar/modificar productos);
+  // el comprador, el asistente de VENTAS (recomendaciones).
+  const bienvenida: MensajeAsistente = esVendedorActual
+    ? {
+        id: 'A-0',
+        emisor: 'bot',
+        texto: `¡Hola${primerNombre ? ', ' + primerNombre : ''}! 👋 Soy tu asistente de gestión 🤖. Puedo ayudarte a agregar un producto nuevo o a modificar uno existente. Usa los botones de abajo o escríbeme.`,
+        acciones: MENU_VENDEDOR,
+      }
+    : {
+        id: 'A-0',
+        emisor: 'bot',
+        texto: `¡Hola${primerNombre ? ', ' + primerNombre : ''}! 👋 Bienvenido a IA InkaShop 🤖. Soy tu asistente de ventas: cuéntame qué buscas (por categoría, uso o presupuesto) y te recomendaré las mejores opciones. También puedes usar los botones rápidos de abajo.`,
+      }
 
+  // Chat separado por rol (no mezclar el de ventas con el de gestión).
+  const claveChat = 'asistente_chat_' + (esVendedorActual ? 'vendedor' : 'comprador')
   const [mensajes, setMensajes] = useState<MensajeAsistente[]>(() =>
-    cargar<MensajeAsistente[]>('asistente_chat', [bienvenida]),
+    cargar<MensajeAsistente[]>(claveChat, [bienvenida]),
   )
   const [texto, setTexto] = useState('')
   const [comparar, setComparar] = useState<Producto[]>([])
+  const [flujo, setFlujo] = useState<FlujoVendedor>(FLUJO_INICIAL)
   const finRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     // No guardamos los mensajes "pensando" (son temporales).
-    guardar('asistente_chat', mensajes.filter((m) => !m.pensando))
+    guardar(claveChat, mensajes.filter((m) => !m.pensando))
     finRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [mensajes])
+  }, [mensajes, claveChat])
 
   function agregarMensaje(m: MensajeAsistente) {
     setMensajes((prev) => [...prev, m])
@@ -120,9 +158,267 @@ export function Asistente() {
     }, 1600)
   }
 
+  // ===== Asistente de GESTIÓN del vendedor (flujo guiado paso a paso) =====
+
+  // Agrega un mensaje del bot, opcionalmente con botones de elección o selector de foto.
+  function responderVendedor(
+    texto: string,
+    acciones?: { label: string; valor: string }[],
+    pedirFoto?: boolean,
+  ) {
+    agregarMensaje({ id: idUnico(), emisor: 'bot', texto, acciones, pedirFoto })
+  }
+
+  // Encuentra el producto elegido: por "id:N" (botón) o por nombre escrito.
+  function elegirProducto(v: string): Producto | undefined {
+    if (v.startsWith('id:')) return misProductos.find((p) => p.id === Number(v.slice(3)))
+    const t = v.toLowerCase()
+    return (
+      misProductos.find((p) => p.nombre.toLowerCase() === t) ||
+      misProductos.find((p) => p.nombre.toLowerCase().includes(t))
+    )
+  }
+
+  // Publica el producto del borrador y muestra una tarjeta de confirmación.
+  function finalizarAgregar(b: Partial<Producto>) {
+    publicarProducto({
+      nombre: b.nombre || 'Producto',
+      descripcion: b.descripcion || '',
+      categoria: b.categoria || 'General',
+      precio: b.precio || 0,
+      stock: b.stock ?? 0,
+      idVendedor: usuarioActual!.idUsuario,
+      imagen: b.imagen,
+    })
+    const muestra: Producto = {
+      id: -1,
+      nombre: b.nombre || 'Producto',
+      descripcion: b.descripcion || '',
+      categoria: b.categoria || 'General',
+      precio: b.precio || 0,
+      stock: b.stock ?? 0,
+      estado: (b.stock ?? 0) > 0 ? 'disponible' : 'agotado',
+      imagen: b.imagen || '📦',
+      idVendedor: usuarioActual!.idUsuario,
+    }
+    setFlujo(FLUJO_INICIAL)
+    agregarMensaje({
+      id: idUnico(),
+      emisor: 'bot',
+      texto: `✅ ¡Listo! Publiqué "${muestra.nombre}" en ${muestra.categoria}, a S/ ${muestra.precio.toFixed(
+        2,
+      )} con ${muestra.stock} en stock. ¿Algo más?`,
+      productos: [muestra],
+      acciones: MENU_VENDEDOR,
+    })
+  }
+
+  // Máquina de pasos: según el estado actual (flujo), procesa la entrada y avanza.
+  function procesarVendedor(valor: string) {
+    const v = valor.trim()
+    const t = v.toLowerCase()
+    const f = flujo
+
+    if (t === 'cancelar' || t === 'salir') {
+      setFlujo(FLUJO_INICIAL)
+      return responderVendedor('Operación cancelada. ¿Qué deseas hacer?', MENU_VENDEDOR)
+    }
+
+    // --- Sin flujo activo: detectamos la intención ---
+    if (f.modo === 'inactivo') {
+      if (/agregar|publicar|nuevo|crear/.test(t)) {
+        setFlujo({ modo: 'agregar', paso: 'nombre', borrador: {} })
+        return responderVendedor('📝 Publiquemos un producto. ¿Cuál es el nombre?')
+      }
+      if (/modificar|editar|cambiar|actualizar/.test(t)) {
+        if (misProductos.length === 0)
+          return responderVendedor('Aún no tienes productos. Escribe "agregar" para publicar el primero.')
+        setFlujo({ modo: 'modificar', paso: 'elegir', borrador: {} })
+        return responderVendedor(
+          '¿Cuál producto quieres modificar?',
+          misProductos.map((p) => ({ label: p.nombre, valor: 'id:' + p.id })),
+        )
+      }
+      if (/mis productos|ver|lista/.test(t)) {
+        if (misProductos.length === 0)
+          return responderVendedor('Todavía no has publicado productos. Escribe "agregar" para empezar.')
+        return agregarMensaje({
+          id: idUnico(),
+          emisor: 'bot',
+          texto: `Tienes ${misProductos.length} producto(s):`,
+          productos: misProductos.slice(0, 6),
+          acciones: MENU_VENDEDOR,
+        })
+      }
+      return responderVendedor('Soy tu asistente de gestión 🤖. ¿Qué deseas hacer?', MENU_VENDEDOR)
+    }
+
+    // --- Flujo AGREGAR ---
+    if (f.modo === 'agregar') {
+      const b: Partial<Producto> = { ...f.borrador }
+      if (f.paso === 'nombre') {
+        b.nombre = v
+        setFlujo({ ...f, paso: 'descripcion', borrador: b })
+        return responderVendedor(`Anotado: "${v}". ¿Una breve descripción?`, [
+          { label: 'Omitir', valor: 'omitir' },
+        ])
+      }
+      if (f.paso === 'descripcion') {
+        if (t !== 'omitir') b.descripcion = v
+        setFlujo({ ...f, paso: 'categoria', borrador: b })
+        return responderVendedor(
+          '¿En qué categoría va?',
+          [...new Set(productos.map((p) => p.categoria))].map((c) => ({ label: c, valor: c })),
+        )
+      }
+      if (f.paso === 'categoria') {
+        b.categoria = v
+        setFlujo({ ...f, paso: 'precio', borrador: b })
+        return responderVendedor('¿Cuál es el precio en soles? (ej. 199.90)')
+      }
+      if (f.paso === 'precio') {
+        const n = Number(v.replace(',', '.'))
+        if (isNaN(n) || n <= 0)
+          return responderVendedor('El precio debe ser un número mayor a 0. Inténtalo de nuevo (ej. 150).')
+        b.precio = n
+        setFlujo({ ...f, paso: 'stock', borrador: b })
+        return responderVendedor('¿Cuánto stock disponible? (cantidad entera)')
+      }
+      if (f.paso === 'stock') {
+        const n = Number(v)
+        if (isNaN(n) || n < 0 || !Number.isInteger(n))
+          return responderVendedor('El stock debe ser un entero ≥ 0. Inténtalo de nuevo (ej. 10).')
+        b.stock = n
+        setFlujo({ ...f, paso: 'foto', borrador: b })
+        return responderVendedor(
+          '¡Casi listo! ¿Quieres agregar una foto? Súbela o pulsa "Omitir".',
+          [{ label: 'Omitir foto', valor: 'omitir' }],
+          true,
+        )
+      }
+      if (f.paso === 'foto') {
+        return finalizarAgregar(b) // se llega aquí al "Omitir"; la foto subida va por subirFotoVendedor
+      }
+    }
+
+    // --- Flujo MODIFICAR ---
+    if (f.modo === 'modificar') {
+      if (f.paso === 'elegir') {
+        const prod = elegirProducto(v)
+        if (!prod)
+          return responderVendedor(
+            'No reconozco ese producto. Elige uno de la lista:',
+            misProductos.map((p) => ({ label: p.nombre, valor: 'id:' + p.id })),
+          )
+        setFlujo({ ...f, paso: 'campo', prodId: prod.id })
+        return responderVendedor(`Vas a modificar "${prod.nombre}". ¿Qué quieres cambiar?`, [
+          { label: 'Precio', valor: 'precio' },
+          { label: 'Stock', valor: 'stock' },
+          { label: 'Nombre', valor: 'nombre' },
+          { label: 'Descripción', valor: 'descripcion' },
+          { label: 'Categoría', valor: 'categoria' },
+          { label: 'Foto', valor: 'foto' },
+        ])
+      }
+      const prod = productos.find((p) => p.id === f.prodId)
+      if (!prod) {
+        setFlujo(FLUJO_INICIAL)
+        return responderVendedor('No encontré el producto. Empecemos de nuevo.', MENU_VENDEDOR)
+      }
+      if (f.paso === 'campo') {
+        if (t === 'foto') {
+          setFlujo({ ...f, paso: 'valor', campo: 'imagen' })
+          return responderVendedor(`Sube la nueva foto de "${prod.nombre}".`, undefined, true)
+        }
+        if (!['precio', 'stock', 'nombre', 'descripcion', 'categoria'].includes(t))
+          return responderVendedor('Elige un campo de la lista, por favor.')
+        const actual =
+          t === 'precio'
+            ? `S/ ${prod.precio.toFixed(2)}`
+            : t === 'stock'
+            ? prod.stock
+            : t === 'nombre'
+            ? prod.nombre
+            : t === 'descripcion'
+            ? prod.descripcion || '(sin descripción)'
+            : prod.categoria
+        setFlujo({ ...f, paso: 'valor', campo: t })
+        return responderVendedor(`Valor actual de ${t}: ${actual}. Escribe el nuevo valor.`)
+      }
+      if (f.paso === 'valor') {
+        const campo = f.campo || ''
+        const cambios: Partial<Producto> = {}
+        if (campo === 'precio') {
+          const n = Number(v.replace(',', '.'))
+          if (isNaN(n) || n <= 0) return responderVendedor('El precio debe ser un número mayor a 0.')
+          cambios.precio = n
+        } else if (campo === 'stock') {
+          const n = Number(v)
+          if (isNaN(n) || n < 0 || !Number.isInteger(n))
+            return responderVendedor('El stock debe ser un entero ≥ 0.')
+          cambios.stock = n
+        } else if (campo === 'nombre') cambios.nombre = v
+        else if (campo === 'descripcion') cambios.descripcion = v
+        else if (campo === 'categoria') cambios.categoria = v
+        else return responderVendedor('No sé qué campo cambiar. Empecemos de nuevo.', MENU_VENDEDOR)
+
+        editarProducto(prod.id, cambios)
+        setFlujo(FLUJO_INICIAL)
+        const actualizado: Producto = { ...prod, ...cambios }
+        if (cambios.stock !== undefined)
+          actualizado.estado = cambios.stock > 0 ? 'disponible' : 'agotado'
+        return agregarMensaje({
+          id: idUnico(),
+          emisor: 'bot',
+          texto: `✅ Actualicé "${prod.nombre}".`,
+          productos: [actualizado],
+          acciones: MENU_VENDEDOR,
+        })
+      }
+    }
+  }
+
+  // Envía un texto o una elección (botón) del vendedor al flujo guiado.
+  function enviarVendedor(textoMostrado: string, valor?: string) {
+    const mostrado = textoMostrado.trim()
+    if (mostrado === '') return
+    agregarMensaje({ id: idUnico(), emisor: 'usuario', texto: mostrado })
+    setTexto('')
+    procesarVendedor(valor ?? textoMostrado)
+  }
+
+  // El vendedor sube una foto dentro del flujo (al agregar o al modificar).
+  async function subirFotoVendedor(file: File) {
+    let dataURL = ''
+    try {
+      dataURL = await comprimirImagen(file)
+    } catch {
+      return responderVendedor('No pude procesar la imagen, intenta con otra.')
+    }
+    agregarMensaje({ id: idUnico(), emisor: 'usuario', texto: '📷 Foto subida' })
+    const f = flujo
+    if (f.modo === 'agregar' && f.paso === 'foto') {
+      finalizarAgregar({ ...f.borrador, imagen: dataURL })
+    } else if (f.modo === 'modificar' && f.paso === 'valor' && f.campo === 'imagen') {
+      const prod = productos.find((p) => p.id === f.prodId)
+      if (prod) {
+        editarProducto(prod.id, { imagen: dataURL })
+        setFlujo(FLUJO_INICIAL)
+        agregarMensaje({
+          id: idUnico(),
+          emisor: 'bot',
+          texto: `✅ Actualicé la foto de "${prod.nombre}".`,
+          productos: [{ ...prod, imagen: dataURL }],
+          acciones: MENU_VENDEDOR,
+        })
+      }
+    }
+  }
+
   function enviar(e: React.FormEvent) {
     e.preventDefault()
-    enviarTexto(texto)
+    if (esVendedorActual) enviarVendedor(texto)
+    else enviarTexto(texto)
   }
 
   // ---- Acciones de las tarjetas de producto dentro del chat ----
@@ -172,6 +468,9 @@ export function Asistente() {
     // Vamos a Mensajes con el producto preseleccionado.
     navegar('/mensajes', { state: { idProducto: p.id } })
   }
+
+  // Solo el último mensaje muestra sus botones/selector activos (evita botones viejos).
+  const ultimoId = mensajes[mensajes.length - 1]?.id
 
   return (
     <div className="pagina">
@@ -235,6 +534,40 @@ export function Asistente() {
 
                 {/* Tabla de comparación */}
                 {m.comparacion && <TablaComparacion productos={m.comparacion} />}
+
+                {/* Botones de elección del flujo del vendedor (solo el último mensaje) */}
+                {m.acciones && m.acciones.length > 0 && m.id === ultimoId && (
+                  <div className="chat-acciones">
+                    {m.acciones.map((a) => (
+                      <button
+                        key={a.valor}
+                        className="chip"
+                        onClick={() => enviarVendedor(a.label, a.valor)}
+                      >
+                        {a.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {/* Selector de foto dentro del chat (solo el último mensaje) */}
+                {m.pedirFoto && m.id === ultimoId && (
+                  <div className="chat-acciones">
+                    <label className="chip chip-foto">
+                      📷 Subir foto
+                      <input
+                        type="file"
+                        accept="image/*"
+                        hidden
+                        onChange={(e) => {
+                          const file = e.target.files?.[0]
+                          if (file) subirFotoVendedor(file)
+                          e.currentTarget.value = ''
+                        }}
+                      />
+                    </label>
+                  </div>
+                )}
               </div>
             ))}
             <div ref={finRef} />
@@ -242,11 +575,21 @@ export function Asistente() {
 
           {/* Botones rápidos */}
           <div className="asistente-rapidos">
-            {BOTONES_RAPIDOS.map((b) => (
-              <button key={b.label} className="chip" onClick={() => enviarTexto(b.query)}>
-                {b.label}
-              </button>
-            ))}
+            {esVendedorActual
+              ? MENU_VENDEDOR.map((b) => (
+                  <button
+                    key={b.valor}
+                    className="chip"
+                    onClick={() => enviarVendedor(b.label, b.valor)}
+                  >
+                    {b.label}
+                  </button>
+                ))
+              : BOTONES_RAPIDOS.map((b) => (
+                  <button key={b.label} className="chip" onClick={() => enviarTexto(b.query)}>
+                    {b.label}
+                  </button>
+                ))}
             {puedeComprar && (
               <button className="chip" onClick={() => navegar('/carrito')}>
                 🛒 Ver mi carrito{cantidadTotal > 0 ? ` (${cantidadTotal})` : ''}
@@ -260,7 +603,11 @@ export function Asistente() {
               type="text"
               value={texto}
               onChange={(e) => setTexto(e.target.value)}
-              placeholder="Escribe lo que buscas... (ej. “laptop hasta 2000”)"
+              placeholder={
+                esVendedorActual
+                  ? 'Escribe “agregar” o “modificar”… o usa los botones'
+                  : 'Escribe lo que buscas... (ej. “laptop hasta 2000”)'
+              }
             />
             <button type="submit" className="btn btn-primario">
               Enviar

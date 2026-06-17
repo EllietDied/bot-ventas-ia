@@ -1443,6 +1443,18 @@ a:hover {
   flex-wrap: wrap;
   gap: 0.6rem;
 }
+/* Botones de elección y selector de foto del flujo guiado del vendedor. */
+.chat-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.45rem;
+}
+.chip-foto {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
 .tarjeta-chat {
   border: 1px solid var(--borde);
   border-radius: 12px;
