@@ -73,14 +73,14 @@ export class ChatBotIA {
   // Recomendación por categorías consultadas (se usa en "Explorar catálogo").
   recomendarProducto(categoriasConsultadas: string[], productos: Producto[]): Producto[] {
     if (categoriasConsultadas.length === 0) {
-      return productos.filter((p) => p.stock > 0).slice(0, 3)
+      return productos.filter((p) => p.stock > 0).slice(0, 4)
     }
     const frecuencia: Record<string, number> = {}
     for (const categoria of categoriasConsultadas) {
       frecuencia[categoria] = (frecuencia[categoria] || 0) + 1
     }
     const categoriaTop = Object.keys(frecuencia).sort((a, b) => frecuencia[b] - frecuencia[a])[0]
-    return productos.filter((p) => p.categoria === categoriaTop && p.stock > 0).slice(0, 3)
+    return productos.filter((p) => p.categoria === categoriaTop && p.stock > 0).slice(0, 4)
   }
 
   // Recomendación inteligente del asistente. Combina, en orden:
