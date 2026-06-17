@@ -6,6 +6,7 @@ import { useProductos } from '../contexto/ProductosContext'
 import { useSesion } from '../contexto/SesionContext'
 import { useToast } from '../contexto/ToastContext'
 import { MetodoPago } from '../core/modelos/Pago'
+import { ImagenProducto } from '../componentes/ImagenProducto'
 
 // Los 4 pasos que el asistente "ejecuta" al pagar (efecto visual guiado).
 const PASOS_PAGO = [
@@ -155,7 +156,12 @@ export function Checkout() {
           {items.map((item) => (
             <div key={item.producto.id} className="checkout-linea">
               <span>
-                {item.producto.imagen} {item.producto.nombre} x{item.cantidad}
+                <ImagenProducto
+                  imagen={item.producto.imagen}
+                  nombre={item.producto.nombre}
+                  className="foto-inline"
+                />{' '}
+                {item.producto.nombre} x{item.cantidad}
               </span>
               <span>S/ {(item.producto.precio * item.cantidad).toFixed(2)}</span>
             </div>

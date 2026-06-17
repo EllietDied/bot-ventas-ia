@@ -12,6 +12,7 @@ export interface NuevoProducto {
   precio: number
   stock: number
   idVendedor: string
+  imagen?: string // foto subida (dataURL); si no, se usa un emoji por defecto
 }
 
 interface ProductosContextType {
@@ -20,6 +21,7 @@ interface ProductosContextType {
   categorias: string[]
   publicarProducto: (datos: NuevoProducto) => void
   actualizarStock: (id: number, nuevoStock: number) => void
+  actualizarImagen: (id: number, imagen: string) => void
 }
 
 const ProductosContext = createContext<ProductosContextType | undefined>(undefined)
@@ -47,10 +49,15 @@ export function ProductosProvider({ children }: { children: ReactNode }) {
       precio: datos.precio,
       stock: datos.stock,
       estado: datos.stock > 0 ? 'disponible' : 'agotado',
-      imagen: '📦',
+      imagen: datos.imagen || '📦', // foto subida o, si no hay, un emoji por defecto
       idVendedor: datos.idVendedor,
     }
     setProductos((prev) => [...prev, producto])
+  }
+
+  // El vendedor cambia la foto de un producto ya publicado.
+  function actualizarImagen(id: number, imagen: string) {
+    setProductos((prev) => prev.map((p) => (p.id === id ? { ...p, imagen } : p)))
   }
 
   // El vendedor (o una compra) actualiza el stock de un producto.
@@ -68,7 +75,7 @@ export function ProductosProvider({ children }: { children: ReactNode }) {
 
   return (
     <ProductosContext.Provider
-      value={{ productos, buscar, categorias, publicarProducto, actualizarStock }}
+      value={{ productos, buscar, categorias, publicarProducto, actualizarStock, actualizarImagen }}
     >
       {children}
     </ProductosContext.Provider>

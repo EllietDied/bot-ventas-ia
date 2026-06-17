@@ -5,10 +5,11 @@ import { useConsultas } from '../contexto/ConsultasContext'
 import { useMensajeria } from '../contexto/MensajeriaContext'
 import { usePedidos } from '../contexto/PedidosContext'
 import { useToast } from '../contexto/ToastContext'
+import { ImagenProducto } from '../componentes/ImagenProducto'
 
 // Pantalla del vendedor: publicar productos y actualizar stock.
 export function PanelVendedor() {
-  const { productos, publicarProducto, actualizarStock } = useProductos()
+  const { productos, publicarProducto, actualizarStock, actualizarImagen } = useProductos()
   const { usuarioActual } = useSesion()
   const { consultasRecientes } = useConsultas()
   const { mensajes } = useMensajeria()
@@ -20,6 +21,7 @@ export function PanelVendedor() {
   const [categoria, setCategoria] = useState('')
   const [precio, setPrecio] = useState('')
   const [stock, setStock] = useState('')
+  const [imagen, setImagen] = useState('') // foto subida (dataURL) para el nuevo producto
   const [error, setError] = useState('')
   const [exito, setExito] = useState('')
 
@@ -66,6 +68,7 @@ export function PanelVendedor() {
       precio: precioNum,
       stock: stockNum,
       idVendedor: usuarioActual!.idUsuario,
+      imagen: imagen || undefined, // si subió foto la usa; si no, queda el emoji
     })
 
     // Limpiamos el formulario y mostramos confirmación.
@@ -74,8 +77,33 @@ export function PanelVendedor() {
     setCategoria('')
     setPrecio('')
     setStock('')
+    setImagen('')
     setExito('Producto publicado correctamente.')
     toast.exito('Producto publicado correctamente 🎉')
+  }
+
+  // El vendedor elige una foto para el NUEVO producto (la comprime y la previsualiza).
+  async function alElegirImagen(e: React.ChangeEvent<HTMLInputElement>) {
+    const archivo = e.target.files?.[0]
+    if (!archivo) return
+    try {
+      setImagen(await comprimirImagen(archivo))
+    } catch {
+      toast.error('No se pudo procesar la imagen.')
+    }
+  }
+
+  // El vendedor cambia la foto de un producto YA publicado.
+  async function alCambiarImagen(e: React.ChangeEvent<HTMLInputElement>, id: number) {
+    const archivo = e.target.files?.[0]
+    if (!archivo) return
+    try {
+      actualizarImagen(id, await comprimirImagen(archivo))
+      toast.exito('Foto actualizada 📷')
+    } catch {
+      toast.error('No se pudo procesar la imagen.')
+    }
+    e.target.value = '' // permite volver a elegir el mismo archivo
   }
 
   return (
@@ -170,6 +198,23 @@ export function PanelVendedor() {
               </label>
             </div>
 
+            <label className="campo">
+              <span>Imagen del producto</span>
+              <input type="file" accept="image/*" onChange={alElegirImagen} />
+            </label>
+            {imagen && (
+              <div className="preview-imagen">
+                <img src={imagen} alt="Vista previa del producto" />
+                <button
+                  type="button"
+                  className="btn btn-secundario btn-pequeno"
+                  onClick={() => setImagen('')}
+                >
+                  Quitar foto
+                </button>
+              </div>
+            )}
+
             {error && <p className="mensaje-error">{error}</p>}
             {exito && <p className="mensaje-exito">{exito}</p>}
 
@@ -188,7 +233,15 @@ export function PanelVendedor() {
             <div className="tabla-productos">
               {misProductos.map((p) => (
                 <div key={p.id} className="fila-producto">
-                  <span className="fila-imagen">{p.imagen}</span>
+                  <label className="fila-imagen" title="Cambiar foto">
+                    <ImagenProducto imagen={p.imagen} nombre={p.nombre} />
+                    <input
+                      type="file"
+                      accept="image/*"
+                      hidden
+                      onChange={(e) => alCambiarImagen(e, p.id)}
+                    />
+                  </label>
                   <span className="fila-nombre">{p.nombre}</span>
                   <span className="texto-tenue">S/ {p.precio.toFixed(2)}</span>
                   <ControlStock
@@ -234,4 +287,42 @@ function ControlStock({
       </button>
     </div>
   )
+}
+
+// Lee un archivo de imagen, lo redimensiona (máx. 400 px de lado) y lo devuelve
+// como dataURL JPEG comprimido. Así la foto ocupa poco y cabe en localStorage
+// (no hay backend donde guardarla).
+function comprimirImagen(archivo: File, maxLado = 400, calidad = 0.72): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const lector = new FileReader()
+    lector.onerror = () => reject(new Error('No se pudo leer el archivo'))
+    lector.onload = () => {
+      const img = new Image()
+      img.onerror = () => reject(new Error('No se pudo cargar la imagen'))
+      img.onload = () => {
+        let { width, height } = img
+        // Escalamos manteniendo la proporción para que el lado mayor sea maxLado.
+        if (width > height && width > maxLado) {
+          height = Math.round((height * maxLado) / width)
+          width = maxLado
+        } else if (height >= width && height > maxLado) {
+          width = Math.round((width * maxLado) / height)
+          height = maxLado
+        }
+        const canvas = document.createElement('canvas')
+        canvas.width = width
+        canvas.height = height
+        const ctx = canvas.getContext('2d')
+        if (!ctx) return reject(new Error('Canvas no disponible'))
+        // Fondo blanco: si la imagen es PNG con transparencia, al pasar a JPEG
+        // las zonas transparentes quedan blancas (no negras).
+        ctx.fillStyle = '#ffffff'
+        ctx.fillRect(0, 0, width, height)
+        ctx.drawImage(img, 0, 0, width, height)
+        resolve(canvas.toDataURL('image/jpeg', calidad))
+      }
+      img.src = lector.result as string
+    }
+    lector.readAsDataURL(archivo)
+  })
 }

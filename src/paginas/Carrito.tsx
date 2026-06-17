@@ -1,5 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useCarrito } from '../contexto/CarritoContext'
+import { ImagenProducto } from '../componentes/ImagenProducto'
 
 // Pantalla del carrito de compras.
 export function Carrito() {
@@ -31,7 +32,9 @@ export function Carrito() {
         <div className="carrito-items">
           {items.map((item) => (
             <div key={item.producto.id} className="carrito-item">
-              <div className="carrito-item-imagen">{item.producto.imagen}</div>
+              <div className="carrito-item-imagen">
+                <ImagenProducto imagen={item.producto.imagen} nombre={item.producto.nombre} />
+              </div>
               <div className="carrito-item-info">
                 <h3>{item.producto.nombre}</h3>
                 <span className="texto-tenue">S/ {item.producto.precio.toFixed(2)} c/u</span>

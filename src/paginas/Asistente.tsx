@@ -6,6 +6,7 @@ import { useConsultas } from '../contexto/ConsultasContext'
 import { useSesion } from '../contexto/SesionContext'
 import { esComprador } from '../core/modelos/Comprador'
 import { LogoUSS } from '../componentes/LogoUSS'
+import { ImagenProducto } from '../componentes/ImagenProducto'
 import { ChatBotIA } from '../core/modelos/ChatBotIA'
 import { Producto } from '../core/modelos/Producto'
 import { cargar, guardar } from '../core/datos/almacenamiento'
@@ -313,7 +314,9 @@ function TarjetaChat({
   return (
     <div className="tarjeta-chat">
       <div className="tarjeta-chat-top">
-        <span className="tarjeta-chat-img">{producto.imagen}</span>
+        <span className="tarjeta-chat-img">
+          <ImagenProducto imagen={producto.imagen} nombre={producto.nombre} />
+        </span>
         <div>
           <div className="tarjeta-chat-nombre">{producto.nombre}</div>
           <div className="tarjeta-chat-cat">{producto.categoria}</div>
