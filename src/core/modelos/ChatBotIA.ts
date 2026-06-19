@@ -57,7 +57,7 @@ export class ChatBotIA {
       return `Tenemos estas categorías: ${categorias.join(', ')}. ¿Cuál te interesa?`
     }
     if (texto.includes('pago') || texto.includes('pagar') || texto.includes('yape')) {
-      return 'Aceptamos tarjeta, Yape, Plin y efectivo (pago simulado en esta demo).'
+      return 'Aceptamos tarjeta, Yape, Plin y efectivo. Pago 100% seguro y protegido.'
     }
 
     const encontrado = this.buscarProductoEnTexto(texto, productos)

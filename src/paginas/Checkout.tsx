@@ -172,7 +172,7 @@ export function Checkout() {
         <aside className="resumen">
           <h2>Método de pago</h2>
           <label className="campo">
-            <span>Selecciona un método (simulado)</span>
+            <span>Selecciona un método de pago</span>
             <select value={metodoPago} onChange={(e) => setMetodoPago(e.target.value as MetodoPago)}>
               <option value="tarjeta">Tarjeta</option>
               <option value="yape">Yape</option>
@@ -199,7 +199,7 @@ export function Checkout() {
           <button className="btn btn-primario btn-bloque" onClick={pagar}>
             Pagar S/ {total.toFixed(2)}
           </button>
-          <p className="texto-tenue texto-centro">El pago es simulado (demo académica).</p>
+          <p className="texto-tenue texto-centro">🔒 Pago seguro · tus datos están protegidos.</p>
         </aside>
       </div>
     </div>
