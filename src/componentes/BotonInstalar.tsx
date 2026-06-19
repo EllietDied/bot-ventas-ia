@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Icono } from './Icono'
 
 // El evento 'beforeinstallprompt' no está en los tipos estándar del navegador,
 // así que describimos lo que necesitamos de él.
@@ -43,7 +44,7 @@ export function BotonInstalar() {
 
   return (
     <button className="btn btn-primario btn-pequeno" onClick={instalar}>
-      ⬇️ Instalar IA InkaShop
+<Icono nombre="descargar" size={16} /> Instalar IA InkaShop
     </button>
   )
 }

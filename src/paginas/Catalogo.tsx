@@ -5,6 +5,7 @@ import { useConsultas } from '../contexto/ConsultasContext'
 import { useSesion } from '../contexto/SesionContext'
 import { useToast } from '../contexto/ToastContext'
 import { TarjetaProducto } from '../componentes/TarjetaProducto'
+import { Icono } from '../componentes/Icono'
 import { ChatBotIA } from '../core/modelos/ChatBotIA'
 import { Producto } from '../core/modelos/Producto'
 import { esComprador } from '../core/modelos/Comprador'
@@ -48,7 +49,7 @@ export function Catalogo() {
   function agregar(producto: Producto) {
     agregarAlCarrito(producto)
     registrarConsulta(producto.nombre, producto.categoria)
-    toast.exito(`${producto.nombre} agregado al carrito 🛒`)
+    toast.exito(`${producto.nombre} agregado al carrito`)
   }
 
   return (
@@ -93,7 +94,9 @@ export function Catalogo() {
       {/* Recomendaciones del bot */}
       {recomendados.length > 0 && (
         <section className="seccion-recomendados">
-          <h2>🤖 Recomendado para ti</h2>
+          <h2>
+            <Icono nombre="ia" size={18} /> Recomendado para ti
+          </h2>
           <p className="texto-tenue">Basado en las categorías que has consultado.</p>
           <div className="grid-productos">
             {recomendados.map((p) => (

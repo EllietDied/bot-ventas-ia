@@ -6,6 +6,7 @@ import { useMensajeria } from '../contexto/MensajeriaContext'
 import { usePedidos } from '../contexto/PedidosContext'
 import { useToast } from '../contexto/ToastContext'
 import { ImagenProducto } from '../componentes/ImagenProducto'
+import { Icono } from '../componentes/Icono'
 import { comprimirImagen } from '../util/imagen'
 
 // Pantalla del vendedor: publicar productos y actualizar stock.
@@ -84,7 +85,7 @@ export function PanelVendedor() {
     setStock('')
     setImagen('')
     setExito('Producto publicado correctamente.')
-    toast.exito('Producto publicado correctamente 🎉')
+    toast.exito('Producto publicado correctamente')
   }
 
   // El vendedor elige una foto para el NUEVO producto (la comprime y la previsualiza).
@@ -104,7 +105,7 @@ export function PanelVendedor() {
     if (!archivo) return
     try {
       actualizarImagen(id, await comprimirImagen(archivo))
-      toast.exito('Foto actualizada 📷')
+      toast.exito('Foto actualizada')
     } catch {
       toast.error('No se pudo procesar la imagen.')
     }
@@ -117,7 +118,9 @@ export function PanelVendedor() {
 
       {/* Sugerencias del asistente IA */}
       <section className="panel sugerencias-ia">
-        <h2>🤖 Sugerencias del asistente IA</h2>
+        <h2>
+          <Icono nombre="ia" size={18} /> Sugerencias del asistente IA
+        </h2>
         <div className="sugerencias-grid">
           <div className="sugerencia">
             <span className="sugerencia-num">{bajoStock.length}</span>
@@ -331,7 +334,7 @@ function BotonEliminar({ nombre, alEliminar }: { nombre: string; alEliminar: () 
       aria-label={`Eliminar ${nombre}`}
       onClick={() => setConfirmando(true)}
     >
-      🗑️
+      <Icono nombre="eliminar" size={18} />
     </button>
   )
 }

@@ -14,6 +14,7 @@ export interface DatosPedido {
   descuento: number
   total: number
   metodoPago: MetodoPago
+  banco?: string // solo si el método es transferencia
 }
 
 interface PedidosContextType {
@@ -57,6 +58,7 @@ export function PedidosProvider({ children }: { children: ReactNode }) {
     const pago: Pago = {
       idPago: 'PG-' + Date.now(),
       metodoPago: datos.metodoPago,
+      banco: datos.banco,
       monto: datos.total,
       estadoPago: 'aprobado', // el pago es simulado
       fechaPago: new Date().toLocaleString(),

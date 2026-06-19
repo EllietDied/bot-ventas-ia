@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Icono } from './Icono'
 
 // Lee el tema actual desde el atributo data-theme del <html>
 // (lo deja preparado el script del index.html al cargar la app).
@@ -25,7 +26,7 @@ export function BotonTema() {
       title={tema === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
       aria-label="Cambiar tema"
     >
-      {tema === 'dark' ? '☀️' : '🌙'}
+      <Icono nombre={tema === 'dark' ? 'sol' : 'luna'} size={18} />
     </button>
   )
 }

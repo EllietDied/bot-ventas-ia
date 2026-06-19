@@ -1,6 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useCarrito } from '../contexto/CarritoContext'
 import { ImagenProducto } from '../componentes/ImagenProducto'
+import { Icono } from '../componentes/Icono'
 
 // Pantalla del carrito de compras.
 export function Carrito() {
@@ -63,7 +64,7 @@ export function Carrito() {
                 onClick={() => quitarDelCarrito(item.producto.id)}
                 title="Quitar"
               >
-                🗑️
+                <Icono nombre="eliminar" size={18} />
               </button>
             </div>
           ))}

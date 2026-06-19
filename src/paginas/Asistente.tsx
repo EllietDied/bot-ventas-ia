@@ -7,14 +7,18 @@ import { useSesion } from '../contexto/SesionContext'
 import { esComprador } from '../core/modelos/Comprador'
 import { LogoUSS } from '../componentes/LogoUSS'
 import { ImagenProducto } from '../componentes/ImagenProducto'
-import { ChatBotIA } from '../core/modelos/ChatBotIA'
+import { Icono } from '../componentes/Icono'
 import { Producto } from '../core/modelos/Producto'
 import { esVendedor } from '../core/modelos/Vendedor'
 import { comprimirImagen } from '../util/imagen'
 import { cargar, guardar } from '../core/datos/almacenamiento'
-
-// Instancia del asistente (IA simulada).
-const bot = new ChatBotIA()
+import { useToast } from '../contexto/ToastContext'
+import {
+  obtenerRespuestaAsistente,
+  usarIAReal,
+  resolverProductos,
+  type MensajeHistorial,
+} from '../core/servicios/AsistenteIAService'
 
 // Genera un id único para cada mensaje (evita claves repetidas en React).
 let contadorMensaje = 0
@@ -31,25 +35,25 @@ interface MensajeAsistente {
   texto: string
   productos?: Producto[]
   comparacion?: Producto[]
-  acciones?: { label: string; valor: string }[] // botones de elección (flujo del vendedor)
+  acciones?: { label: string; valor: string; icono?: string }[] // botones de elección (flujo del vendedor)
   pedirFoto?: boolean // muestra un selector de foto dentro del chat
   pensando?: boolean // mientras el asistente "procesa" la consulta
 }
 
 // Botones rápidos: lo que se muestra (label) y lo que se le envía al bot (query).
-const BOTONES_RAPIDOS: { label: string; query: string }[] = [
-  { label: '🎮 Quiero algo gamer', query: 'Quiero algo gamer' },
-  { label: '💰 Busco algo económico', query: 'Busco algo económico' },
-  { label: '🖥️ Armar una PC básica', query: 'Armar una PC básica' },
-  { label: '🔥 Ver ofertas', query: 'Ver ofertas económicas' },
+const BOTONES_RAPIDOS: { icono: string; label: string; query: string }[] = [
+  { icono: 'gamer', label: 'Quiero algo gamer', query: 'Quiero algo gamer' },
+  { icono: 'dinero', label: 'Busco algo económico', query: 'Busco algo económico' },
+  { icono: 'pc', label: 'Armar una PC básica', query: 'Armar una PC básica' },
+  { icono: 'ofertas', label: 'Ver ofertas', query: 'Ver ofertas económicas' },
 ]
 
 // Menú (botones) del asistente de gestión del vendedor.
-const MENU_VENDEDOR: { label: string; valor: string }[] = [
-  { label: '➕ Agregar producto', valor: 'agregar' },
-  { label: '✏️ Modificar producto', valor: 'modificar' },
-  { label: '🗑️ Eliminar producto', valor: 'eliminar' },
-  { label: '📦 Ver mis productos', valor: 'mis productos' },
+const MENU_VENDEDOR: { icono: string; label: string; valor: string }[] = [
+  { icono: 'agregar', label: 'Agregar producto', valor: 'agregar' },
+  { icono: 'editar', label: 'Modificar producto', valor: 'modificar' },
+  { icono: 'eliminar', label: 'Eliminar producto', valor: 'eliminar' },
+  { icono: 'caja', label: 'Ver mis productos', valor: 'mis productos' },
 ]
 
 // Estado del flujo guiado del vendedor (máquina de pasos para agregar/modificar).
@@ -65,9 +69,10 @@ const FLUJO_INICIAL: FlujoVendedor = { modo: 'inactivo', paso: '', borrador: {} 
 // PANTALLA PRINCIPAL: el Asistente IA es el centro de la aplicación.
 export function Asistente() {
   const { productos, publicarProducto, editarProducto, eliminarProducto } = useProductos()
-  const { agregarAlCarrito, cantidadTotal } = useCarrito()
+  const { agregarAlCarrito, cantidadTotal, items, total } = useCarrito()
   const { registrarConsulta, consultasRecientes, categoriasConsultadas } = useConsultas()
   const { usuarioActual } = useSesion()
+  const toast = useToast()
   const navegar = useNavigate()
 
   const puedeComprar = usuarioActual ? esComprador(usuarioActual) : false
@@ -85,13 +90,13 @@ export function Asistente() {
     ? {
         id: 'A-0',
         emisor: 'bot',
-        texto: `¡Hola${primerNombre ? ', ' + primerNombre : ''}! 👋 Soy tu asistente de gestión 🤖. Puedo ayudarte a agregar un producto nuevo o a modificar uno existente. Usa los botones de abajo o escríbeme.`,
+        texto: `¡Hola${primerNombre ? ', ' + primerNombre : ''}! Soy tu asistente de gestión. Puedo ayudarte a agregar un producto nuevo o a modificar uno existente. Usa los botones de abajo o escríbeme.`,
         acciones: MENU_VENDEDOR,
       }
     : {
         id: 'A-0',
         emisor: 'bot',
-        texto: `¡Hola${primerNombre ? ', ' + primerNombre : ''}! 👋 Bienvenido a IA InkaShop 🤖. Soy tu asistente de ventas: cuéntame qué buscas (por categoría, uso o presupuesto) y te recomendaré las mejores opciones. También puedes usar los botones rápidos de abajo.`,
+        texto: `¡Hola${primerNombre ? ', ' + primerNombre : ''}! Bienvenido a IA InkaShop. Soy tu asistente de ventas: cuéntame qué buscas (por categoría, uso o presupuesto) y te recomendaré las mejores opciones. También puedes usar los botones rápidos de abajo.`,
       }
 
   // Chat separado por rol (no mezclar el de ventas con el de gestión).
@@ -102,6 +107,7 @@ export function Asistente() {
   const [texto, setTexto] = useState('')
   const [comparar, setComparar] = useState<Producto[]>([])
   const [flujo, setFlujo] = useState<FlujoVendedor>(FLUJO_INICIAL)
+  const [cargando, setCargando] = useState(false) // mientras esperamos la respuesta del asistente
   const finRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -129,34 +135,66 @@ export function Asistente() {
   }
 
   // Envía un texto al asistente (desde el input o desde un botón rápido).
-  function enviarTexto(consulta: string) {
+  async function enviarTexto(consulta: string) {
     const limpio = consulta.trim()
-    if (limpio === '') return
+    if (limpio === '' || cargando) return // no enviamos vacíos ni por doble clic
 
     // 1) Mensaje del usuario.
     agregarMensaje({ id: idUnico(), emisor: 'usuario', texto: limpio })
 
     // 2) Registramos la consulta en la PILA LIFO (para historial y recomendaciones).
+    //    Esto ocurre SIEMPRE, se use el modo simulado o la IA real.
     registrarConsulta(limpio, detectarCategoria(limpio))
     setTexto('')
+    setCargando(true)
 
-    // 3) Efecto "IA trabajando": mostramos pasos antes de la respuesta final.
+    // 3) Efecto "IA trabajando": mensaje temporal mientras se prepara la respuesta.
     const idBot = idUnico()
-    agregarMensaje({ id: idBot, emisor: 'bot', texto: 'Analizando tu consulta', pensando: true })
+    agregarMensaje({
+      id: idBot,
+      emisor: 'bot',
+      texto: usarIAReal() ? 'IA InkaShop está analizando tu consulta' : 'Analizando tu consulta',
+      pensando: true,
+    })
+    const tarea = setTimeout(
+      () => actualizarMensaje(idBot, { texto: 'Buscando productos relacionados' }),
+      700,
+    )
+    const inicio = Date.now()
 
-    // Paso intermedio: "buscando productos".
-    setTimeout(() => {
-      actualizarMensaje(idBot, { texto: 'Buscando productos relacionados' })
-    }, 700)
+    // 4) Contexto para el asistente (historial reciente + carrito).
+    const historial: MensajeHistorial[] = mensajes
+      .filter((m) => !m.pensando)
+      .slice(-10)
+      .map((m) => ({ rol: m.emisor, texto: m.texto }))
+    const contexto = {
+      productos,
+      categoriasConsultadas,
+      carrito: items.map((i) => ({
+        nombre: i.producto.nombre,
+        cantidad: i.cantidad,
+        precio: i.producto.precio,
+      })),
+      totalCarrito: total,
+      historial,
+    }
 
-    // Respuesta final: texto del bot + tarjetas de productos recomendados.
-    setTimeout(() => {
-      const respuesta = bot.responderConsulta(limpio, productos)
-      const recomendados = limpio.toLowerCase().includes('gracias')
-        ? []
-        : bot.recomendarPorConsulta(limpio, productos, categoriasConsultadas)
-      actualizarMensaje(idBot, { texto: respuesta, productos: recomendados, pensando: false })
-    }, 1600)
+    // 5) Pedimos la respuesta (IA real o, si falla / está apagada, modo simulado).
+    const resultado = await obtenerRespuestaAsistente(limpio, contexto)
+
+    // Aseguramos una sensación mínima de "trabajo" antes de mostrar la respuesta.
+    const transcurrido = Date.now() - inicio
+    if (transcurrido < 1100) await new Promise((res) => setTimeout(res, 1100 - transcurrido))
+    clearTimeout(tarea)
+
+    const recomendados = resolverProductos(resultado.productosRecomendados, productos)
+    actualizarMensaje(idBot, { texto: resultado.mensaje, productos: recomendados, pensando: false })
+    setCargando(false)
+
+    // Si se intentó la IA real y falló, avisamos de forma discreta.
+    if (resultado.falloIA) {
+      toast.info('No fue posible comunicarse con el servicio de IA. Se utilizó el modo local.')
+    }
   }
 
   // ===== Asistente de GESTIÓN del vendedor (flujo guiado paso a paso) =====
@@ -164,7 +202,7 @@ export function Asistente() {
   // Agrega un mensaje del bot, opcionalmente con botones de elección o selector de foto.
   function responderVendedor(
     texto: string,
-    acciones?: { label: string; valor: string }[],
+    acciones?: { label: string; valor: string; icono?: string }[],
     pedirFoto?: boolean,
   ) {
     agregarMensaje({ id: idUnico(), emisor: 'bot', texto, acciones, pedirFoto })
@@ -208,7 +246,7 @@ export function Asistente() {
     agregarMensaje({
       id: idUnico(),
       emisor: 'bot',
-      texto: `✅ ¡Listo! Publiqué "${muestra.nombre}" en ${muestra.categoria}, a S/ ${muestra.precio.toFixed(
+      texto: `¡Listo! Publiqué "${muestra.nombre}" en ${muestra.categoria}, a S/ ${muestra.precio.toFixed(
         2,
       )} con ${muestra.stock} en stock. ¿Algo más?`,
       productos: [muestra],
@@ -231,7 +269,7 @@ export function Asistente() {
     if (f.modo === 'inactivo') {
       if (/agregar|publicar|nuevo|crear/.test(t)) {
         setFlujo({ modo: 'agregar', paso: 'nombre', borrador: {} })
-        return responderVendedor('📝 Publiquemos un producto. ¿Cuál es el nombre?')
+        return responderVendedor('Publiquemos un producto. ¿Cuál es el nombre?')
       }
       if (/modificar|editar|cambiar|actualizar/.test(t)) {
         if (misProductos.length === 0)
@@ -262,7 +300,7 @@ export function Asistente() {
           acciones: MENU_VENDEDOR,
         })
       }
-      return responderVendedor('Soy tu asistente de gestión 🤖. ¿Qué deseas hacer?', MENU_VENDEDOR)
+      return responderVendedor('Soy tu asistente de gestión. ¿Qué deseas hacer?', MENU_VENDEDOR)
     }
 
     // --- Flujo AGREGAR ---
@@ -391,7 +429,7 @@ export function Asistente() {
         return agregarMensaje({
           id: idUnico(),
           emisor: 'bot',
-          texto: `✅ Actualicé "${prod.nombre}".`,
+          texto: `Actualicé "${prod.nombre}".`,
           productos: [actualizado],
           acciones: MENU_VENDEDOR,
         })
@@ -411,7 +449,7 @@ export function Asistente() {
         return responderVendedor(
           `¿Seguro que quieres eliminar "${prod.nombre}"? Esta acción no se puede deshacer.`,
           [
-            { label: '🗑️ Sí, eliminar', valor: 'confirmar' },
+            { label: 'Sí, eliminar', valor: 'confirmar', icono: 'eliminar' },
             { label: 'Cancelar', valor: 'cancelar' },
           ],
         )
@@ -424,7 +462,7 @@ export function Asistente() {
         if (t === 'confirmar' || t === 'si' || t === 'sí' || t.includes('eliminar')) {
           eliminarProducto(prod.id)
           return responderVendedor(
-            `🗑️ Eliminé "${prod.nombre}" de tu catálogo. ¿Algo más?`,
+            `Eliminé "${prod.nombre}" de tu catálogo. ¿Algo más?`,
             MENU_VENDEDOR,
           )
         }
@@ -450,7 +488,7 @@ export function Asistente() {
     } catch {
       return responderVendedor('No pude procesar la imagen, intenta con otra.')
     }
-    agregarMensaje({ id: idUnico(), emisor: 'usuario', texto: '📷 Foto subida' })
+    agregarMensaje({ id: idUnico(), emisor: 'usuario', texto: 'Foto subida' })
     const f = flujo
     if (f.modo === 'agregar' && f.paso === 'foto') {
       finalizarAgregar({ ...f.borrador, imagen: dataURL })
@@ -462,7 +500,7 @@ export function Asistente() {
         agregarMensaje({
           id: idUnico(),
           emisor: 'bot',
-          texto: `✅ Actualicé la foto de "${prod.nombre}".`,
+          texto: `Actualicé la foto de "${prod.nombre}".`,
           productos: [{ ...prod, imagen: dataURL }],
           acciones: MENU_VENDEDOR,
         })
@@ -481,7 +519,7 @@ export function Asistente() {
     agregarMensaje({
       id: idUnico(),
       emisor: 'bot',
-      texto: `📋 ${p.nombre}${p.marca ? ' · ' + p.marca : ''} — ${p.categoria}\n${
+      texto: `${p.nombre}${p.marca ? ' · ' + p.marca : ''} — ${p.categoria}\n${
         p.descripcion
       }\nPrecio: S/ ${p.precio.toFixed(2)} · Stock: ${p.stock}`,
     })
@@ -493,7 +531,7 @@ export function Asistente() {
     agregarMensaje({
       id: idUnico(),
       emisor: 'bot',
-      texto: `✅ Agregué ${p.nombre} a tu carrito. ¿Deseas algo más o pasamos a pagar?`,
+      texto: `Agregué ${p.nombre} a tu carrito. ¿Deseas algo más o pasamos a pagar?`,
     })
   }
 
@@ -544,7 +582,7 @@ export function Asistente() {
       {/* Bloque institucional discreto */}
       <div className="bloque-institucional">
         <LogoUSS size="small" />
-        <span>Universidad Señor de Sipán · Taller de Aplicaciones</span>
+        <span>Respaldado por la Universidad Señor de Sipán</span>
       </div>
 
       <div className="asistente-layout">
@@ -599,7 +637,7 @@ export function Asistente() {
                         className="chip"
                         onClick={() => enviarVendedor(a.label, a.valor)}
                       >
-                        {a.label}
+                        {a.icono && <Icono nombre={a.icono} size={15} />} {a.label}
                       </button>
                     ))}
                   </div>
@@ -609,7 +647,7 @@ export function Asistente() {
                 {m.pedirFoto && m.id === ultimoId && (
                   <div className="chat-acciones">
                     <label className="chip chip-foto">
-                      📷 Subir foto
+                      <Icono nombre="camara" size={15} /> Subir foto
                       <input
                         type="file"
                         accept="image/*"
@@ -637,17 +675,18 @@ export function Asistente() {
                     className="chip"
                     onClick={() => enviarVendedor(b.label, b.valor)}
                   >
-                    {b.label}
+                    <Icono nombre={b.icono} size={15} /> {b.label}
                   </button>
                 ))
               : BOTONES_RAPIDOS.map((b) => (
                   <button key={b.label} className="chip" onClick={() => enviarTexto(b.query)}>
-                    {b.label}
+                    <Icono nombre={b.icono} size={15} /> {b.label}
                   </button>
                 ))}
             {puedeComprar && (
               <button className="chip" onClick={() => navegar('/carrito')}>
-                🛒 Ver mi carrito{cantidadTotal > 0 ? ` (${cantidadTotal})` : ''}
+                <Icono nombre="carrito" size={15} /> Ver mi carrito
+                {cantidadTotal > 0 ? ` (${cantidadTotal})` : ''}
               </button>
             )}
           </div>
@@ -664,15 +703,17 @@ export function Asistente() {
                   : 'Escribe lo que buscas... (ej. “laptop hasta 2000”)'
               }
             />
-            <button type="submit" className="btn btn-primario">
-              Enviar
+            <button type="submit" className="btn btn-primario" disabled={cargando}>
+              {cargando ? 'Enviando…' : 'Enviar'}
             </button>
           </form>
         </div>
 
         {/* ===== Panel lateral: consultas recientes (Pila LIFO) ===== */}
         <aside className="asistente-panel">
-          <h2>🧾 Consultas recientes</h2>
+          <h2>
+            <Icono nombre="lista" size={18} /> Consultas recientes
+          </h2>
           <p className="texto-tenue">Pila LIFO: la última consulta aparece primero.</p>
           {consultasRecientes.length === 0 ? (
             <p className="texto-tenue">Aún no hay consultas.</p>
@@ -687,7 +728,8 @@ export function Asistente() {
             </ul>
           )}
           <div className="asistente-tip">
-            <strong>💡 Tip:</strong> dime tu presupuesto (ej. “laptop hasta 2000”) y filtro por precio.
+            <Icono nombre="tip" size={16} /> <strong>Tip:</strong> dime tu presupuesto (ej. “laptop
+            hasta 2000”) y filtro por precio.
           </div>
         </aside>
       </div>

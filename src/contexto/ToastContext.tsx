@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, ReactNode } from 'react'
+import { Icono } from '../componentes/Icono'
 
 // Alertas visuales (toasts) para éxito / error / información.
 // Es solo capa visual: no toca la lógica del proyecto.
@@ -22,11 +23,11 @@ const ToastContext = createContext<ToastAPI | undefined>(undefined)
 // Contador para un id único por toast (sin usar Date.now()).
 let contadorToast = 0
 
-// Icono según el tipo de alerta.
+// Icono (nombre del SVG) según el tipo de alerta.
 const ICONOS: Record<TipoToast, string> = {
-  exito: '✅',
-  error: '⚠️',
-  info: '🤖',
+  exito: 'check',
+  error: 'alerta',
+  info: 'ia',
 }
 
 // Proveedor que dibuja los toasts en una esquina de la pantalla.
@@ -55,7 +56,9 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       <div className="toast-contenedor">
         {toasts.map((t) => (
           <div key={t.id} className={`toast ${t.tipo}`}>
-            <span className="toast-icono">{ICONOS[t.tipo]}</span>
+            <span className="toast-icono">
+              <Icono nombre={ICONOS[t.tipo]} size={18} />
+            </span>
             <span>{t.texto}</span>
           </div>
         ))}

@@ -1454,6 +1454,92 @@ a:hover {
   display: inline-flex;
   gap: 0.3rem;
 }
+/* Métodos de pago: tarjetas seleccionables con icono (en el color de cada marca). */
+.metodos-pago-titulo {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem;
+}
+.metodos-pago {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(84px, 1fr));
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+.metodo-pago {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.7rem 0.4rem;
+  background: var(--tarjeta);
+  border: 1.5px solid var(--borde);
+  border-radius: 10px;
+  cursor: pointer;
+  color: var(--texto);
+  font-family: inherit;
+  transition: all 0.15s ease;
+}
+.metodo-pago:hover {
+  border-color: var(--acento-ia);
+}
+.metodo-pago.activo {
+  border-color: var(--acento-ia);
+  background: var(--acento-ia-suave);
+}
+.metodo-icono {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.metodo-nombre {
+  font-size: 0.76rem;
+  text-align: center;
+  line-height: 1.15;
+}
+/* Sub-selección de banco (al elegir Transferencia). */
+.bancos {
+  margin: -0.4rem 0 1rem;
+}
+.bancos-titulo {
+  font-size: 0.82rem;
+  margin: 0 0 0.45rem;
+  color: var(--texto-tenue);
+}
+.bancos-lista {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
+  gap: 0.4rem;
+}
+.banco-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.5rem 0.6rem;
+  background: var(--tarjeta);
+  border: 1.5px solid var(--borde);
+  border-radius: 9px;
+  cursor: pointer;
+  color: var(--texto);
+  font-family: inherit;
+  font-size: 0.83rem;
+  transition: all 0.15s ease;
+}
+.banco-chip:hover {
+  border-color: var(--acento-ia);
+}
+.banco-chip.activo {
+  border-color: var(--acento-ia);
+  background: var(--acento-ia-suave);
+}
+.banco-icono {
+  display: flex;
+  align-items: center;
+}
+.banco-icono svg {
+  width: 18px;
+  height: 18px;
+}
 .fila-imagen {
   font-size: 1.4rem;
 }
@@ -1531,6 +1617,100 @@ a:hover {
     transparent 74%
   );
 }
+/* ----- Hero de la página introductoria (centrado) ----- */
+.intro-hero {
+  position: relative;
+  z-index: 2;
+  max-width: 660px;
+  margin: 0 auto;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.intro-hero::before {
+  content: '';
+  position: absolute;
+  inset: -2rem -3rem;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(
+    75% 75% at 50% 45%,
+    rgba(8, 13, 24, 0.82),
+    rgba(8, 13, 24, 0.45) 55%,
+    transparent 80%
+  );
+}
+[data-theme='light'] .intro-hero::before {
+  background: radial-gradient(
+    75% 75% at 50% 45%,
+    rgba(247, 240, 226, 0.92),
+    rgba(247, 240, 226, 0.55) 55%,
+    transparent 82%
+  );
+}
+.intro-mascota {
+  width: 92px;
+  height: 92px;
+  margin-bottom: 0.5rem;
+}
+.intro-marca {
+  font-size: 1.45rem;
+  font-weight: 800;
+  margin-bottom: 0.7rem;
+}
+.intro-titular {
+  font-size: 2.5rem;
+  line-height: 1.12;
+  margin: 0 0 0.7rem;
+}
+.intro-sub {
+  font-size: 1.08rem;
+  line-height: 1.6;
+  margin: 0 0 1.4rem;
+  max-width: 34rem;
+}
+.intro-cta {
+  display: flex;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.intro-demo-link {
+  margin-top: 1rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.95rem;
+  color: var(--acento-ia);
+}
+.intro-demo-link:hover {
+  text-decoration: underline;
+}
+.intro-cierre {
+  text-align: center;
+}
+.intro-cierre .intro-cta {
+  margin-top: 0.8rem;
+}
+[data-theme='dark'] .intro-hero {
+  color: #eaf0f7;
+}
+[data-theme='dark'] .intro-sub {
+  color: #c4cdda;
+}
+[data-theme='light'] .intro-hero {
+  color: #2a1f12;
+}
+[data-theme='light'] .intro-sub {
+  color: #5a4a36;
+}
+@media (max-width: 600px) {
+  .intro-titular {
+    font-size: 1.9rem;
+  }
+}
 .landing-marca {
   display: flex;
   align-items: center;
@@ -1581,6 +1761,21 @@ a:hover {
   flex-wrap: wrap;
   gap: 0.6rem;
 }
+/* Acceso rápido de demostración en la tarjeta de login (sin credenciales a la vista). */
+.auth-demo-titulo {
+  display: block;
+  margin-bottom: 0.55rem;
+  font-size: 0.85rem;
+}
+.auth-demo-botones {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.auth-demo-botones .btn {
+  flex: 1;
+  min-width: 130px;
+}
 .btn-dorado {
   background: #d4a017;
   color: #2a1d05;
@@ -1629,12 +1824,19 @@ a:hover {
 
 /* ----- Secciones debajo del hero ----- */
 .landing-extra {
+  position: relative;
+  z-index: 2; /* por encima de las figuras del fondo inka */
   max-width: 1040px;
   margin: 0 auto;
   padding: 1.5rem 1.5rem 3rem;
   display: flex;
   flex-direction: column;
   gap: 2rem;
+}
+/* En la intro, el fondo inka cubre toda la página: la viñeta central del hero
+   no aplica (quedaría como una mancha en medio); el hero usa su propio velo. */
+.auth-landing.inka-auth-bg::after {
+  display: none;
 }
 .landing-confianza {
   display: flex;
@@ -1670,7 +1872,17 @@ a:hover {
   padding: 1.4rem;
 }
 .feature-icono {
-  font-size: 2rem;
+  display: inline-flex;
+  color: var(--acento-ia);
+}
+/* Iconos SVG (componente Icono): se alinean con el texto. */
+.icono {
+  vertical-align: -0.18em;
+  flex-shrink: 0;
+}
+.confianza-icono {
+  display: inline-flex;
+  color: var(--acento-ia);
 }
 .feature-card h3 {
   margin: 0.5rem 0 0.3rem;

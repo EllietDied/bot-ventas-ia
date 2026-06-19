@@ -10,7 +10,7 @@ export class ChatBotIA {
 
   constructor() {
     this.idBot = 'BOT-001'
-    this.modeloIA = 'Asistente simulado v2'
+    this.modeloIA = 'Asistente InkaShop v2'
   }
 
   // Genera la respuesta en texto del asistente según el mensaje del usuario.
@@ -21,7 +21,7 @@ export class ChatBotIA {
       return '¡Hola! Soy tu asistente de ventas. Cuéntame qué buscas (por categoría, uso o presupuesto) y te recomiendo las mejores opciones.'
     }
     if (texto.includes('gracias')) {
-      return '¡Con gusto! Estoy aquí para acompañarte en tu compra. 😊'
+      return '¡Con gusto! Estoy aquí para acompañarte en tu compra.'
     }
     if (texto.includes('precio') || texto.includes('cuesta') || texto.includes('vale')) {
       const p = this.buscarProductoEnTexto(texto, productos)

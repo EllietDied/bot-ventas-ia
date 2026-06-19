@@ -2,6 +2,8 @@ import { usePedidos } from '../contexto/PedidosContext'
 import { useSesion } from '../contexto/SesionContext'
 import { esVendedor } from '../core/modelos/Vendedor'
 import { Pedido } from '../core/modelos/Pedido'
+import { NOMBRE_METODO } from '../core/modelos/Pago'
+import { Icono } from '../componentes/Icono'
 
 // Pantalla de pedidos: historial + cola de pedidos pendientes (FIFO).
 export function Pedidos() {
@@ -10,49 +12,54 @@ export function Pedidos() {
 
   if (!usuarioActual) return null
 
-  // El vendedor ve todos los pedidos; el comprador solo los suyos.
-  const mios = esVendedor(usuarioActual) ? pedidos : pedidosDe(usuarioActual.correo)
+  // El vendedor ve y atiende todos los pedidos; el comprador solo ve los suyos.
+  const esVend = esVendedor(usuarioActual)
+  const mios = esVend ? pedidos : pedidosDe(usuarioActual.correo)
 
   return (
     <div className="pagina">
       <h1>Pedidos</h1>
 
-      {/* COLA FIFO: pedidos pendientes de atención */}
-      <section className="panel">
-        <div className="panel-cabecera">
-          <h2>🕒 Pedidos pendientes (Cola FIFO)</h2>
-          <button
-            className="btn btn-primario btn-pequeno"
-            onClick={() => atenderSiguiente()}
-            disabled={pedidosPendientes.length === 0}
-          >
-            Atender siguiente
-          </button>
-        </div>
-        <p className="texto-tenue">
-          Se atienden en el orden en que llegaron: el primero en entrar es el primero en salir.
-        </p>
+      {/* COLA FIFO: pedidos pendientes — solo el vendedor los atiende */}
+      {esVend && (
+        <section className="panel">
+          <div className="panel-cabecera">
+            <h2>
+              <Icono nombre="reloj" size={18} /> Pedidos pendientes (Cola FIFO)
+            </h2>
+            <button
+              className="btn btn-primario btn-pequeno"
+              onClick={() => atenderSiguiente()}
+              disabled={pedidosPendientes.length === 0}
+            >
+              Atender siguiente
+            </button>
+          </div>
+          <p className="texto-tenue">
+            Se atienden en el orden en que llegaron: el primero en entrar es el primero en salir.
+          </p>
 
-        {pedidosPendientes.length === 0 ? (
-          <p className="texto-tenue">No hay pedidos pendientes.</p>
-        ) : (
-          <ol className="cola-lista">
-            {pedidosPendientes.map((p, i) => (
-              <li key={p.idPedido}>
-                <span className="cola-pos">{i + 1}</span>
-                <span>
-                  {p.idPedido} — {p.correoComprador}
-                </span>
-                <span className="cola-total">S/ {p.total.toFixed(2)}</span>
-              </li>
-            ))}
-          </ol>
-        )}
-      </section>
+          {pedidosPendientes.length === 0 ? (
+            <p className="texto-tenue">No hay pedidos pendientes.</p>
+          ) : (
+            <ol className="cola-lista">
+              {pedidosPendientes.map((p, i) => (
+                <li key={p.idPedido}>
+                  <span className="cola-pos">{i + 1}</span>
+                  <span>
+                    {p.idPedido} — {p.correoComprador}
+                  </span>
+                  <span className="cola-total">S/ {p.total.toFixed(2)}</span>
+                </li>
+              ))}
+            </ol>
+          )}
+        </section>
+      )}
 
       {/* Historial de pedidos */}
       <section>
-        <h2>{esVendedor(usuarioActual) ? 'Todos los pedidos' : 'Mi historial de pedidos'}</h2>
+        <h2>{esVend ? 'Todos los pedidos' : 'Mi historial de pedidos'}</h2>
         {mios.length === 0 ? (
           <p className="texto-tenue">Aún no hay pedidos registrados.</p>
         ) : (
@@ -88,7 +95,8 @@ function TarjetaPedido({ pedido }: { pedido: Pedido }) {
 
       <div className="pedido-pie">
         <span className="texto-tenue">
-          Pago: {pedido.pago?.metodoPago ?? '—'} ({pedido.pago?.estadoPago ?? '—'})
+          Pago: {pedido.pago ? NOMBRE_METODO[pedido.pago.metodoPago] : '—'}
+          {pedido.pago?.banco ? ' · ' + pedido.pago.banco : ''} ({pedido.pago?.estadoPago ?? '—'})
         </span>
         <span className="pedido-total">Total: S/ {pedido.total.toFixed(2)}</span>
       </div>

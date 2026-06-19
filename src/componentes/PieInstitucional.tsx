@@ -5,7 +5,7 @@ export function PieInstitucional() {
   return (
     <footer className="pie-institucional">
       <LogoUSS size="small" />
-      <span>IA InkaShop · Universidad Señor de Sipán · Taller de Aplicaciones · 2026</span>
+      <span>IA InkaShop · Respaldado por la Universidad Señor de Sipán · 2026</span>
     </footer>
   )
 }

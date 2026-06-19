@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useSesion } from '../contexto/SesionContext'
 import { useCarrito } from '../contexto/CarritoContext'
 import { useMensajeria } from '../contexto/MensajeriaContext'
@@ -13,6 +13,7 @@ export function BarraNavegacion() {
   const { cantidadTotal } = useCarrito()
   const { noLeidosDe } = useMensajeria()
   const navegar = useNavigate()
+  const ubicacion = useLocation()
 
   // Mensajes recibidos sin leer del usuario actual (para el aviso).
   const noLeidos = usuarioActual ? noLeidosDe(usuarioActual.correo) : 0
@@ -69,6 +70,13 @@ export function BarraNavegacion() {
               Salir
             </button>
           </>
+        )}
+
+        {/* Visitante (sin sesión): acceso directo a iniciar sesión */}
+        {!usuarioActual && ubicacion.pathname !== '/login' && (
+          <Link to="/login" className="btn btn-primario btn-pequeno">
+            Iniciar sesión
+          </Link>
         )}
 
         {/* Botón para instalar la PWA (aparece solo si el navegador lo permite) */}

@@ -3,6 +3,8 @@ import { BarraNavegacion } from './componentes/BarraNavegacion'
 import { PieInstitucional } from './componentes/PieInstitucional'
 import { RutaProtegida } from './componentes/RutaProtegida'
 import { InkaAnimatedBackground } from './componentes/InkaAnimatedBackground'
+import { useSesion } from './contexto/SesionContext'
+import { Intro } from './paginas/Intro'
 import { Login } from './paginas/Login'
 import { Registro } from './paginas/Registro'
 import { Catalogo } from './paginas/Catalogo'
@@ -16,13 +18,14 @@ import { Mensajes } from './paginas/Mensajes'
 // Define las rutas (pantallas) de la aplicación.
 export default function App() {
   const ubicacion = useLocation()
-  // En login/registro NO va el fondo global: esas páginas tienen su propio
-  // hero a sangre (.inka-auth-bg). En el resto, una sola capa fija detrás de todo.
+  const { usuarioActual } = useSesion()
+  // El fondo global ambiental va solo en las páginas de la app (con sesión).
+  // Intro, login y registro tienen su propio hero a sangre (.inka-auth-bg).
   const esAuth =
     ubicacion.pathname === '/login' || ubicacion.pathname === '/registro'
   return (
     <>
-      {!esAuth && (
+      {usuarioActual && !esAuth && (
         <div className="inka-fondo-global" aria-hidden="true">
           {/* Versión ambiental: menos figuras y menos dorado que el login. El
               intervalo mayor da tiempo a que cada figura complete su dibujado de 7 s. */}
@@ -36,15 +39,10 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/registro" element={<Registro />} />
 
+          {/* Raíz: visitante ve la Intro pública; con sesión, la app (Asistente) */}
+          <Route path="/" element={usuarioActual ? <Asistente /> : <Intro />} />
+
           {/* Rutas protegidas (requieren sesión) */}
-          <Route
-            path="/"
-            element={
-              <RutaProtegida>
-                <Asistente />
-              </RutaProtegida>
-            }
-          />
           <Route
             path="/catalogo"
             element={
