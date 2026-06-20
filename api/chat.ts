@@ -152,11 +152,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }),
     })
     if (!respuesta.ok) {
-      const detalle = await respuesta.text().catch(() => '')
-      return res.status(502).json({
-        error: 'No se pudo obtener respuesta del asistente IA.',
-        _debug: { status: respuesta.status, detalle: detalle.slice(0, 400) },
-      })
+      return res.status(502).json({ error: 'No se pudo obtener respuesta del asistente IA.' })
     }
 
     const datos = await respuesta.json()
@@ -165,11 +161,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // 8) Interpretamos el JSON de forma robusta y validamos los ids.
     const resultado = interpretar(textoRespuesta, idsValidos)
     return res.status(200).json(resultado)
-  } catch (e) {
-    return res.status(502).json({
-      error: 'No se pudo obtener respuesta del asistente IA.',
-      _debug: String(e).slice(0, 300),
-    })
+  } catch {
+    // Nunca exponemos detalles internos ni la clave.
+    return res.status(502).json({ error: 'No se pudo obtener respuesta del asistente IA.' })
   }
 }
 
