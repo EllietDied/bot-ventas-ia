@@ -19,6 +19,7 @@ import {
   resolverProductos,
   type MensajeHistorial,
 } from '../core/servicios/AsistenteIAService'
+import { buscarPorFoto } from '../core/servicios/BusquedaVisualService'
 
 // Genera un id único para cada mensaje (evita claves repetidas en React).
 let contadorMensaje = 0
@@ -36,6 +37,7 @@ interface MensajeAsistente {
   productos?: Producto[]
   comparacion?: Producto[]
   acciones?: { label: string; valor: string; icono?: string }[] // botones de elección (flujo del vendedor)
+  categorias?: string[] // chips de categoría (búsqueda por foto cuando no se identifica)
   pedirFoto?: boolean // muestra un selector de foto dentro del chat
   pensando?: boolean // mientras el asistente "procesa" la consulta
 }
@@ -508,6 +510,72 @@ export function Asistente() {
     }
   }
 
+  // Mensaje simple del asistente (avisos de la búsqueda por foto).
+  function responderFoto(texto: string) {
+    agregarMensaje({ id: idUnico(), emisor: 'bot', texto })
+  }
+
+  // BÚSQUEDA POR FOTO: la IA identifica el producto y muestra las opciones (marcas/modelos).
+  async function buscarConFoto(file: File) {
+    if (cargando) return
+    let dataURL = ''
+    try {
+      dataURL = await comprimirImagen(file)
+    } catch {
+      return responderFoto('No pude procesar la imagen, intenta con otra.')
+    }
+
+    agregarMensaje({ id: idUnico(), emisor: 'usuario', texto: 'Foto de un producto' })
+    setCargando(true)
+    const idBot = idUnico()
+    agregarMensaje({
+      id: idBot,
+      emisor: 'bot',
+      texto: 'IA InkaShop está identificando el producto',
+      pensando: true,
+    })
+    const inicio = Date.now()
+
+    let r
+    try {
+      r = await buscarPorFoto(dataURL, productos)
+    } catch {
+      r = { termino: '', etiqueta: '', productos: [], fuente: 'manual' as const, necesitaCategoria: true }
+    }
+    const transcurrido = Date.now() - inicio
+    if (transcurrido < 900) await new Promise((res) => setTimeout(res, 900 - transcurrido))
+
+    if (r.termino) registrarConsulta(r.termino, '')
+
+    if (r.necesitaCategoria || r.productos.length === 0) {
+      const categorias = [...new Set(productos.filter((p) => p.stock > 0).map((p) => p.categoria))]
+      actualizarMensaje(idBot, {
+        texto: 'No logré identificar el producto con seguridad. ¿De qué tipo es? Elige una categoría:',
+        categorias,
+        pensando: false,
+      })
+    } else {
+      actualizarMensaje(idBot, {
+        texto: `Identifiqué ${r.etiqueta || r.termino}. Estas son las opciones por marca y modelo:`,
+        productos: r.productos,
+        pensando: false,
+      })
+    }
+    setCargando(false)
+  }
+
+  // El cliente elige la categoría cuando la foto no se pudo identificar.
+  function filtrarCategoriaFoto(categoria: string) {
+    agregarMensaje({ id: idUnico(), emisor: 'usuario', texto: categoria })
+    const encontrados = productos.filter((p) => p.categoria === categoria && p.stock > 0)
+    agregarMensaje({
+      id: idUnico(),
+      emisor: 'bot',
+      texto: `Opciones de ${categoria} por marca y modelo:`,
+      productos: encontrados,
+    })
+  }
+
   function enviar(e: React.FormEvent) {
     e.preventDefault()
     if (esVendedorActual) enviarVendedor(texto)
@@ -643,6 +711,17 @@ export function Asistente() {
                   </div>
                 )}
 
+                {/* Categorías para la búsqueda por foto (solo el último mensaje) */}
+                {m.categorias && m.categorias.length > 0 && m.id === ultimoId && (
+                  <div className="chat-acciones">
+                    {m.categorias.map((c) => (
+                      <button key={c} className="chip" onClick={() => filtrarCategoriaFoto(c)}>
+                        {c}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
                 {/* Selector de foto dentro del chat (solo el último mensaje) */}
                 {m.pedirFoto && m.id === ultimoId && (
                   <div className="chat-acciones">
@@ -683,6 +762,23 @@ export function Asistente() {
                     <Icono nombre={b.icono} size={15} /> {b.label}
                   </button>
                 ))}
+            {puedeComprar && (
+              <label className="chip chip-foto">
+                <Icono nombre="camara" size={15} /> Buscar por foto
+                <input
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  hidden
+                  disabled={cargando}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0]
+                    if (file) buscarConFoto(file)
+                    e.currentTarget.value = ''
+                  }}
+                />
+              </label>
+            )}
             {puedeComprar && (
               <button className="chip" onClick={() => navegar('/carrito')}>
                 <Icono nombre="carrito" size={15} /> Ver mi carrito
