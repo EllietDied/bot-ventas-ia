@@ -16,7 +16,7 @@ export function BarraNavegacion() {
   const ubicacion = useLocation()
 
   // Mensajes recibidos sin leer del usuario actual (para el aviso).
-  const noLeidos = usuarioActual ? noLeidosDe(usuarioActual.correo) : 0
+  const noLeidos = usuarioActual ? noLeidosDe(usuarioActual.idUsuario) : 0
 
   function cerrarSesion() {
     logout()

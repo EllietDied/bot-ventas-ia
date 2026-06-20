@@ -10,4 +10,5 @@ export interface Producto {
   estado: string // 'disponible' | 'agotado'
   imagen: string // emoji representativo del producto
   idVendedor?: string // qué vendedor lo publicó (opcional)
+  vendedorNombre?: string // nombre del vendedor (lo usa la mensajería); presente con Supabase
 }

@@ -16,6 +16,7 @@ interface FilaProducto {
   estado: string | null
   imagen: string | null
   id_vendedor: string | null
+  vendedor_nombre: string | null
 }
 
 // Convierte una fila de Supabase al modelo Producto de la app.
@@ -31,6 +32,7 @@ export function mapProducto(fila: FilaProducto): Producto {
     estado: fila.estado ?? 'disponible',
     imagen: fila.imagen ?? '📦',
     idVendedor: fila.id_vendedor ?? undefined,
+    vendedorNombre: fila.vendedor_nombre ?? undefined,
   }
 }
 

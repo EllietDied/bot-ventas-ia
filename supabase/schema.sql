@@ -95,8 +95,12 @@ create index if not exists idx_consultas_usuario on public.consultas (usuario_id
 create table if not exists public.mensajes (
   id bigint generated always as identity primary key,
   producto_id bigint references public.productos(id) on delete set null,
+  nombre_producto text, -- copia del nombre del producto (para mostrarlo sin join)
   de_usuario uuid not null references public.perfiles(id) on delete cascade,
   para_usuario uuid not null references public.perfiles(id) on delete cascade,
+  de_nombre text, -- nombre del remitente (copia, para mostrar sin leer su perfil)
+  para_nombre text, -- nombre del destinatario (copia)
+  tipo text not null default 'consulta', -- 'consulta' | 'respuesta'
   texto text not null,
   leido boolean not null default false,
   creado_en timestamptz not null default now()

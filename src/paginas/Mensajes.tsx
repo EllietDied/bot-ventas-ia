@@ -18,7 +18,7 @@ function VistaComprador() {
   const { usuarioActual, usuarios } = useSesion()
   const { productos } = useProductos()
   const { mensajesDe, enviarMensaje, marcarLeido } = useMensajeria()
-  const correo = usuarioActual!.correo
+  const yo = usuarioActual!
 
   // Si llegamos desde el Asistente ("Consultar vendedor"), preseleccionamos el producto.
   const location = useLocation()
@@ -28,12 +28,12 @@ function VistaComprador() {
   const [error, setError] = useState('')
   const [exito, setExito] = useState('')
 
-  const mios = [...mensajesDe(correo)].reverse() // más recientes primero
+  const mios = [...mensajesDe(yo.idUsuario)].reverse() // más recientes primero
 
   // Al abrir la pantalla, marcamos como leídos los mensajes recibidos.
   useEffect(() => {
-    mensajesDe(correo)
-      .filter((m) => m.destinatario === correo && !m.leido)
+    mensajesDe(yo.idUsuario)
+      .filter((m) => m.destinatario === yo.idUsuario && !m.leido)
       .forEach((m) => marcarLeido(m.idMensaje))
   }, [])
 
@@ -52,16 +52,22 @@ function VistaComprador() {
       setError('Selecciona un producto válido.')
       return
     }
-    // Buscamos al vendedor dueño del producto.
-    const vendedor = usuarios.find((u) => u.idUsuario === producto.idVendedor)
-    if (!vendedor) {
+    // Identificamos al vendedor dueño del producto (por su id).
+    const idVendedor = producto.idVendedor
+    if (!idVendedor) {
       setError('Este producto no tiene un vendedor asignado.')
       return
     }
+    const nombreVendedor =
+      producto.vendedorNombre ||
+      usuarios.find((u) => u.idUsuario === idVendedor)?.nombre ||
+      'Vendedor'
 
     enviarMensaje({
-      remitente: correo,
-      destinatario: vendedor.correo,
+      remitente: yo.idUsuario,
+      destinatario: idVendedor,
+      remitenteNombre: yo.nombre,
+      destinatarioNombre: nombreVendedor,
       idProducto: producto.id,
       nombreProducto: producto.nombre,
       contenido,
@@ -117,7 +123,7 @@ function VistaComprador() {
         ) : (
           <div className="msg-lista">
             {mios.map((m) => (
-              <MensajeItem key={m.idMensaje} mensaje={m} correoActual={correo} />
+              <MensajeItem key={m.idMensaje} mensaje={m} idActual={yo.idUsuario} />
             ))}
           </div>
         )}
@@ -130,11 +136,11 @@ function VistaComprador() {
 function VistaVendedor() {
   const { usuarioActual } = useSesion()
   const { mensajes } = useMensajeria()
-  const correo = usuarioActual!.correo
+  const idActual = usuarioActual!.idUsuario
 
   // Consultas dirigidas a este vendedor (más recientes primero).
   const recibidas = [...mensajes]
-    .filter((m) => m.destinatario === correo && m.tipoMensaje === 'consulta')
+    .filter((m) => m.destinatario === idActual && m.tipoMensaje === 'consulta')
     .reverse()
 
   return (
@@ -185,8 +191,10 @@ function TarjetaConsulta({ consulta }: { consulta: Mensaje }) {
     }
 
     enviarMensaje({
-      remitente: consulta.destinatario, // el vendedor
-      destinatario: consulta.remitente, // el comprador
+      remitente: consulta.destinatario, // el vendedor (idUsuario)
+      destinatario: consulta.remitente, // el comprador (idUsuario)
+      remitenteNombre: consulta.destinatarioNombre ?? 'Vendedor',
+      destinatarioNombre: consulta.remitenteNombre ?? 'Comprador',
       idProducto: consulta.idProducto,
       nombreProducto: consulta.nombreProducto,
       contenido: respuesta,
@@ -199,7 +207,7 @@ function TarjetaConsulta({ consulta }: { consulta: Mensaje }) {
   return (
     <div className="msg-item recibido">
       <div className="msg-cabecera">
-        <span className="msg-de">De: {consulta.remitente}</span>
+        <span className="msg-de">De: {consulta.remitenteNombre ?? consulta.remitente}</span>
         <span className="chip-mini">{consulta.nombreProducto}</span>
         {!consulta.leido && <span className="badge-no-leido">nuevo</span>}
       </div>
@@ -233,8 +241,8 @@ function TarjetaConsulta({ consulta }: { consulta: Mensaje }) {
 }
 
 // Tarjeta de un mensaje en la lista del comprador.
-function MensajeItem({ mensaje, correoActual }: { mensaje: Mensaje; correoActual: string }) {
-  const enviadoPorMi = mensaje.remitente === correoActual
+function MensajeItem({ mensaje, idActual }: { mensaje: Mensaje; idActual: string }) {
+  const enviadoPorMi = mensaje.remitente === idActual
   return (
     <div className={enviadoPorMi ? 'msg-item enviado' : 'msg-item recibido'}>
       <div className="msg-cabecera">

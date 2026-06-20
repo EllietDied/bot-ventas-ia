@@ -2,8 +2,10 @@
 // Las conversaciones se guardan en una lista Mensaje[].
 export interface Mensaje {
   idMensaje: string
-  remitente: string // correo de quien envía
-  destinatario: string // correo de quien recibe
+  remitente: string // id de quien envía (idUsuario)
+  destinatario: string // id de quien recibe (idUsuario)
+  remitenteNombre?: string // nombre de quien envía (para mostrar)
+  destinatarioNombre?: string // nombre de quien recibe (para mostrar)
   idProducto: number // producto relacionado
   nombreProducto: string
   contenido: string
