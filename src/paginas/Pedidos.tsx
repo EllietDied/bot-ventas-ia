@@ -25,7 +25,7 @@ export function Pedidos() {
         <section className="panel">
           <div className="panel-cabecera">
             <h2>
-              <Icono nombre="reloj" size={18} /> Pedidos pendientes (Cola FIFO)
+              <Icono nombre="reloj" size={18} /> Pedidos pendientes
             </h2>
             <button
               className="btn btn-primario btn-pequeno"

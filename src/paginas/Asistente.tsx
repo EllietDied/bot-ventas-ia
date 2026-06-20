@@ -714,7 +714,7 @@ export function Asistente() {
           <h2>
             <Icono nombre="lista" size={18} /> Consultas recientes
           </h2>
-          <p className="texto-tenue">Pila LIFO: la última consulta aparece primero.</p>
+          <p className="texto-tenue">Tus últimas búsquedas aparecen primero.</p>
           {consultasRecientes.length === 0 ? (
             <p className="texto-tenue">Aún no hay consultas.</p>
           ) : (
