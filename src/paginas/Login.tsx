@@ -12,7 +12,7 @@ export function Login() {
   const [contrasena, setContrasena] = useState('')
   const [error, setError] = useState('')
 
-  function enviar(e: React.FormEvent) {
+  async function enviar(e: React.FormEvent) {
     e.preventDefault()
     setError('')
 
@@ -21,7 +21,7 @@ export function Login() {
       return
     }
 
-    const resultado = login(correo, contrasena)
+    const resultado = await login(correo, contrasena)
     if (!resultado.ok) {
       setError(resultado.mensaje)
       return
@@ -30,8 +30,8 @@ export function Login() {
   }
 
   // Acceso rápido para explorar con una cuenta de demostración.
-  function entrarComo(correo: string) {
-    const r = login(correo, '123456')
+  async function entrarComo(correo: string) {
+    const r = await login(correo, '123456')
     if (r.ok) navegar('/')
   }
 

@@ -8,6 +8,14 @@ import { validarUbicacion } from '../utils/validarUbicacion'
 import { Ubicacion } from '../config/addressCountryConfig'
 import { cargar, guardar } from '../core/datos/almacenamiento'
 import { USUARIOS_INICIALES } from '../core/datos/seed'
+import { usarSupabase } from '../core/datos/supabase'
+import {
+  loginSupabase,
+  registrarSupabase,
+  logoutSupabase,
+  obtenerUsuarioActual,
+  escucharCambiosSesion,
+} from '../core/servicios/SupabaseAuthService'
 
 // Datos completos que llegan del formulario de registro.
 export interface DatosRegistro {
@@ -35,8 +43,8 @@ export interface DatosRegistro {
 interface SesionContextType {
   usuarioActual: Usuario | null
   usuarios: Usuario[]
-  login: (correo: string, contrasena: string) => Resultado
-  registrar: (datos: DatosRegistro) => Resultado
+  login: (correo: string, contrasena: string) => Promise<Resultado>
+  registrar: (datos: DatosRegistro) => Promise<Resultado>
   logout: () => void
 }
 
@@ -46,25 +54,52 @@ export function SesionProvider({ children }: { children: ReactNode }) {
   // Lista de usuarios registrados (se carga desde localStorage).
   const [usuarios, setUsuarios] = useState<Usuario[]>(() => cargar('usuarios', USUARIOS_INICIALES))
   // Usuario que tiene la sesión iniciada.
+  // Con Supabase, la sesión la maneja Supabase (no se lee de localStorage).
   const [usuarioActual, setUsuarioActual] = useState<Usuario | null>(() =>
-    cargar<Usuario | null>('sesion', null),
+    usarSupabase() ? null : cargar<Usuario | null>('sesion', null),
   )
 
-  // Cada vez que cambian, los guardamos en localStorage.
+  // Guardamos la lista de usuarios y la sesión en localStorage SOLO en el modo local.
   useEffect(() => guardar('usuarios', usuarios), [usuarios])
-  useEffect(() => guardar('sesion', usuarioActual), [usuarioActual])
+  useEffect(() => {
+    if (!usarSupabase()) guardar('sesion', usuarioActual)
+  }, [usuarioActual])
 
-  function login(correo: string, contrasena: string): Resultado {
+  // Con Supabase: al cargar restauramos la sesión y escuchamos sus cambios.
+  useEffect(() => {
+    if (!usarSupabase()) return
+    let activo = true
+    obtenerUsuarioActual().then((u) => {
+      if (activo && u) setUsuarioActual(u)
+    })
+    const cancelar = escucharCambiosSesion((u) => {
+      if (activo) setUsuarioActual(u)
+    })
+    return () => {
+      activo = false
+      cancelar()
+    }
+  }, [])
+
+  async function login(correo: string, contrasena: string): Promise<Resultado> {
+    // Modo Supabase (autenticación real).
+    if (usarSupabase()) {
+      const r = await loginSupabase(correo, contrasena)
+      if (r.ok && r.usuario) setUsuarioActual(r.usuario)
+      return { ok: r.ok, mensaje: r.mensaje }
+    }
+    // Modo local (sin conexión).
     const usuario = iniciarSesion(correo, contrasena, usuarios)
     if (!usuario) return { ok: false, mensaje: 'Correo o contraseña incorrectos.' }
     setUsuarioActual(usuario)
     return { ok: true, mensaje: `Bienvenido, ${usuario.nombre}.` }
   }
 
-  function registrar(datos: DatosRegistro): Resultado {
-    // Validación COMPLETA (la misma del formulario) como verificación final
-    // antes de guardar. Nunca confiamos solo en lo que llega del formulario.
-    const correos = usuarios.map((u) => u.correo)
+  async function registrar(datos: DatosRegistro): Promise<Resultado> {
+    // Validación COMPLETA (la misma del formulario) como verificación final.
+    // El correo duplicado: en local lo revisamos aquí; con Supabase lo controla Supabase.
+    const supa = usarSupabase()
+    const correos = supa ? [] : usuarios.map((u) => u.correo)
     const validacion = validarRegistroCompleto(datos, correos)
     if (!validacion.ok) {
       const primer = validacion.orden.find((campo) => validacion.errores[campo])
@@ -80,7 +115,7 @@ export function SesionProvider({ children }: { children: ReactNode }) {
       return { ok: false, mensaje: Object.values(valUbic.errores)[0] ?? 'Revisa los datos de dirección.' }
     }
 
-    // Documento normalizado (string, sin separadores, conserva ceros) y su formato visual.
+    // Datos derivados (comunes a ambos modos): documento normalizado y su formato visual.
     const doc = validateIdentityDocument({
       countryCode: datos.countryCode,
       documentCode: datos.tipoDocumento,
@@ -91,7 +126,41 @@ export function SesionProvider({ children }: { children: ReactNode }) {
     const display = formatIdentityDocument(datos.countryCode, datos.tipoDocumento, datos.documentoNumero)
     const telNacional = datos.telefono.replace(/\D/g, '')
     const u = datos.ubicacion
+    const documentoDisplay = datos.prefijoDocumento ? `${datos.prefijoDocumento}-${display}` : display
 
+    // ----- Modo Supabase: los datos del perfil viajan como metadata (los copia el trigger) -----
+    if (supa) {
+      const metadata: Record<string, string> = {
+        nombre: datos.nombre.trim(),
+        apellido: datos.apellido.trim(),
+        telefono: telNacional,
+        prefijo_telefonico: datos.callingCode,
+        telefono_internacional: (datos.callingCode || '') + telNacional,
+        rol: datos.rol,
+        pais_codigo: datos.countryCode,
+        pais_nombre: datos.countryName,
+        tipo_documento: datos.tipoDocumento,
+        documento_numero: doc.normalizedValue,
+        documento_display: documentoDisplay,
+        documento_complemento: datos.documentoComplemento || '',
+        codigo_postal: u.codigoPostal || '',
+        nivel1_tipo: u.nivel1.tipo,
+        nivel1_codigo: u.nivel1.codigo,
+        nivel1_nombre: u.nivel1.nombre,
+        nivel2_tipo: u.nivel2.tipo,
+        nivel2_codigo: u.nivel2.codigo,
+        nivel2_nombre: u.nivel2.nombre,
+        nivel3_tipo: u.nivel3?.tipo || '',
+        nivel3_codigo: u.nivel3?.codigo || '',
+        nivel3_nombre: u.nivel3?.nombre || '',
+        direccion: u.direccion.trim(),
+      }
+      const r = await registrarSupabase(datos.correo, datos.contrasena, metadata)
+      if (r.ok && r.usuario) setUsuarioActual(r.usuario)
+      return { ok: r.ok, mensaje: r.mensaje }
+    }
+
+    // ----- Modo local (sin conexión) -----
     const nuevo: Usuario = {
       idPersona: 'P-' + Date.now(),
       idUsuario: 'U-' + Date.now(),
@@ -112,7 +181,7 @@ export function SesionProvider({ children }: { children: ReactNode }) {
       prefijoTelefonico: datos.callingCode,
       telefonoInternacional: (datos.callingCode || '') + telNacional,
       tipoDocumento: datos.tipoDocumento,
-      documentoDisplay: datos.prefijoDocumento ? `${datos.prefijoDocumento}-${display}` : display,
+      documentoDisplay,
       documentoComplemento: datos.documentoComplemento || undefined,
       // Dirección territorial estructurada (códigos como texto, conservan ceros).
       codigoPostal: u.codigoPostal || undefined,
@@ -131,7 +200,8 @@ export function SesionProvider({ children }: { children: ReactNode }) {
     return { ok: true, mensaje: 'Cuenta creada correctamente.' }
   }
 
-  function logout() {
+  async function logout() {
+    if (usarSupabase()) await logoutSupabase()
     setUsuarioActual(null)
   }
 

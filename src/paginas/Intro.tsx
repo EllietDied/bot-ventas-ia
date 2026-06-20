@@ -78,8 +78,8 @@ export function Intro() {
   const navegar = useNavigate()
 
   // Acceso rápido para explorar con una cuenta de demostración.
-  function entrarComo(correo: string) {
-    const r = login(correo, '123456')
+  async function entrarComo(correo: string) {
+    const r = await login(correo, '123456')
     if (r.ok) navegar('/')
   }
 

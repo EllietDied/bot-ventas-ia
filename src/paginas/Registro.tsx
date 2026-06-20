@@ -152,7 +152,7 @@ export function Registro() {
     el?.focus()
   }
 
-  function enviar(e: React.FormEvent) {
+  async function enviar(e: React.FormEvent) {
     e.preventDefault()
     setError('')
     // Marcamos todo como tocado (datos personales + niveles de dirección del país).
@@ -187,7 +187,7 @@ export function Registro() {
       return
     }
 
-    const resultado = registrar(form)
+    const resultado = await registrar(form)
     if (!resultado.ok) {
       setError(resultado.mensaje)
       return
