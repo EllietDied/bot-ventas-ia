@@ -414,15 +414,14 @@ Estas limitaciones responden al alcance académico definido para el proyecto y p
 El asistente de IA InkaShop funciona en **dos modos**, sin perder ninguna de las funcionalidades académicas:
 
 - **Modo simulado (por defecto):** utiliza la clase `ChatBotIA` con reglas y palabras clave. Funciona **sin conexión**, sin clave y sin costo. Es el modo activo en la versión estándar del proyecto y conserva todas las estructuras de datos (Pila LIFO, Cola FIFO) y algoritmos.
-- **Modo IA real (opcional):** utiliza la **API de Claude** (SDK oficial `@anthropic-ai/sdk`) a través de una función segura del servidor en `api/chat.ts`. Comprende lenguaje natural, mantiene el contexto reciente de la conversación y recomienda **solo productos reales del catálogo**.
+- **Modo IA real (opcional):** utiliza la **API de DeepSeek** (modelo `deepseek-chat`, compatible con OpenAI) a través de una función segura del servidor en `api/chat.ts`. Comprende lenguaje natural, mantiene el contexto reciente de la conversación y recomienda **solo productos reales del catálogo**.
 
-La integración con Claude es una **ampliación** del proyecto, no un reemplazo: la Pila LIFO sigue registrando cada consulta, la Cola FIFO sigue procesando los pedidos, y **los pagos y pedidos los sigue controlando la aplicación**, nunca el modelo.
+La integración con DeepSeek es una **ampliación** del proyecto, no un reemplazo: la Pila LIFO sigue registrando cada consulta, la Cola FIFO sigue procesando los pedidos, y **los pagos y pedidos los sigue controlando la aplicación**, nunca el modelo.
 
 ### 18.1. Instalación de dependencias
 
 ```bash
 npm install
-npm install @anthropic-ai/sdk
 npm install -D @vercel/node
 ```
 
@@ -432,10 +431,10 @@ Copia el archivo `.env.example` como `.env.local` (este archivo está ignorado p
 
 ```bash
 VITE_USAR_IA_REAL=true
-ANTHROPIC_API_KEY=sk-ant-tu-clave-secreta
+DEEPSEEK_API_KEY=sk-tu-clave-secreta
 ```
 
-- `ANTHROPIC_API_KEY`: la clave de Claude. **Solo se usa en el servidor** (`api/chat.ts`). **Nunca** debe empezar con `VITE_` ni colocarse en componentes, `localStorage` o el frontend.
+- `DEEPSEEK_API_KEY`: la clave de DeepSeek. **Solo se usa en el servidor** (`api/chat.ts`). **Nunca** debe empezar con `VITE_` ni colocarse en componentes, `localStorage` o el frontend.
 - `VITE_USAR_IA_REAL`: interruptor del modo. `true` activa la IA real; cualquier otro valor (o ausencia) mantiene el **modo simulado**.
 
 > El modo IA real requiere desplegar la función `api/chat.ts` (por ejemplo en Vercel). El servidor de desarrollo de Vite (`npm run dev`) **no** ejecuta funciones serverless; para probar la IA real en local se usa `vercel dev`. Si la app no encuentra el servicio, **usa automáticamente el modo simulado**.
@@ -452,7 +451,7 @@ npm run test     # ejecuta las pruebas automatizadas
 ### 18.4. Configuración de variables en Vercel
 
 1. En el proyecto de Vercel: **Settings → Environment Variables**.
-2. Agregar `ANTHROPIC_API_KEY` con la clave secreta (marcada como *Secret*; queda solo en el servidor).
+2. Agregar `DEEPSEEK_API_KEY` con la clave secreta (marcada como *Secret*; queda solo en el servidor).
 3. Agregar `VITE_USAR_IA_REAL` con el valor `true` para activar la IA real en el sitio publicado.
 4. Volver a desplegar para aplicar las variables.
 
@@ -460,8 +459,8 @@ La función `api/chat.ts` se despliega automáticamente como *Serverless Functio
 
 ### 18.5. Consideraciones
 
-- **Seguridad:** la clave de Claude vive **solo en el servidor**. El frontend únicamente hace `fetch('/api/chat')`; lo único público es el interruptor `VITE_USAR_IA_REAL`.
-- **Costo:** el uso de la API de Claude **puede generar costos** según el consumo de la cuenta.
+- **Seguridad:** la clave de DeepSeek vive **solo en el servidor**. El frontend únicamente hace `fetch('/api/chat')`; lo único público es el interruptor `VITE_USAR_IA_REAL`.
+- **Costo:** el uso de la API de DeepSeek **puede generar costos** según el consumo de la cuenta.
 - **Conexión:** el modo IA real **requiere conexión a internet**.
 - **Tolerancia a fallos:** si la API falla, no responde a tiempo o no está configurada, la aplicación **usa automáticamente el modo simulado**, de forma transparente para el usuario.
 - **Privacidad:** a la API solo se envía el mensaje, un historial breve, el catálogo relevante y el carrito; **nunca** contraseñas, datos de pago ni información privada.

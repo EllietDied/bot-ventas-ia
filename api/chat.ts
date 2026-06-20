@@ -1,15 +1,14 @@
 // api/chat.ts
 // Función serverless de Vercel: el "Modo IA real" del asistente IA InkaShop.
-// Aquí —y SOLO aquí— se usa la clave de Claude (ANTHROPIC_API_KEY), que vive en
-// el servidor y NUNCA llega al navegador. Recibe el mensaje del comprador y un
-// poco de contexto (catálogo relevante + carrito) y devuelve la respuesta del
-// asistente en formato JSON. Si algo falla, el frontend usa el chatbot simulado.
+// Proveedor: DeepSeek (API compatible con OpenAI). La clave vive SOLO en el
+// servidor (DEEPSEEK_API_KEY) y NUNCA llega al navegador. Si algo falla, el
+// frontend usa el chatbot simulado.
 
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import Anthropic from '@anthropic-ai/sdk'
 
-// Modelo vigente de Claude para la API Messages.
-const MODELO = 'claude-opus-4-8'
+// Proveedor de IA: DeepSeek (compatible con OpenAI).
+const DEEPSEEK_URL = 'https://api.deepseek.com/chat/completions'
+const MODELO = 'deepseek-chat'
 // Límite de tokens de la respuesta (un asistente de ventas responde corto).
 const MAX_TOKENS = 1024
 // Límite de caracteres del mensaje del usuario.
@@ -62,7 +61,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   // 2) La clave debe estar configurada en el servidor.
-  if (!process.env.ANTHROPIC_API_KEY) {
+  if (!process.env.DEEPSEEK_API_KEY) {
     return res.status(500).json({ error: 'El servicio de IA no está configurado.' })
   }
 
@@ -105,7 +104,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // IDs reales del catálogo (para descartar productos inventados por el modelo).
     const idsValidos = new Set(productos.map((p) => String(p.id)))
 
-    // 5) Historial (máximo 10) → formato de mensajes de la API Messages.
+    // 5) Historial (máximo 10) → formato de mensajes (compatible con OpenAI).
     const historial = Array.isArray(cuerpo.historial) ? cuerpo.historial.slice(-MAX_HISTORIAL) : []
     const mensajes: { role: 'user' | 'assistant'; content: string }[] = []
     for (const h of historial) {
@@ -118,7 +117,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // Mensaje actual del usuario, al final.
     mensajes.push({ role: 'user', content: mensaje })
 
-    // 6) Contexto (catálogo + carrito) que verá el modelo, junto al formato pedido.
+    // 6) Contexto (catálogo + carrito) + formato pedido (debe mencionar "JSON").
     const contexto = [
       'CATÁLOGO DISPONIBLE (usa SOLO estos productos; cada uno trae su id real):',
       JSON.stringify(productos),
@@ -137,23 +136,29 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       .filter(Boolean)
       .join('\n')
 
-    // 7) Llamada a Claude mediante el SDK oficial.
-    const cliente = new Anthropic() // lee la clave desde process.env.ANTHROPIC_API_KEY
-    const respuesta = await cliente.messages.create({
-      model: MODELO,
-      max_tokens: MAX_TOKENS,
-      system: [
-        { type: 'text', text: SISTEMA },
-        { type: 'text', text: contexto },
-      ],
-      messages: mensajes,
+    // 7) Llamada a DeepSeek (API compatible con OpenAI).
+    const respuesta = await fetch(DEEPSEEK_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.DEEPSEEK_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: MODELO,
+        max_tokens: MAX_TOKENS,
+        temperature: 0.7,
+        response_format: { type: 'json_object' },
+        messages: [{ role: 'system', content: SISTEMA + '\n\n' + contexto }, ...mensajes],
+      }),
     })
-
-    // 8) Extraemos el texto y lo interpretamos como JSON de forma robusta.
-    let textoRespuesta = ''
-    for (const bloque of respuesta.content) {
-      if (bloque.type === 'text') textoRespuesta += bloque.text
+    if (!respuesta.ok) {
+      return res.status(502).json({ error: 'No se pudo obtener respuesta del asistente IA.' })
     }
+
+    const datos = await respuesta.json()
+    const textoRespuesta: string = datos?.choices?.[0]?.message?.content ?? ''
+
+    // 8) Interpretamos el JSON de forma robusta y validamos los ids.
     const resultado = interpretar(textoRespuesta, idsValidos)
     return res.status(200).json(resultado)
   } catch {
@@ -181,7 +186,6 @@ function interpretar(texto: string, idsValidos: Set<string>) {
       // Si el JSON viene mal, caemos al texto plano de abajo.
     }
   }
-  // Sin JSON válido: usamos el texto tal cual como mensaje (respuesta estable).
   return {
     mensaje: texto.trim() || 'No pude generar una respuesta. ¿Puedes reformular tu consulta?',
     productosRecomendados: [] as string[],
