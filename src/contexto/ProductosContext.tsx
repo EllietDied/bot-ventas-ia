@@ -3,6 +3,14 @@ import { Producto } from '../core/modelos/Producto'
 import { buscarProductos, obtenerCategorias } from '../core/servicios/CatalogoService'
 import { cargar, guardar } from '../core/datos/almacenamiento'
 import { PRODUCTOS_INICIALES } from '../core/datos/seed'
+import { usarSupabase } from '../core/datos/supabase'
+import {
+  listarProductosSupabase,
+  insertarProductoSupabase,
+  actualizarProductoSupabase,
+  eliminarProductoSupabase,
+} from '../core/servicios/ProductosService'
+import { useSesion } from './SesionContext'
 
 // Datos del formulario para publicar un producto.
 export interface NuevoProducto {
@@ -30,69 +38,102 @@ interface ProductosContextType {
 const ProductosContext = createContext<ProductosContextType | undefined>(undefined)
 
 export function ProductosProvider({ children }: { children: ReactNode }) {
-  // LISTA de productos (arreglo Producto[]). Se carga desde localStorage.
+  const { usuarioActual } = useSesion()
+
+  // LISTA de productos (arreglo Producto[]).
+  // En modo local se carga desde localStorage; con Supabase, desde la base.
   const [productos, setProductos] = useState<Producto[]>(() =>
-    cargar('productos', PRODUCTOS_INICIALES),
+    usarSupabase() ? [] : cargar('productos', PRODUCTOS_INICIALES),
   )
 
-  useEffect(() => guardar('productos', productos), [productos])
+  // Guardamos en localStorage SOLO en el modo local (con Supabase los datos viven en la base).
+  useEffect(() => {
+    if (!usarSupabase()) guardar('productos', productos)
+  }, [productos])
+
+  // Con Supabase: al cargar, traemos el catálogo desde la base.
+  useEffect(() => {
+    if (!usarSupabase()) return
+    let activo = true
+    listarProductosSupabase().then((lista) => {
+      if (activo) setProductos(lista)
+    })
+    return () => {
+      activo = false
+    }
+  }, [])
 
   function buscar(termino: string): Producto[] {
     return buscarProductos(termino, productos)
   }
 
   // El vendedor publica un nuevo producto.
-  function publicarProducto(datos: NuevoProducto) {
+  async function publicarProducto(datos: NuevoProducto) {
+    const estado = datos.stock > 0 ? 'disponible' : 'agotado'
+    const imagen = datos.imagen || '📦'
+    const marca = datos.marca?.trim() || undefined
+
+    if (usarSupabase()) {
+      const creado = await insertarProductoSupabase({
+        nombre: datos.nombre,
+        marca,
+        descripcion: datos.descripcion,
+        categoria: datos.categoria,
+        precio: datos.precio,
+        stock: datos.stock,
+        estado,
+        imagen,
+        idVendedor: datos.idVendedor,
+        vendedorNombre: usuarioActual
+          ? `${usuarioActual.nombre} ${usuarioActual.apellido}`.trim()
+          : '',
+      })
+      if (creado) setProductos((prev) => [...prev, creado])
+      return
+    }
+
+    // Modo local: id incremental en memoria.
     const nuevoId = productos.reduce((max, p) => Math.max(max, p.id), 0) + 1
     const producto: Producto = {
       id: nuevoId,
       nombre: datos.nombre,
-      marca: datos.marca?.trim() || undefined,
+      marca,
       descripcion: datos.descripcion,
       categoria: datos.categoria,
       precio: datos.precio,
       stock: datos.stock,
-      estado: datos.stock > 0 ? 'disponible' : 'agotado',
-      imagen: datos.imagen || '📦', // foto subida o, si no hay, un emoji por defecto
+      estado,
+      imagen,
       idVendedor: datos.idVendedor,
     }
     setProductos((prev) => [...prev, producto])
   }
 
+  // Editor general: aplica cambios parciales. Si cambia el stock, recalcula el estado.
+  function editarProducto(id: number, cambios: Partial<Producto>) {
+    const conEstado: Partial<Producto> = { ...cambios }
+    if (cambios.stock !== undefined) {
+      conEstado.estado = cambios.stock > 0 ? 'disponible' : 'agotado'
+    }
+    // Con Supabase, persistimos en segundo plano (la UI se actualiza al instante).
+    if (usarSupabase()) actualizarProductoSupabase(id, conEstado)
+    setProductos((prev) => prev.map((p) => (p.id === id ? { ...p, ...conEstado } : p)))
+  }
+
   // El vendedor cambia la foto de un producto ya publicado.
   function actualizarImagen(id: number, imagen: string) {
-    setProductos((prev) => prev.map((p) => (p.id === id ? { ...p, imagen } : p)))
-  }
-
-  // El vendedor elimina (da de baja) uno de sus productos del catálogo.
-  function eliminarProducto(id: number) {
-    setProductos((prev) => prev.filter((p) => p.id !== id))
-  }
-
-  // Editor general: aplica cambios parciales a un producto (nombre, precio,
-  // stock, etc.). Si cambia el stock, recalcula el estado disponible/agotado.
-  function editarProducto(id: number, cambios: Partial<Producto>) {
-    setProductos((prev) =>
-      prev.map((p) => {
-        if (p.id !== id) return p
-        const actualizado = { ...p, ...cambios }
-        if (cambios.stock !== undefined) {
-          actualizado.estado = cambios.stock > 0 ? 'disponible' : 'agotado'
-        }
-        return actualizado
-      }),
-    )
+    editarProducto(id, { imagen })
   }
 
   // El vendedor (o una compra) actualiza el stock de un producto.
   function actualizarStock(id: number, nuevoStock: number) {
-    setProductos((prev) =>
-      prev.map((p) =>
-        p.id === id
-          ? { ...p, stock: nuevoStock, estado: nuevoStock > 0 ? 'disponible' : 'agotado' }
-          : p,
-      ),
-    )
+    editarProducto(id, { stock: nuevoStock })
+  }
+
+  // El vendedor elimina (da de baja) uno de sus productos del catálogo.
+  function eliminarProducto(id: number) {
+    if (usarSupabase()) eliminarProductoSupabase(id)
+    setProductos((prev) => prev.filter((p) => p.id !== id))
   }
 
   const categorias = obtenerCategorias(productos)
