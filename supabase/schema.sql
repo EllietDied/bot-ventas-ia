@@ -58,6 +58,7 @@ create index if not exists idx_productos_vendedor  on public.productos (id_vende
 create table if not exists public.pedidos (
   id bigint generated always as identity primary key,
   id_comprador uuid not null references public.perfiles(id) on delete cascade,
+  correo_comprador text, -- correo del comprador (copia, para mostrarlo sin leer su perfil)
   subtotal numeric(10,2) not null,
   descuento numeric(10,2) not null default 0,
   total numeric(10,2) not null,

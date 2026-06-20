@@ -5,6 +5,13 @@ import { DetallePedido } from '../core/modelos/DetallePedido'
 import { ItemCarrito } from '../core/modelos/Carrito'
 import { ColaPedidos } from '../core/estructuras/ColaPedidos'
 import { cargar, guardar } from '../core/datos/almacenamiento'
+import { usarSupabase } from '../core/datos/supabase'
+import {
+  listarPedidosSupabase,
+  insertarPedidoSupabase,
+  atenderPedidoSupabase,
+} from '../core/servicios/PedidosService'
+import { useSesion } from './SesionContext'
 
 // Datos necesarios para registrar un pedido.
 export interface DatosPedido {
@@ -20,7 +27,7 @@ export interface DatosPedido {
 interface PedidosContextType {
   pedidos: Pedido[]
   pedidosPendientes: Pedido[] // en orden FIFO (el más antiguo primero)
-  registrarPedido: (datos: DatosPedido) => Pedido
+  registrarPedido: (datos: DatosPedido) => void
   atenderSiguiente: () => Pedido | undefined
   pedidosDe: (correo: string) => Pedido[]
 }
@@ -40,13 +47,49 @@ function construirCola(pedidos: Pedido[]): ColaPedidos {
 }
 
 export function PedidosProvider({ children }: { children: ReactNode }) {
-  // LISTA de pedidos (los más recientes se guardan primero).
-  const [pedidos, setPedidos] = useState<Pedido[]>(() => cargar<Pedido[]>('pedidos', []))
+  const { usuarioActual } = useSesion()
 
-  useEffect(() => guardar('pedidos', pedidos), [pedidos])
+  // LISTA de pedidos (los más recientes primero).
+  // En modo local desde localStorage; con Supabase, desde la base.
+  const [pedidos, setPedidos] = useState<Pedido[]>(() =>
+    usarSupabase() ? [] : cargar<Pedido[]>('pedidos', []),
+  )
+
+  // Guardamos en localStorage SOLO en el modo local.
+  useEffect(() => {
+    if (!usarSupabase()) guardar('pedidos', pedidos)
+  }, [pedidos])
+
+  // Con Supabase: al cargar, traemos los pedidos accesibles (el RLS ya filtra).
+  useEffect(() => {
+    if (!usarSupabase()) return
+    let activo = true
+    listarPedidosSupabase().then((lista) => {
+      if (activo) setPedidos(lista)
+    })
+    return () => {
+      activo = false
+    }
+  }, [])
 
   // ALGORITMO RegistrarPedido + ProcesarPago (pago simulado).
-  function registrarPedido(datos: DatosPedido): Pedido {
+  async function registrarPedido(datos: DatosPedido) {
+    if (usarSupabase()) {
+      const creado = await insertarPedidoSupabase({
+        idComprador: usuarioActual?.idUsuario ?? '',
+        correoComprador: datos.correoComprador,
+        items: datos.items,
+        subtotal: datos.subtotal,
+        descuento: datos.descuento,
+        total: datos.total,
+        metodoPago: datos.metodoPago,
+        banco: datos.banco,
+      })
+      if (creado) setPedidos((prev) => [creado, ...prev])
+      return
+    }
+
+    // Modo local.
     const detalles: DetallePedido[] = datos.items.map((i) => ({
       idProducto: i.producto.id,
       nombreProducto: i.producto.nombre,
@@ -77,7 +120,6 @@ export function PedidosProvider({ children }: { children: ReactNode }) {
     }
 
     setPedidos((prev) => [pedido, ...prev]) // el más reciente va primero
-    return pedido
   }
 
   // Atiende el primer pedido pendiente usando la cola FIFO.
@@ -85,6 +127,8 @@ export function PedidosProvider({ children }: { children: ReactNode }) {
     const cola = construirCola(pedidos)
     const siguiente = cola.desencolar() // FIFO: sale el más antiguo
     if (!siguiente) return undefined
+    // Con Supabase, persistimos en segundo plano (la UI se actualiza al instante).
+    if (usarSupabase()) atenderPedidoSupabase(Number(siguiente.idPedido))
     setPedidos((prev) =>
       prev.map((p) => (p.idPedido === siguiente.idPedido ? { ...p, estado: 'atendido' } : p)),
     )
