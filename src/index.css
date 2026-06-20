@@ -1559,6 +1559,138 @@ a:hover {
   padding: 0.35rem 0.5rem;
 }
 
+/* ============================================================
+   REGISTRO INTERNACIONAL: teléfono con país, documento por país,
+   fuerza de contraseña y errores por campo. Solo capa visual; reutiliza
+   .campo (los inputs/selects heredan su estilo y el del fondo inka).
+   ============================================================ */
+/* Celda que ocupa todo el ancho del form-grid. */
+.span-2 {
+  grid-column: 1 / -1;
+}
+/* Teléfono: país + prefijo + número en una fila. */
+.tel-grupo {
+  display: flex;
+  gap: 0.5rem;
+  align-items: stretch;
+}
+.tel-grupo select {
+  flex: 0 0 auto;
+  max-width: 54%;
+}
+.tel-prefijo {
+  display: flex;
+  align-items: center;
+  padding: 0 0.4rem;
+  font-weight: 600;
+  color: var(--texto-tenue);
+  white-space: nowrap;
+}
+.tel-grupo input {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+/* Documento de identidad adaptable. */
+.campo-documento {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+.doc-fila {
+  display: flex;
+  gap: 0.5rem;
+  align-items: stretch;
+}
+.doc-prefijo {
+  flex: 0 0 4.2rem;
+}
+.doc-numero {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.doc-complemento {
+  flex: 0 0 4.5rem;
+}
+.doc-pie {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.6rem;
+}
+/* Texto de ayuda, contador y error por campo. */
+.form-ayuda {
+  font-size: 0.78rem;
+  font-weight: 400;
+  color: var(--texto-tenue);
+}
+.contador {
+  font-size: 0.76rem;
+  font-weight: 400;
+  color: var(--texto-tenue);
+  white-space: nowrap;
+}
+.form-error {
+  margin: 0.15rem 0 0;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--error);
+}
+/* Medidor de fuerza de la contraseña. */
+.fuerza {
+  height: 6px;
+  border-radius: 4px;
+  background: var(--borde);
+  overflow: hidden;
+  margin-top: 0.3rem;
+}
+.fuerza-barra {
+  height: 100%;
+  width: 0;
+  border-radius: 4px;
+  transition: width 0.2s ease, background 0.2s ease;
+}
+.fuerza-barra.nivel-debil {
+  width: 33%;
+  background: #ef4444;
+}
+.fuerza-barra.nivel-media {
+  width: 66%;
+  background: #f59e0b;
+}
+.fuerza-barra.nivel-fuerte {
+  width: 100%;
+  background: #22c55e;
+}
+/* Indicador de coincidencia de contraseñas. */
+.coincide,
+.no-coincide {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-top: 0.2rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+.coincide {
+  color: #16a34a;
+}
+[data-theme='dark'] .coincide {
+  color: #4ade80;
+}
+.no-coincide {
+  color: var(--error);
+}
+/* Responsive: en móvil el teléfono apila país y número. */
+@media (max-width: 540px) {
+  .tel-grupo {
+    flex-wrap: wrap;
+  }
+  .tel-grupo select {
+    max-width: 100%;
+    flex: 1 1 100%;
+  }
+}
+
 /* ---------- Mascota "Asistente InkaShop" ---------- */
 .mascota-inkashop {
   display: block;

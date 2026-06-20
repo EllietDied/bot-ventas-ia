@@ -1,6 +1,11 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
 import { Usuario, Rol } from '../core/modelos/Usuario'
-import { iniciarSesion, validarRegistro, Resultado } from '../core/servicios/AuthService'
+import { iniciarSesion, Resultado } from '../core/servicios/AuthService'
+import { validarRegistroCompleto } from '../utils/validacionesRegistro'
+import { validateIdentityDocument } from '../utils/validateIdentityDocument'
+import { formatIdentityDocument } from '../utils/formatIdentityDocument'
+import { validarUbicacion } from '../utils/validarUbicacion'
+import { Ubicacion } from '../config/addressCountryConfig'
 import { cargar, guardar } from '../core/datos/almacenamiento'
 import { USUARIOS_INICIALES } from '../core/datos/seed'
 
@@ -8,14 +13,21 @@ import { USUARIOS_INICIALES } from '../core/datos/seed'
 export interface DatosRegistro {
   nombre: string
   apellido: string
-  telefono: string
-  dni: string
+  // Teléfono con país: el país elegido es la fuente de verdad (countryCode ISO).
+  countryCode: string
+  countryName: string
+  callingCode: string
+  telefono: string // número nacional
+  // Documento de identidad según el país.
+  tipoDocumento: string
+  documentoNumero: string
+  documentoComplemento: string // Bolivia (opcional)
+  prefijoDocumento: string // Venezuela (V/E)
   correo: string
   contrasena: string
   confirmar: string
-  direccion: string
-  distrito: string
-  departamento: string
+  // Dirección territorial dinámica según el país (Fase 2).
+  ubicacion: Ubicacion
   rol: Rol
 }
 
@@ -50,24 +62,69 @@ export function SesionProvider({ children }: { children: ReactNode }) {
   }
 
   function registrar(datos: DatosRegistro): Resultado {
-    // Reutilizamos las validaciones del servicio.
-    const validacion = validarRegistro(datos, usuarios)
-    if (!validacion.ok) return validacion
+    // Validación COMPLETA (la misma del formulario) como verificación final
+    // antes de guardar. Nunca confiamos solo en lo que llega del formulario.
+    const correos = usuarios.map((u) => u.correo)
+    const validacion = validarRegistroCompleto(datos, correos)
+    if (!validacion.ok) {
+      const primer = validacion.orden.find((campo) => validacion.errores[campo])
+      return {
+        ok: false,
+        mensaje: primer ? validacion.errores[primer]! : 'Revisa los datos del formulario.',
+      }
+    }
+
+    // Validación de la dirección (según el país).
+    const valUbic = validarUbicacion(datos.countryCode, datos.ubicacion)
+    if (!valUbic.ok) {
+      return { ok: false, mensaje: Object.values(valUbic.errores)[0] ?? 'Revisa los datos de dirección.' }
+    }
+
+    // Documento normalizado (string, sin separadores, conserva ceros) y su formato visual.
+    const doc = validateIdentityDocument({
+      countryCode: datos.countryCode,
+      documentCode: datos.tipoDocumento,
+      value: datos.documentoNumero,
+      complement: datos.documentoComplemento,
+      prefix: datos.prefijoDocumento,
+    })
+    const display = formatIdentityDocument(datos.countryCode, datos.tipoDocumento, datos.documentoNumero)
+    const telNacional = datos.telefono.replace(/\D/g, '')
+    const u = datos.ubicacion
 
     const nuevo: Usuario = {
       idPersona: 'P-' + Date.now(),
       idUsuario: 'U-' + Date.now(),
-      nombre: datos.nombre,
-      apellido: datos.apellido,
-      telefono: datos.telefono,
-      dni: datos.dni,
-      correo: datos.correo,
+      nombre: datos.nombre.trim(),
+      apellido: datos.apellido.trim(),
+      telefono: telNacional,
+      dni: doc.normalizedValue, // documento normalizado (compatibilidad con el modelo Persona)
+      correo: datos.correo.trim(),
       contrasena: datos.contrasena,
-      direccion: datos.direccion,
-      distrito: datos.distrito,
-      departamento: datos.departamento,
+      // Compatibilidad con el modelo: nombres legibles del nivel principal y del más específico.
+      direccion: u.direccion.trim(),
+      distrito: (u.nivel3?.nombre || u.nivel2.nombre || '').trim(),
+      departamento: u.nivel1.nombre.trim(),
       rol: datos.rol,
       estado: 'activo',
+      paisCodigo: datos.countryCode,
+      paisNombre: datos.countryName,
+      prefijoTelefonico: datos.callingCode,
+      telefonoInternacional: (datos.callingCode || '') + telNacional,
+      tipoDocumento: datos.tipoDocumento,
+      documentoDisplay: datos.prefijoDocumento ? `${datos.prefijoDocumento}-${display}` : display,
+      documentoComplemento: datos.documentoComplemento || undefined,
+      // Dirección territorial estructurada (códigos como texto, conservan ceros).
+      codigoPostal: u.codigoPostal || undefined,
+      nivel1Tipo: u.nivel1.tipo || undefined,
+      nivel1Codigo: u.nivel1.codigo || undefined,
+      nivel1Nombre: u.nivel1.nombre || undefined,
+      nivel2Tipo: u.nivel2.tipo || undefined,
+      nivel2Codigo: u.nivel2.codigo || undefined,
+      nivel2Nombre: u.nivel2.nombre || undefined,
+      nivel3Tipo: u.nivel3?.tipo || undefined,
+      nivel3Codigo: u.nivel3?.codigo || undefined,
+      nivel3Nombre: u.nivel3?.nombre || undefined,
     }
     setUsuarios((prev) => [...prev, nuevo])
     setUsuarioActual(nuevo)
