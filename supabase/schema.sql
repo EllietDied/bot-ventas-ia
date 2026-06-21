@@ -154,6 +154,9 @@ create trigger al_crear_usuario
   after insert on auth.users
   for each row execute function public.crear_perfil();
 
+-- El trigger ejecuta la función igual, pero NADIE debe poder llamarla desde la API.
+revoke execute on function public.crear_perfil() from public, anon, authenticated;
+
 -- ============================================================
 -- 3) SEGURIDAD: Row Level Security (RLS)
 --    Cada quien solo accede a lo suyo; el catálogo es público.
@@ -174,11 +177,8 @@ grant select on public.productos to anon;
 create policy "perfil propio - leer"   on public.perfiles for select using (auth.uid() = id);
 create policy "perfil propio - editar" on public.perfiles for update using (auth.uid() = id);
 -- (el INSERT lo hace el trigger con security definer; no se necesita policy de insert)
-
--- Vista pública SOLO con datos no sensibles (para mostrar nombres; sin documento ni dirección)
-create or replace view public.perfiles_publicos as
-  select id, nombre, apellido, rol from public.perfiles;
-grant select on public.perfiles_publicos to anon, authenticated;
+-- Nota: los nombres a mostrar se guardan ya copiados en productos.vendedor_nombre,
+-- mensajes.de_nombre/para_nombre, etc., así que NO hace falta exponer perfiles.
 
 -- ---------- PRODUCTOS: catálogo visible para todos; solo el dueño los gestiona ----------
 create policy "productos - leer"   on public.productos for select using (true);
@@ -231,7 +231,8 @@ insert into storage.buckets (id, name, public)
 values ('productos', 'productos', true)
 on conflict (id) do nothing;
 
-create policy "fotos - leer"   on storage.objects for select using (bucket_id = 'productos');
+-- Las fotos públicas se sirven por su URL pública (bucket public), sin policy de
+-- SELECT; así nadie puede LISTAR/enumerar los archivos del bucket.
 create policy "fotos - subir"  on storage.objects for insert to authenticated with check (bucket_id = 'productos');
 create policy "fotos - editar" on storage.objects for update to authenticated using (bucket_id = 'productos');
 create policy "fotos - borrar" on storage.objects for delete to authenticated using (bucket_id = 'productos');

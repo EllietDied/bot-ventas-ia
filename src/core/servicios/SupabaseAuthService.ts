@@ -88,9 +88,17 @@ export async function registrarSupabase(
     options: { data: metadata },
   })
   if (error) {
-    const mensaje = /already|registered|exist/i.test(error.message)
-      ? 'Ya existe una cuenta con ese correo.'
-      : 'No se pudo crear la cuenta. Inténtalo de nuevo.'
+    // Mensaje claro según el motivo real que devuelve Supabase.
+    let mensaje: string
+    if (error.status === 429 || /rate limit|security purposes/i.test(error.message)) {
+      mensaje = 'Demasiados intentos seguidos. Espera unos minutos y vuelve a intentarlo.'
+    } else if (/already|registered|exist/i.test(error.message)) {
+      mensaje = 'Ya existe una cuenta con ese correo. Inicia sesión.'
+    } else if (/password/i.test(error.message)) {
+      mensaje = 'La contraseña no cumple los requisitos mínimos.'
+    } else {
+      mensaje = `No se pudo crear la cuenta: ${error.message}`
+    }
     return { ok: false, mensaje }
   }
   // Si "Confirmar correo" está activado en Supabase, todavía no hay sesión.
