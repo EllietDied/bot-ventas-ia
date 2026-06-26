@@ -192,8 +192,9 @@ export class ChatBotIA {
   // Busca productos comparando las PALABRAS del cliente con el nombre, la marca y
   // la categoría del producto (ej. "teclado" → "Teclado Mecánico"). Tolera:
   //   - tildes: "audifonos" encuentra "Audífonos".
-  //   - plurales: "teclados"/"monitores" encuentran "teclado"/"monitor".
-  private buscarPorPalabras(texto: string, productos: Producto[]): Producto[] {
+  //   - plurales y escritura parcial: "teclados"/"lapto" encuentran "Teclado"/"Laptops".
+  // Es pública porque también la usa el filtro de la IA real (AsistenteIAService).
+  buscarPorPalabras(texto: string, productos: Producto[]): Producto[] {
     // Pasa a minúsculas y quita las tildes para comparar de forma flexible.
     const limpiar = (s: string) =>
       s.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '')

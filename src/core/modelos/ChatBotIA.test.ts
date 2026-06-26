@@ -31,3 +31,22 @@ describe('ChatBotIA - recomendación por categorías consultadas', () => {
     expect(r.every((p) => p.categoria === 'Componentes')).toBe(true)
   })
 })
+
+describe('ChatBotIA - búsqueda por palabras (nombre/categoría parcial)', () => {
+  const items: Producto[] = [
+    { id: 1, nombre: 'Laptop HP 15', descripcion: 'Para oficina', categoria: 'Laptops', precio: 2200, stock: 7, estado: 'disponible', imagen: '💻' },
+    { id: 2, nombre: 'Mouse Gamer', descripcion: 'RGB', categoria: 'Periféricos', precio: 90, stock: 5, estado: 'disponible', imagen: '🖱️' },
+    { id: 3, nombre: 'Audífonos Gamer', descripcion: '7.1', categoria: 'Periféricos', precio: 149, stock: 9, estado: 'disponible', imagen: '🎧' },
+  ]
+
+  it('encuentra la laptop aunque se escriba parcial ("lapto")', () => {
+    const r = bot.buscarPorPalabras('quiero lapto', items)
+    expect(r.some((p) => p.nombre === 'Laptop HP 15')).toBe(true)
+    expect(r.some((p) => p.nombre === 'Mouse Gamer')).toBe(false)
+  })
+
+  it('tolera tildes ("audifonos" encuentra "Audífonos")', () => {
+    const r = bot.buscarPorPalabras('tienes audifonos', items)
+    expect(r.some((p) => p.nombre === 'Audífonos Gamer')).toBe(true)
+  })
+})

@@ -81,18 +81,16 @@ function filtrarRelevantes(
   presupuesto: number | null,
   categoria: string,
 ): Producto[] {
-  const t = mensaje.toLowerCase()
   let lista = productos.filter((p) => p.stock > 0)
   if (categoria) lista = lista.filter((p) => p.categoria === categoria)
   if (presupuesto) lista = lista.filter((p) => p.precio <= presupuesto)
 
-  // Coincidencia por nombre, marca o categoría dentro del texto del usuario.
-  const porTexto = lista.filter(
-    (p) =>
-      t.includes(p.nombre.toLowerCase()) ||
-      (p.marca && t.includes(p.marca.toLowerCase())) ||
-      t.includes(p.categoria.toLowerCase()),
-  )
+  // Coincidencia por las palabras del usuario con el nombre, marca o categoría.
+  // Usa la MISMA búsqueda flexible del chatbot, que tolera escritura parcial
+  // ("lapto" encuentra "Laptops"), plurales y tildes. Así la IA real siempre
+  // recibe los productos relevantes (antes "lapto" no detectaba nada y las
+  // laptops quedaban fuera de los primeros 12 que se enviaban).
+  const porTexto = bot.buscarPorPalabras(mensaje, lista)
   const elegidos = porTexto.length > 0 ? porTexto : lista
   // Respaldo: si quedó vacío, mandamos productos disponibles.
   const base = elegidos.length > 0 ? elegidos : productos.filter((p) => p.stock > 0)
