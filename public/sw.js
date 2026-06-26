@@ -3,7 +3,7 @@
 // cargue rápido y pueda abrirse incluso sin conexión.
 // (No toca la lógica de negocio: solo es la capa de entrega.)
 
-const CACHE = 'inkashop-v1'
+const CACHE = 'inkashop-v2'
 
 // Archivos base de la app (con nombres estables).
 const ARCHIVOS_BASE = [
@@ -37,6 +37,12 @@ self.addEventListener('activate', (evento) => {
 self.addEventListener('fetch', (evento) => {
   const peticion = evento.request
   if (peticion.method !== 'GET') return
+
+  // SOLO gestionamos archivos del MISMO ORIGEN (los de la app).
+  // Las llamadas a APIs externas (Supabase, IA, modelos) deben ir SIEMPRE a la
+  // red y NUNCA cachearse: si no, se serviría una respuesta vieja (p. ej. el
+  // catálogo vacío) aunque la base ya tenga datos nuevos.
+  if (new URL(peticion.url).origin !== self.location.origin) return
 
   // Para la navegación (HTML): primero la red; si falla, usamos la caché (offline).
   if (peticion.mode === 'navigate') {
