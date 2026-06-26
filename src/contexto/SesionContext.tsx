@@ -42,6 +42,7 @@ export interface DatosRegistro {
 // Qué expone el contexto de sesión.
 interface SesionContextType {
   usuarioActual: Usuario | null
+  cargandoSesion: boolean
   usuarios: Usuario[]
   login: (correo: string, contrasena: string) => Promise<Resultado>
   registrar: (datos: DatosRegistro) => Promise<Resultado>
@@ -58,6 +59,10 @@ export function SesionProvider({ children }: { children: ReactNode }) {
   const [usuarioActual, setUsuarioActual] = useState<Usuario | null>(() =>
     usarSupabase() ? null : cargar<Usuario | null>('sesion', null),
   )
+  // En modo Supabase la sesión se restaura de forma asíncrona al cargar la app.
+  // Mientras tanto, "cargandoSesion" evita que las rutas protegidas rebote al
+  // usuario (en modo local la sesión es síncrona, así que arranca en false).
+  const [cargandoSesion, setCargandoSesion] = useState<boolean>(() => usarSupabase())
 
   // Guardamos la lista de usuarios y la sesión en localStorage SOLO en el modo local.
   useEffect(() => guardar('usuarios', usuarios), [usuarios])
@@ -70,7 +75,9 @@ export function SesionProvider({ children }: { children: ReactNode }) {
     if (!usarSupabase()) return
     let activo = true
     obtenerUsuarioActual().then((u) => {
-      if (activo && u) setUsuarioActual(u)
+      if (!activo) return
+      if (u) setUsuarioActual(u)
+      setCargandoSesion(false) // terminó la restauración (haya sesión o no)
     })
     const cancelar = escucharCambiosSesion((u) => {
       if (activo) setUsuarioActual(u)
@@ -206,7 +213,9 @@ export function SesionProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <SesionContext.Provider value={{ usuarioActual, usuarios, login, registrar, logout }}>
+    <SesionContext.Provider
+      value={{ usuarioActual, cargandoSesion, usuarios, login, registrar, logout }}
+    >
       {children}
     </SesionContext.Provider>
   )
