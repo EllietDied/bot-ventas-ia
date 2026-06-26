@@ -1,7 +1,7 @@
 {
   "name": "IA InkaShop",
   "short_name": "IA InkaShop",
-  "description": "Asistente inteligente de ventas multiplataforma (demo académica).",
+  "description": "Asistente inteligente de ventas — IA InkaShop (Versión Beta RA3).",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

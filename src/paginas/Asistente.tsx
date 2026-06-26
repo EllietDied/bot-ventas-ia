@@ -644,6 +644,13 @@ export function Asistente() {
         <div>
           <h1>IA InkaShop</h1>
           <p>Compra con respaldo, vende con innovación.</p>
+          <span
+            className="ia-modo-badge"
+            title="Modo del asistente IA"
+            style={{ fontSize: '0.72rem', opacity: 0.65 }}
+          >
+            {usarIAReal() ? '● IA real' : '○ IA simulada'}
+          </span>
         </div>
       </header>
 

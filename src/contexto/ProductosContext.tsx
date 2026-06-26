@@ -10,6 +10,11 @@ import {
   actualizarProductoSupabase,
   eliminarProductoSupabase,
 } from '../core/servicios/ProductosService'
+import {
+  crearProductoLocal,
+  editarEnLista,
+  eliminarEnLista,
+} from '../core/servicios/ProductosLocal'
 import { useSesion } from './SesionContext'
 
 // Datos del formulario para publicar un producto.
@@ -92,20 +97,8 @@ export function ProductosProvider({ children }: { children: ReactNode }) {
       return
     }
 
-    // Modo local: id incremental en memoria.
-    const nuevoId = productos.reduce((max, p) => Math.max(max, p.id), 0) + 1
-    const producto: Producto = {
-      id: nuevoId,
-      nombre: datos.nombre,
-      marca,
-      descripcion: datos.descripcion,
-      categoria: datos.categoria,
-      precio: datos.precio,
-      stock: datos.stock,
-      estado,
-      imagen,
-      idVendedor: datos.idVendedor,
-    }
+    // Modo local: lógica pura reutilizable y testeable (id incremental en memoria).
+    const producto = crearProductoLocal(productos, datos)
     setProductos((prev) => [...prev, producto])
   }
 
@@ -117,7 +110,7 @@ export function ProductosProvider({ children }: { children: ReactNode }) {
     }
     // Con Supabase, persistimos en segundo plano (la UI se actualiza al instante).
     if (usarSupabase()) actualizarProductoSupabase(id, conEstado)
-    setProductos((prev) => prev.map((p) => (p.id === id ? { ...p, ...conEstado } : p)))
+    setProductos((prev) => editarEnLista(prev, id, cambios))
   }
 
   // El vendedor cambia la foto de un producto ya publicado.
@@ -133,7 +126,7 @@ export function ProductosProvider({ children }: { children: ReactNode }) {
   // El vendedor elimina (da de baja) uno de sus productos del catálogo.
   function eliminarProducto(id: number) {
     if (usarSupabase()) eliminarProductoSupabase(id)
-    setProductos((prev) => prev.filter((p) => p.id !== id))
+    setProductos((prev) => eliminarEnLista(prev, id))
   }
 
   const categorias = obtenerCategorias(productos)

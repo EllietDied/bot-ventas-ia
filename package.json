@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "description": "IA InkaShop - Asistente inteligente de ventas multiplataforma (demo académica) - Taller de Aplicaciones (RA1)",
+  "description": "IA InkaShop – Versión Beta RA3 — Asistente inteligente de ventas (Taller de Programación de Aplicaciones). CRUD, persistencia (Supabase opcional), API REST y DeepSeek opcional.",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",

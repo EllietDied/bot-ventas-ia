@@ -1,4 +1,4 @@
-// Utilidad de imagen (capa de presentación, sin backend).
+// Utilidad de imagen (capa de presentación; se ejecuta en el cliente).
 // Lee un archivo de imagen, lo redimensiona (máx. `maxLado` px de lado) y lo
 // devuelve como dataURL JPEG comprimido. Así la foto ocupa poco y cabe en
 // localStorage. Se usa tanto en el panel del vendedor como en el chat.

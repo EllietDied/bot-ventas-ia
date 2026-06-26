@@ -1,9 +1,9 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
 import { Pedido } from '../core/modelos/Pedido'
-import { Pago, MetodoPago } from '../core/modelos/Pago'
-import { DetallePedido } from '../core/modelos/DetallePedido'
+import { MetodoPago } from '../core/modelos/Pago'
 import { ItemCarrito } from '../core/modelos/Carrito'
 import { ColaPedidos } from '../core/estructuras/ColaPedidos'
+import { construirPedidoLocal } from '../core/servicios/PedidosLocal'
 import { cargar, guardar } from '../core/datos/almacenamiento'
 import { usarSupabase } from '../core/datos/supabase'
 import {
@@ -89,36 +89,8 @@ export function PedidosProvider({ children }: { children: ReactNode }) {
       return
     }
 
-    // Modo local.
-    const detalles: DetallePedido[] = datos.items.map((i) => ({
-      idProducto: i.producto.id,
-      nombreProducto: i.producto.nombre,
-      cantidad: i.cantidad,
-      precioUnitario: i.producto.precio,
-      subtotal: i.producto.precio * i.cantidad,
-    }))
-
-    const pago: Pago = {
-      idPago: 'PG-' + Date.now(),
-      metodoPago: datos.metodoPago,
-      banco: datos.banco,
-      monto: datos.total,
-      estadoPago: 'aprobado', // el pago es simulado
-      fechaPago: new Date().toLocaleString(),
-    }
-
-    const pedido: Pedido = {
-      idPedido: 'PED-' + Date.now(),
-      correoComprador: datos.correoComprador,
-      fecha: new Date().toLocaleString(),
-      detalles,
-      subtotal: datos.subtotal,
-      descuento: datos.descuento,
-      total: datos.total,
-      estado: 'pendiente',
-      pago,
-    }
-
+    // Modo local (pago simulado). Lógica pura, reutilizable y testeable.
+    const pedido = construirPedidoLocal(datos, Date.now())
     setPedidos((prev) => [pedido, ...prev]) // el más reciente va primero
   }
 

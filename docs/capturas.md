@@ -1,4 +1,4 @@
-# 📸 Lista de capturas para el informe del RA2
+# 📸 Lista de capturas — IA InkaShop (RA3)
 
 Capturas recomendadas para evidenciar el funcionamiento del sistema.
 Sugerencia: guárdalas en `docs/capturas/` con el nombre indicado.
