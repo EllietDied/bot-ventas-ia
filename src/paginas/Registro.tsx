@@ -227,11 +227,19 @@ export function Registro() {
               onBlur={() => marcar('apellido')}
             />
 
-            {/* Teléfono: país (fuente de verdad) + número nacional */}
+            {/* País: fuente de verdad del registro (define prefijo telefónico, documento y dirección) */}
+            <label className="campo span-2">
+              <span>País *</span>
+              <SelectorPais id="reg-pais" value={form.countryCode} onChange={cambiarPais} describedBy="pais-ayuda" />
+              <span id="pais-ayuda" className="form-ayuda">
+                Elige tu país: el código telefónico se coloca solo y define tu tipo de documento y dirección.
+              </span>
+            </label>
+
+            {/* Teléfono: prefijo automático según el país + número nacional */}
             <label className="campo span-2">
               <span>Teléfono *</span>
               <div className="tel-grupo">
-                <SelectorPais value={form.countryCode} onChange={cambiarPais} describedBy="tel-ayuda" />
                 <span className="tel-prefijo">{form.callingCode}</span>
                 <input
                   id="reg-telefono"
@@ -247,7 +255,7 @@ export function Registro() {
                 />
               </div>
               <span id="tel-ayuda" className="form-ayuda">
-                Elige tu país y escribe tu número (lo usaremos para recuperar tu cuenta por SMS).
+                Escribe solo tu número; el código {form.callingCode} se agrega automáticamente. Lo usaremos para recuperar tu cuenta por SMS.
               </span>
               {errorDe('telefono') && (
                 <p id="tel-error" className="form-error" role="alert">
