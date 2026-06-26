@@ -53,6 +53,18 @@ export class ChatBotIA {
     if (texto.includes('pc') || texto.includes('armar') || texto.includes('computadora')) {
       return '¡Vamos a armar esa PC! 🔧 Estos componentes son una base sólida para empezar:'
     }
+    // El cliente suele pedir el producto por su NOMBRE ("teclado", "mouse",
+    // "monitor"…), no por la categoría. Si encontramos ese producto, respondemos
+    // con algo concreto en vez de un mensaje genérico.
+    const porNombre = this.buscarPorPalabras(texto, productos).filter((p) => p.stock > 0)
+    if (porNombre.length === 1) {
+      const p = porNombre[0]
+      const marca = p.marca ? ` ${p.marca}` : ''
+      return `¡Claro! Justo tengo el ${p.nombre}${marca} a S/ ${p.precio.toFixed(2)}. ¿Te muestro el detalle o lo agrego al carrito? 🙂`
+    }
+    if (porNombre.length > 1) {
+      return '¡Claro! Mira lo que tengo para lo que buscas:'
+    }
     if (texto.includes('recomi') || texto.includes('busco') || texto.includes('quiero')) {
       return 'Con lo que me cuentas, creo que estas opciones te van muy bien:'
     }
@@ -128,6 +140,17 @@ export class ChatBotIA {
       }
     }
 
+    // 2.5) Coincidencia por NOMBRE del producto ("teclado", "mouse", "monitor"…)
+    //      cuando el texto no mencionó una categoría. Es el caso típico: el
+    //      cliente pide el producto por su nombre, no por su categoría.
+    if (!filtrado) {
+      const porNombre = this.buscarPorPalabras(texto, candidatos)
+      if (porNombre.length > 0) {
+        candidatos = porNombre
+        filtrado = true
+      }
+    }
+
     // 3) Presupuesto mencionado
     const presupuesto = this.extraerPresupuesto(texto)
     if (presupuesto !== null) {
@@ -164,5 +187,30 @@ export class ChatBotIA {
   // Busca, dentro del texto, el primer producto cuyo nombre aparezca.
   private buscarProductoEnTexto(texto: string, productos: Producto[]): Producto | undefined {
     return productos.find((p) => texto.includes(p.nombre.toLowerCase()))
+  }
+
+  // Busca productos comparando las PALABRAS del cliente con el nombre, la marca y
+  // la categoría del producto (ej. "teclado" → "Teclado Mecánico"). Tolera:
+  //   - tildes: "audifonos" encuentra "Audífonos".
+  //   - plurales: "teclados"/"monitores" encuentran "teclado"/"monitor".
+  private buscarPorPalabras(texto: string, productos: Producto[]): Producto[] {
+    // Pasa a minúsculas y quita las tildes para comparar de forma flexible.
+    const limpiar = (s: string) =>
+      s.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '')
+    // Parte un texto en palabras (descarta signos y palabras de 1-2 letras).
+    const palabrasDe = (s: string) => limpiar(s).split(/[^a-z0-9]+/).filter((w) => w.length >= 3)
+
+    const palabrasCliente = palabrasDe(texto)
+    if (palabrasCliente.length === 0) return []
+
+    return productos.filter((p) => {
+      const palabrasProducto = palabrasDe(`${p.nombre} ${p.marca ?? ''} ${p.categoria}`)
+      // Coincide si alguna palabra del cliente y del producto comparten raíz.
+      return palabrasCliente.some((w) =>
+        palabrasProducto.some((c) =>
+          w.length >= 4 && c.length >= 4 ? w.startsWith(c) || c.startsWith(w) : w === c,
+        ),
+      )
+    })
   }
 }
