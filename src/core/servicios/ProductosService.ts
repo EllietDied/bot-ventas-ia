@@ -105,3 +105,22 @@ export async function eliminarProductoSupabase(id: number): Promise<void> {
   if (!supabase) return
   await supabase.from('productos').delete().eq('id', id)
 }
+
+// Sube una foto (dataURL) al bucket "productos" de Supabase Storage y devuelve su
+// URL pública. Si no hay Supabase o no es una imagen subida, devuelve null y el
+// llamador conserva el valor original (emoji o dataURL en modo local).
+export async function subirImagenProducto(dataUrl: string): Promise<string | null> {
+  if (!supabase || !dataUrl.startsWith('data:')) return null
+  try {
+    const blob = await (await fetch(dataUrl)).blob()
+    const ext = (blob.type.split('/')[1] || 'jpg').replace('jpeg', 'jpg')
+    const ruta = `prod-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`
+    const { error } = await supabase.storage
+      .from('productos')
+      .upload(ruta, blob, { contentType: blob.type || 'image/jpeg', upsert: false })
+    if (error) return null
+    return supabase.storage.from('productos').getPublicUrl(ruta).data.publicUrl
+  } catch {
+    return null
+  }
+}

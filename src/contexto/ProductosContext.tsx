@@ -9,6 +9,7 @@ import {
   insertarProductoSupabase,
   actualizarProductoSupabase,
   eliminarProductoSupabase,
+  subirImagenProducto,
 } from '../core/servicios/ProductosService'
 import {
   crearProductoLocal,
@@ -79,6 +80,13 @@ export function ProductosProvider({ children }: { children: ReactNode }) {
     const marca = datos.marca?.trim() || undefined
 
     if (usarSupabase()) {
+      // Si es una foto subida (dataURL), la guardamos en Supabase Storage y
+      // usamos su URL pública; si no, dejamos el emoji por defecto.
+      let imagenFinal = imagen
+      if (imagen.startsWith('data:')) {
+        const url = await subirImagenProducto(imagen)
+        if (url) imagenFinal = url
+      }
       const creado = await insertarProductoSupabase({
         nombre: datos.nombre,
         marca,
@@ -87,7 +95,7 @@ export function ProductosProvider({ children }: { children: ReactNode }) {
         precio: datos.precio,
         stock: datos.stock,
         estado,
-        imagen,
+        imagen: imagenFinal,
         idVendedor: datos.idVendedor,
         vendedorNombre: usuarioActual
           ? `${usuarioActual.nombre} ${usuarioActual.apellido}`.trim()
@@ -114,8 +122,13 @@ export function ProductosProvider({ children }: { children: ReactNode }) {
   }
 
   // El vendedor cambia la foto de un producto ya publicado.
-  function actualizarImagen(id: number, imagen: string) {
-    editarProducto(id, { imagen })
+  async function actualizarImagen(id: number, imagen: string) {
+    let img = imagen
+    if (usarSupabase() && imagen.startsWith('data:')) {
+      const url = await subirImagenProducto(imagen)
+      if (url) img = url
+    }
+    editarProducto(id, { imagen: img })
   }
 
   // El vendedor (o una compra) actualiza el stock de un producto.
