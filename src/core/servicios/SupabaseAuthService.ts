@@ -50,6 +50,14 @@ export function mapPerfilAUsuario(perfil: FilaPerfil, correo: string): Usuario {
   }
 }
 
+// Carga el perfil (tabla "perfiles") de una cuenta de Auth y lo mapea a Usuario.
+async function cargarPerfil(user: { id: string; email?: string | null }): Promise<Usuario | null> {
+  if (!supabase) return null
+  const { data: perfil } = await supabase.from('perfiles').select('*').eq('id', user.id).single()
+  if (!perfil) return null
+  return mapPerfilAUsuario(perfil as FilaPerfil, user.email ?? '')
+}
+
 // Carga el usuario de la sesión actual (su cuenta de Auth + su perfil).
 export async function obtenerUsuarioActual(): Promise<Usuario | null> {
   if (!supabase) return null
@@ -57,20 +65,19 @@ export async function obtenerUsuarioActual(): Promise<Usuario | null> {
     data: { user },
   } = await supabase.auth.getUser()
   if (!user) return null
-  const { data: perfil } = await supabase.from('perfiles').select('*').eq('id', user.id).single()
-  if (!perfil) return null
-  return mapPerfilAUsuario(perfil as FilaPerfil, user.email ?? '')
+  return cargarPerfil(user)
 }
 
 // Inicia sesión con correo y contraseña.
 export async function loginSupabase(correo: string, contrasena: string): Promise<ResultadoAuth> {
   if (!supabase) return { ok: false, mensaje: 'Supabase no está configurado.' }
-  const { error } = await supabase.auth.signInWithPassword({
+  const { data, error } = await supabase.auth.signInWithPassword({
     email: correo.trim(),
     password: contrasena,
   })
-  if (error) return { ok: false, mensaje: 'Correo o contraseña incorrectos.' }
-  const usuario = await obtenerUsuarioActual()
+  if (error || !data.user) return { ok: false, mensaje: 'Correo o contraseña incorrectos.' }
+  // Usamos el usuario que ya devolvió el login (no volvemos a llamar getUser).
+  const usuario = await cargarPerfil(data.user)
   return { ok: true, mensaje: `Bienvenido, ${usuario?.nombre ?? ''}.`, usuario }
 }
 
@@ -119,8 +126,18 @@ export async function logoutSupabase(): Promise<void> {
 // Devuelve una función para cancelar la suscripción.
 export function escucharCambiosSesion(cb: (usuario: Usuario | null) => void): () => void {
   if (!supabase) return () => {}
-  const { data } = supabase.auth.onAuthStateChange(async (_evento, session) => {
-    cb(session ? await obtenerUsuarioActual() : null)
+  const { data } = supabase.auth.onAuthStateChange((_evento, session) => {
+    const user = session?.user
+    if (!user) {
+      cb(null)
+      return
+    }
+    // IMPORTANTE: dentro de onAuthStateChange NO se deben llamar otras funciones de
+    // auth (como getUser): puede bloquear la sesión (deadlock). Usamos session.user y
+    // diferimos la consulta del perfil con setTimeout para salir del callback.
+    setTimeout(() => {
+      cargarPerfil(user).then(cb)
+    }, 0)
   })
   return () => data.subscription.unsubscribe()
 }
