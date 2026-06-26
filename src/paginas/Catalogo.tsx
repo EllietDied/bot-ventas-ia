@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useProductos } from '../contexto/ProductosContext'
 import { useCarrito } from '../contexto/CarritoContext'
 import { useConsultas } from '../contexto/ConsultasContext'
@@ -20,12 +21,17 @@ export function Catalogo() {
   const { registrarConsulta, categoriasConsultadas } = useConsultas()
   const { usuarioActual } = useSesion()
   const toast = useToast()
+  const navegar = useNavigate()
 
   const [termino, setTermino] = useState('')
   const [categoria, setCategoria] = useState('')
 
+  // Un visitante (sin sesión) puede MIRAR el catálogo, pero no comprar.
+  const esVisitante = !usuarioActual
   // El comprador puede agregar al carrito; el vendedor solo observa.
   const puedeComprar = usuarioActual ? esComprador(usuarioActual) : false
+  // Mostramos el botón también al visitante: al pulsarlo lo enviamos a login.
+  const mostrarBoton = puedeComprar || esVisitante
 
   // Aplicamos el buscador y luego el filtro por categoría.
   let resultados: Producto[] = buscar(termino)
@@ -50,6 +56,17 @@ export function Catalogo() {
     agregarAlCarrito(producto)
     registrarConsulta(producto.nombre, producto.categoria)
     toast.exito(`${producto.nombre} agregado al carrito`)
+  }
+
+  // Acción del botón: el comprador agrega al carrito; al visitante lo enviamos a
+  // iniciar sesión (para comprar primero hay que tener una cuenta).
+  function intentarComprar(producto: Producto) {
+    if (esVisitante) {
+      toast.info('Inicia sesión para comprar.')
+      navegar('/login')
+      return
+    }
+    agregar(producto)
   }
 
   return (
@@ -103,7 +120,8 @@ export function Catalogo() {
               <TarjetaProducto
                 key={p.id}
                 producto={p}
-                alAgregar={puedeComprar ? agregar : undefined}
+                alAgregar={mostrarBoton ? intentarComprar : undefined}
+                textoBoton={esVisitante ? 'Inicia sesión para comprar' : undefined}
               />
             ))}
           </div>
@@ -121,7 +139,8 @@ export function Catalogo() {
               <TarjetaProducto
                 key={p.id}
                 producto={p}
-                alAgregar={puedeComprar ? agregar : undefined}
+                alAgregar={mostrarBoton ? intentarComprar : undefined}
+                textoBoton={esVisitante ? 'Inicia sesión para comprar' : undefined}
               />
             ))}
           </div>

@@ -5,10 +5,12 @@ interface Props {
   producto: Producto
   // Acción opcional del botón (ej. agregar al carrito).
   alAgregar?: (producto: Producto) => void
+  // Texto del botón cuando hay stock (por defecto "Agregar al carrito").
+  textoBoton?: string
 }
 
 // Tarjeta visual de un producto del catálogo.
-export function TarjetaProducto({ producto, alAgregar }: Props) {
+export function TarjetaProducto({ producto, alAgregar, textoBoton }: Props) {
   const agotado = producto.stock <= 0
   const bajoStock = producto.stock > 0 && producto.stock <= 5
 
@@ -39,7 +41,7 @@ export function TarjetaProducto({ producto, alAgregar }: Props) {
           disabled={agotado}
           onClick={() => alAgregar(producto)}
         >
-          {agotado ? 'Sin stock' : 'Agregar al carrito'}
+          {agotado ? 'Sin stock' : (textoBoton ?? 'Agregar al carrito')}
         </button>
       )}
     </div>

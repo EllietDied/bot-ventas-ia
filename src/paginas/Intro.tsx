@@ -1,6 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { useSesion } from '../contexto/SesionContext'
+import { Link } from 'react-router-dom'
 import { useProductos } from '../contexto/ProductosContext'
 import { InkaAnimatedBackground } from '../componentes/InkaAnimatedBackground'
 import { Icono } from '../componentes/Icono'
@@ -73,15 +72,7 @@ const FAQS = [
 
 // Página introductoria pública (la puerta de entrada antes del login).
 export function Intro() {
-  const { login } = useSesion()
   const { productos, categorias } = useProductos()
-  const navegar = useNavigate()
-
-  // Acceso rápido para explorar con una cuenta de demostración.
-  async function entrarComo(correo: string) {
-    const r = await login(correo, '123456')
-    if (r.ok) navegar('/')
-  }
 
   return (
     <div className="auth-landing inka-auth-bg">
@@ -112,13 +103,9 @@ export function Intro() {
               Iniciar sesión
             </Link>
           </div>
-          <button
-            type="button"
-            className="intro-demo-link"
-            onClick={() => entrarComo('comprador@demo.com')}
-          >
-            ¿Solo quieres mirar? Probar la demo →
-          </button>
+          <Link to="/catalogo" className="intro-demo-link">
+            ¿Solo quieres mirar? Ver el catálogo →
+          </Link>
         </div>
       </section>
 

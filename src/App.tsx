@@ -46,19 +46,13 @@ export default function App() {
           <Route path="/registro" element={<Registro />} />
           <Route path="/recuperar" element={<Recuperar />} />
           <Route path="/restablecer" element={<Restablecer />} />
+          {/* Catálogo público: el visitante puede mirar sin iniciar sesión */}
+          <Route path="/catalogo" element={<Catalogo />} />
 
           {/* Raíz: visitante ve la Intro pública; con sesión, la app (Asistente) */}
           <Route path="/" element={usuarioActual ? <Asistente /> : <Intro />} />
 
           {/* Rutas protegidas (requieren sesión) */}
-          <Route
-            path="/catalogo"
-            element={
-              <RutaProtegida>
-                <Catalogo />
-              </RutaProtegida>
-            }
-          />
           <Route
             path="/carrito"
             element={

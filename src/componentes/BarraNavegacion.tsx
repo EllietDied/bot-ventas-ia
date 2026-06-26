@@ -73,7 +73,8 @@ export function BarraNavegacion() {
           </>
         )}
 
-        {/* Visitante (sin sesión): acceso directo a iniciar sesión */}
+        {/* Visitante (sin sesión): puede explorar el catálogo y entrar */}
+        {!usuarioActual && <Link to="/catalogo">Explorar catálogo</Link>}
         {!usuarioActual && ubicacion.pathname !== '/login' && (
           <Link to="/login" className="btn btn-primario btn-pequeno">
             Iniciar sesión
