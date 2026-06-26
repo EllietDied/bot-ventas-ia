@@ -12,6 +12,8 @@ import { Producto } from '../core/modelos/Producto'
 import { esVendedor } from '../core/modelos/Vendedor'
 import { comprimirImagen } from '../util/imagen'
 import { cargar, guardar } from '../core/datos/almacenamiento'
+import { usarSupabase } from '../core/datos/supabase'
+import { cargarChatSupabase, guardarChatSupabase } from '../core/servicios/ChatService'
 import { useToast } from '../contexto/ToastContext'
 import {
   obtenerRespuestaAsistente,
@@ -102,7 +104,11 @@ export function Asistente() {
       }
 
   // Chat separado por rol (no mezclar el de ventas con el de gestión).
-  const claveChat = 'asistente_chat_' + (esVendedorActual ? 'vendedor' : 'comprador')
+  const rolChat = esVendedorActual ? 'vendedor' : 'comprador'
+  const claveChat = 'asistente_chat_' + rolChat
+  // En modo Supabase esperamos a cargar el historial de la nube antes de guardar,
+  // para no pisarlo. En modo local, "listo" desde el inicio.
+  const [listo, setListo] = useState(() => !usarSupabase())
   const [mensajes, setMensajes] = useState<MensajeAsistente[]>(() => {
     const guardados = cargar<MensajeAsistente[]>(claveChat, [])
     if (guardados.length === 0) return [bienvenida]
@@ -116,11 +122,38 @@ export function Asistente() {
   const [cargando, setCargando] = useState(false) // mientras esperamos la respuesta del asistente
   const finRef = useRef<HTMLDivElement>(null)
 
+  // Con Supabase: al entrar, cargamos el historial del chat desde la nube.
   useEffect(() => {
+    if (!usarSupabase() || !usuarioActual) {
+      setListo(true)
+      return
+    }
+    let activo = true
+    cargarChatSupabase(usuarioActual.idUsuario, rolChat).then((guardados) => {
+      if (!activo) return
+      if (guardados && guardados.length > 0) {
+        setMensajes(
+          (guardados as unknown as MensajeAsistente[]).map((m) => (m.id === 'A-0' ? bienvenida : m)),
+        )
+      }
+      setListo(true)
+    })
+    return () => {
+      activo = false
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!listo) return // no guardamos hasta cargar el historial (para no pisarlo)
     // No guardamos los mensajes "pensando" (son temporales).
-    guardar(claveChat, mensajes.filter((m) => !m.pensando))
+    const limpios = mensajes.filter((m) => !m.pensando)
+    if (usarSupabase() && usuarioActual) {
+      guardarChatSupabase(usuarioActual.idUsuario, rolChat, limpios)
+    } else {
+      guardar(claveChat, limpios)
+    }
     finRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [mensajes, claveChat])
+  }, [mensajes, listo, claveChat])
 
   function agregarMensaje(m: MensajeAsistente) {
     setMensajes((prev) => [...prev, m])
