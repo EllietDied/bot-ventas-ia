@@ -2702,3 +2702,113 @@ a:hover {
     animation: none !important;
   }
 }
+
+/* ---------- Dashboard de estadísticas (vendedor) ---------- */
+.stats-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+.stat-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  background: var(--tarjeta);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  padding: 1.1rem 1.25rem;
+}
+.stat-card-valor {
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: var(--primario);
+  line-height: 1.1;
+}
+.stat-card-etiqueta {
+  font-size: 0.9rem;
+  color: var(--texto);
+}
+.stat-card-sub {
+  font-size: 0.8rem;
+  color: var(--texto-tenue);
+}
+.stats-bloque {
+  background: var(--tarjeta);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  padding: 1.1rem 1.25rem;
+  margin-bottom: 1.25rem;
+}
+.stats-bloque h2 {
+  margin: 0 0 0.9rem;
+  font-size: 1.05rem;
+}
+.stats-barras {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+.stats-barras li {
+  display: grid;
+  grid-template-columns: minmax(120px, 1fr) 2fr auto;
+  align-items: center;
+  gap: 0.75rem;
+}
+.stats-barra-nombre {
+  font-size: 0.9rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.stats-barra-track {
+  background: var(--superficie);
+  border-radius: 999px;
+  height: 12px;
+  overflow: hidden;
+}
+.stats-barra-fill {
+  display: block;
+  height: 100%;
+  background: var(--primario);
+  border-radius: 999px;
+  min-width: 4px;
+  transition: width 0.4s ease;
+}
+.stats-barra-valor {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--texto-tenue);
+  min-width: 2ch;
+  text-align: right;
+}
+.stats-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.stats-lista li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.4rem 0;
+  border-bottom: 1px solid var(--borde);
+}
+.stats-lista li:last-child {
+  border-bottom: none;
+}
+.stats-alerta {
+  color: var(--error);
+  font-weight: 600;
+}
+@media (max-width: 600px) {
+  .stats-barras li {
+    grid-template-columns: minmax(90px, 1fr) 1.5fr auto;
+  }
+}

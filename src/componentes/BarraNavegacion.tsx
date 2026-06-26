@@ -50,8 +50,9 @@ export function BarraNavegacion() {
               </Link>
             )}
 
-            {/* Solo el vendedor ve su panel */}
+            {/* Solo el vendedor ve su panel y sus estadísticas */}
             {esVendedor(usuarioActual) && <Link to="/vendedor">Panel Vendedor</Link>}
+            {esVendedor(usuarioActual) && <Link to="/estadisticas">Estadísticas</Link>}
 
             <Link to="/mensajes">
               Mensajes{' '}

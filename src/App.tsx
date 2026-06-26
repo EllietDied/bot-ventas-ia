@@ -14,6 +14,7 @@ import { Pedidos } from './paginas/Pedidos'
 import { Asistente } from './paginas/Asistente'
 import { PanelVendedor } from './paginas/PanelVendedor'
 import { Mensajes } from './paginas/Mensajes'
+import { Estadisticas } from './paginas/Estadisticas'
 
 // Define las rutas (pantallas) de la aplicación.
 export default function App() {
@@ -88,6 +89,14 @@ export default function App() {
             element={
               <RutaProtegida>
                 <Mensajes />
+              </RutaProtegida>
+            }
+          />
+          <Route
+            path="/estadisticas"
+            element={
+              <RutaProtegida rol="vendedor">
+                <Estadisticas />
               </RutaProtegida>
             }
           />
