@@ -103,9 +103,13 @@ export function Asistente() {
 
   // Chat separado por rol (no mezclar el de ventas con el de gestión).
   const claveChat = 'asistente_chat_' + (esVendedorActual ? 'vendedor' : 'comprador')
-  const [mensajes, setMensajes] = useState<MensajeAsistente[]>(() =>
-    cargar<MensajeAsistente[]>(claveChat, [bienvenida]),
-  )
+  const [mensajes, setMensajes] = useState<MensajeAsistente[]>(() => {
+    const guardados = cargar<MensajeAsistente[]>(claveChat, [])
+    if (guardados.length === 0) return [bienvenida]
+    // El saludo inicial (A-0) se regenera con el nombre del usuario ACTUAL,
+    // para no mostrar el nombre de una sesión anterior guardada en localStorage.
+    return guardados.map((m) => (m.id === 'A-0' ? bienvenida : m))
+  })
   const [texto, setTexto] = useState('')
   const [comparar, setComparar] = useState<Producto[]>([])
   const [flujo, setFlujo] = useState<FlujoVendedor>(FLUJO_INICIAL)
