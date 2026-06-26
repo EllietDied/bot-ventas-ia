@@ -26,6 +26,7 @@ export interface MensajeHistorial {
 export interface ContextoAsistente {
   productos: Producto[]
   categoriasConsultadas: string[]
+  nombreCliente?: string // primer nombre del cliente, para saludarlo por su nombre
   carrito: { nombre: string; cantidad: number; precio: number }[]
   totalCarrito: number
   historial: MensajeHistorial[]
@@ -107,7 +108,7 @@ export function resolverProductos(ids: string[], productos: Producto[]): Product
 
 // Respuesta del MODO SIMULADO (chatbot académico, sin conexión).
 function respuestaLocal(mensaje: string, ctx: ContextoAsistente): ResultadoAsistente {
-  const texto = bot.responderConsulta(mensaje, ctx.productos)
+  const texto = bot.responderConsulta(mensaje, ctx.productos, ctx.nombreCliente)
   const recomendados = mensaje.toLowerCase().includes('gracias')
     ? []
     : bot.recomendarPorConsulta(mensaje, ctx.productos, ctx.categoriasConsultadas)
@@ -145,6 +146,7 @@ async function consultarClaude(
     totalCarrito: ctx.totalCarrito,
     presupuesto,
     categoria,
+    nombreCliente: ctx.nombreCliente,
   }
 
   // Cancelamos si tarda demasiado (evita esperas eternas).

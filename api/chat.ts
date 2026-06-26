@@ -26,6 +26,7 @@ Tu objetivo es acompañar al comprador a encontrar, comparar y elegir productos 
 
 CÓMO CONVERSAS (tu estilo, esto es lo más importante):
 - Habla como una persona real, en español, con un tono cálido, natural y cercano. Nada de sonar robótico, acartonado ni como un manual.
+- Si el sistema te indica el nombre del cliente, salúdalo y dirígete a él por su nombre de forma natural y cercana (por ejemplo, "¡Hola, Pepito!"), sin repetirlo en cada frase.
 - Varía tus frases; no repitas siempre las mismas fórmulas ni empieces todas las respuestas igual.
 - Antes de recomendar, conecta en una frase con lo que busca el cliente (demuestra que lo entendiste).
 - Sé claro y al grano, pero humano y con chispa. Puedes usar algún emoji ocasional, con moderación (no en cada frase).
@@ -99,6 +100,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const totalCarrito = Number(cuerpo.totalCarrito ?? 0)
     const presupuesto = typeof cuerpo.presupuesto === 'number' ? cuerpo.presupuesto : null
     const categoria = typeof cuerpo.categoria === 'string' ? cuerpo.categoria : ''
+    // Nombre del cliente (saneado: solo letras/espacios, breve) para personalizar el trato.
+    const nombreCliente =
+      typeof cuerpo.nombreCliente === 'string'
+        ? cuerpo.nombreCliente.replace(/[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s]/g, '').trim().slice(0, 40)
+        : ''
 
     // IDs reales del catálogo (para descartar productos inventados por el modelo).
     const idsValidos = new Set(productos.map((p) => String(p.id)))
@@ -118,6 +124,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // 6) Contexto (catálogo + carrito) + formato pedido (debe mencionar "JSON").
     const contexto = [
+      nombreCliente ? `CLIENTE: el cliente se llama ${nombreCliente}.` : '',
       'CATÁLOGO DISPONIBLE (usa SOLO estos productos; cada uno trae su id real):',
       JSON.stringify(productos),
       '',

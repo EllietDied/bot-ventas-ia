@@ -172,6 +172,7 @@ export function Asistente() {
     const contexto = {
       productos,
       categoriasConsultadas,
+      nombreCliente: primerNombre,
       carrito: items.map((i) => ({
         nombre: i.producto.nombre,
         cantidad: i.cantidad,

@@ -14,14 +14,18 @@ export class ChatBotIA {
   }
 
   // Genera la respuesta en texto del asistente según el mensaje del usuario.
-  responderConsulta(mensaje: string, productos: Producto[]): string {
+  responderConsulta(mensaje: string, productos: Producto[], nombreCliente?: string): string {
     const texto = mensaje.toLowerCase()
+    const nombre = (nombreCliente ?? '').trim()
+    const saludo = nombre ? `¡Hola, ${nombre}!` : '¡Hola!'
 
     if (texto.includes('hola') || texto.includes('buenas') || texto.includes('buenos')) {
-      return '¡Hola! 👋 Qué bueno verte por IA InkaShop. Cuéntame qué andas buscando —por categoría, para qué lo usarás o tu presupuesto— y te ayudo a encontrar justo lo tuyo.'
+      return `${saludo} 👋 Qué bueno verte por IA InkaShop. Cuéntame qué andas buscando —por categoría, para qué lo usarás o tu presupuesto— y te ayudo a encontrar justo lo tuyo.`
     }
     if (texto.includes('gracias')) {
-      return '¡Un gusto ayudarte! 😊 Aquí ando para lo que necesites.'
+      return nombre
+        ? `¡Un gusto ayudarte, ${nombre}! 😊 Aquí ando para lo que necesites.`
+        : '¡Un gusto ayudarte! 😊 Aquí ando para lo que necesites.'
     }
     if (texto.includes('precio') || texto.includes('cuesta') || texto.includes('vale')) {
       const p = this.buscarProductoEnTexto(texto, productos)
