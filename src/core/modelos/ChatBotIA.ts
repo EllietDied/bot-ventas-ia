@@ -18,56 +18,56 @@ export class ChatBotIA {
     const texto = mensaje.toLowerCase()
 
     if (texto.includes('hola') || texto.includes('buenas') || texto.includes('buenos')) {
-      return '¡Hola! Soy tu asistente de ventas. Cuéntame qué buscas (por categoría, uso o presupuesto) y te recomiendo las mejores opciones.'
+      return '¡Hola! 👋 Qué bueno verte por IA InkaShop. Cuéntame qué andas buscando —por categoría, para qué lo usarás o tu presupuesto— y te ayudo a encontrar justo lo tuyo.'
     }
     if (texto.includes('gracias')) {
-      return '¡Con gusto! Estoy aquí para acompañarte en tu compra.'
+      return '¡Un gusto ayudarte! 😊 Aquí ando para lo que necesites.'
     }
     if (texto.includes('precio') || texto.includes('cuesta') || texto.includes('vale')) {
       const p = this.buscarProductoEnTexto(texto, productos)
-      if (p) return `El ${p.nombre} cuesta S/ ${p.precio.toFixed(2)}. ¿Quieres que lo agregue a tu carrito?`
-      return 'Dime el nombre del producto y te indico su precio.'
+      if (p) return `El ${p.nombre} está en S/ ${p.precio.toFixed(2)}. ¿Te lo agrego al carrito o prefieres verlo a detalle primero?`
+      return 'Dime el nombre del producto y al toque te paso su precio. 🙂'
     }
     if (texto.includes('stock') || texto.includes('disponible') || texto.includes('queda')) {
       const p = this.buscarProductoEnTexto(texto, productos)
       if (p) {
         return p.stock > 0
-          ? `Sí, tenemos ${p.stock} unidades de ${p.nombre}.`
-          : `Lo siento, ${p.nombre} está agotado.`
+          ? `¡Sí! Aún nos quedan ${p.stock} unidades de ${p.nombre}, así que vas a tiempo.`
+          : `Uy, justo ${p.nombre} se nos agotó. ¿Quieres que te muestre algo parecido?`
       }
-      return '¿De qué producto quieres saber el stock?'
+      return '¿De qué producto quieres saber si hay stock?'
     }
     if (texto.includes('económic') || texto.includes('economic') || texto.includes('barat')) {
-      return 'Te muestro las opciones más económicas disponibles:'
+      return '¡Buena! Aquí van las opciones más económicas que tenemos ahora mismo:'
     }
     if (texto.includes('laptop') || texto.includes('portátil') || texto.includes('portatil')) {
-      return 'Estas son las laptops que te puedo recomendar:'
+      return '¡Genial! Estas son las laptops que mejor te calzarían:'
     }
     if (texto.includes('gamer') || texto.includes('juego')) {
-      return 'Si buscas rendimiento gamer, te recomiendo estos productos:'
+      return 'Si lo tuyo es el rendimiento gamer, mira estas que te van a encantar:'
     }
     if (texto.includes('pc') || texto.includes('armar') || texto.includes('computadora')) {
-      return 'Para armar tu PC, estos componentes son una buena base:'
+      return '¡Vamos a armar esa PC! 🔧 Estos componentes son una base sólida para empezar:'
     }
     if (texto.includes('recomi') || texto.includes('busco') || texto.includes('quiero')) {
-      return 'Según lo que me cuentas, te recomiendo estas opciones:'
+      return 'Con lo que me cuentas, creo que estas opciones te van muy bien:'
     }
     if (texto.includes('categoria') || texto.includes('categoría') || texto.includes('tipos')) {
       const categorias = [...new Set(productos.map((p) => p.categoria))]
-      return `Tenemos estas categorías: ${categorias.join(', ')}. ¿Cuál te interesa?`
+      return `Tenemos varias categorías: ${categorias.join(', ')}. ¿Por cuál arrancamos?`
     }
     if (texto.includes('pago') || texto.includes('pagar') || texto.includes('yape')) {
-      return 'Aceptamos tarjeta, Yape, Plin y efectivo. Pago 100% seguro y protegido.'
+      return 'Puedes pagar con tarjeta, Yape, Plin o efectivo, con total seguridad. ¿Avanzamos con tu pedido?'
     }
 
     const encontrado = this.buscarProductoEnTexto(texto, productos)
     if (encontrado) {
-      return `${encontrado.nombre}: ${encontrado.descripcion} Precio: S/ ${encontrado.precio.toFixed(
+      return `${encontrado.nombre}: ${encontrado.descripcion} Está en S/ ${encontrado.precio.toFixed(
         2,
-      )} (stock: ${encontrado.stock}).`
+      )} y nos quedan ${encontrado.stock} en stock. ¿Te interesa?`
     }
 
-    return 'Puedo recomendarte productos por categoría, uso (gamer, oficina) o presupuesto. ¿Qué necesitas?'
+    return 'Puedo ayudarte por categoría, por uso (gamer, oficina, estudio) o por presupuesto. ¿Qué tienes en mente? 🙂'
   }
 
   // Recomendación por categorías consultadas (se usa en "Explorar catálogo").
