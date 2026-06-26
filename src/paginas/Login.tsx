@@ -29,12 +29,6 @@ export function Login() {
     navegar('/') // sesión iniciada
   }
 
-  // Acceso rápido para explorar con una cuenta de demostración.
-  async function entrarComo(correo: string) {
-    const r = await login(correo, '123456')
-    if (r.ok) navegar('/')
-  }
-
   return (
     <div className="auth-contenedor inka-auth-bg">
       <InkaAnimatedBackground />
@@ -81,26 +75,6 @@ export function Login() {
         <p className="auth-pie">
           ¿No tienes cuenta? <Link to="/registro">Regístrate</Link>
         </p>
-
-        <div className="auth-demo">
-          <span className="auth-demo-titulo">¿Solo quieres explorar?</span>
-          <div className="auth-demo-botones">
-            <button
-              type="button"
-              className="btn btn-secundario btn-pequeno"
-              onClick={() => entrarComo('comprador@demo.com')}
-            >
-              Entrar como comprador
-            </button>
-            <button
-              type="button"
-              className="btn btn-secundario btn-pequeno"
-              onClick={() => entrarComo('vendedor@demo.com')}
-            >
-              Entrar como vendedor
-            </button>
-          </div>
-        </div>
       </div>
     </div>
   )
