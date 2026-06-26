@@ -1,6 +1,7 @@
 // Validaciones de los campos del registro (nombre, correo, contraseña) y un
 // validador completo que reúne todo (lo usan el formulario y el guardado).
 import { validateIdentityDocument } from './validateIdentityDocument'
+import { getPais } from '../config/paises'
 
 // Solo letras (incluye vocales con acento y ñ) y espacios. Quita el resto.
 // Se usa en onChange para que el usuario no pueda escribir números ni símbolos.
@@ -109,10 +110,15 @@ export function validarRegistroCompleto(
     errores.apellido = 'El apellido solo debe contener letras.'
   }
 
-  // Teléfono: país elegido + número de 6 a 15 dígitos.
+  // Teléfono: país elegido + número (longitud exacta si el país la define; si no, 6 a 15 dígitos).
   const tel = filtrarSoloNumeros(d.telefono)
+  const telLongitud = getPais(d.countryCode)?.telefonoLongitud
   if (!d.countryCode) {
     errores.telefono = 'Selecciona el país de tu teléfono.'
+  } else if (telLongitud) {
+    if (tel.length !== telLongitud) {
+      errores.telefono = `El teléfono debe tener exactamente ${telLongitud} dígitos.`
+    }
   } else if (tel.length < 6 || tel.length > 15) {
     errores.telefono = 'Ingresa un número de teléfono válido (entre 6 y 15 dígitos).'
   }

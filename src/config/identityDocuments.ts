@@ -106,6 +106,15 @@ export const DOCUMENTOS: ConfigDocumento[] = [
     sourceUrl: 'https://www.reniec.gob.pe/', reviewedAt: '2026-06-19',
   },
   {
+    countryCode: 'PE', countryName: 'Perú', documentCode: 'RUC', documentName: 'RUC',
+    characterType: 'numeric', minLength: 11, maxLength: 11, exactLength: 11, inputMode: 'numeric',
+    allowedRegex: /^[0-9]+$/, finalRegex: /^[0-9]{11}$/, placeholder: '20123456789',
+    helpText: 'Ingresa los 11 números de tu RUC.', normalize: soloNumeros,
+    validateCheckDigit: false, mensajeError: 'El RUC peruano debe contener exactamente 11 números.',
+    requiresOfficialReview: false, strictValidation: true,
+    sourceUrl: 'https://www.sunat.gob.pe/', reviewedAt: '2026-06-21',
+  },
+  {
     countryCode: 'PE', countryName: 'Perú', documentCode: 'CE', documentName: 'Carné de extranjería',
     characterType: 'alphanumeric', minLength: 9, maxLength: 12, inputMode: 'text',
     allowedRegex: /^[A-Z0-9]+$/, finalRegex: /^[A-Z0-9]{9,12}$/, placeholder: '001234567',

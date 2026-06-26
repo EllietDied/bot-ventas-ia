@@ -76,6 +76,9 @@ export function Registro() {
   const { errores: erroresUbic } = validarUbicacion(form.countryCode, form.ubicacion)
   const configDir = getConfigDireccion(form.countryCode)
   const fuerza = evaluarContrasena(form.contrasena)
+  // Longitud del teléfono según el país (ej. Perú = 9 dígitos exactos).
+  const telExacto = getPais(form.countryCode)?.telefonoLongitud
+  const telMax = telExacto ?? 15
 
   // Cambia un campo del formulario por su nombre.
   function cambiar(campo: keyof DatosRegistro, valor: string) {
@@ -247,15 +250,16 @@ export function Registro() {
                   inputMode="numeric"
                   value={form.telefono}
                   placeholder="987654321"
+                  maxLength={telMax}
                   autoComplete="off"
                   aria-invalid={Boolean(errorDe('telefono'))}
                   aria-describedby={errorDe('telefono') ? 'tel-error' : 'tel-ayuda'}
-                  onChange={(e) => cambiar('telefono', filtrarSoloNumeros(e.target.value))}
+                  onChange={(e) => cambiar('telefono', filtrarSoloNumeros(e.target.value).slice(0, telMax))}
                   onBlur={() => marcar('telefono')}
                 />
               </div>
               <span id="tel-ayuda" className="form-ayuda">
-                Escribe solo tu número; el código {form.callingCode} se agrega automáticamente. Lo usaremos para recuperar tu cuenta por SMS.
+                Escribe solo tu número{telExacto ? ` (${telExacto} dígitos)` : ''}; el código {form.callingCode} se agrega automáticamente. Lo usaremos para recuperar tu cuenta por SMS.
               </span>
               {errorDe('telefono') && (
                 <p id="tel-error" className="form-error" role="alert">

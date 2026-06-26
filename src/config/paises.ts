@@ -11,11 +11,12 @@ export interface Pais {
   countryName: string
   callingCode: string // prefijo telefónico internacional (+51, +56...)
   flag: string // bandera (emoji)
+  telefonoLongitud?: number // dígitos exactos del número nacional (ej. Perú = 9)
 }
 
 // Orden: Perú primero (país principal del proyecto) y luego el resto alfabéticamente.
 export const PAISES: Pais[] = [
-  { countryCode: 'PE', countryName: 'Perú', callingCode: '+51', flag: '🇵🇪' },
+  { countryCode: 'PE', countryName: 'Perú', callingCode: '+51', flag: '🇵🇪', telefonoLongitud: 9 },
   { countryCode: 'AR', countryName: 'Argentina', callingCode: '+54', flag: '🇦🇷' },
   { countryCode: 'BO', countryName: 'Bolivia', callingCode: '+591', flag: '🇧🇴' },
   { countryCode: 'BR', countryName: 'Brasil', callingCode: '+55', flag: '🇧🇷' },

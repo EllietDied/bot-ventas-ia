@@ -90,7 +90,7 @@ export function CampoDocumento({
             autoComplete="off"
             aria-invalid={mostrarError}
             aria-describedby={mostrarError ? idError : idAyuda}
-            onChange={(e) => onChangeValor(config.normalize(e.target.value))}
+            onChange={(e) => onChangeValor(config.normalize(e.target.value).slice(0, config.maxLength))}
             onBlur={onBlur}
           />
 
