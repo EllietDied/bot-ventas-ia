@@ -141,3 +141,34 @@ export function escucharCambiosSesion(cb: (usuario: Usuario | null) => void): ()
   })
   return () => data.subscription.unsubscribe()
 }
+
+// Envía un correo con un enlace para restablecer la contraseña.
+export async function recuperarContrasena(correo: string): Promise<Resultado> {
+  if (!supabase) return { ok: false, mensaje: 'La recuperación por correo requiere Supabase.' }
+  const { error } = await supabase.auth.resetPasswordForEmail(correo.trim(), {
+    redirectTo: `${window.location.origin}/restablecer`,
+  })
+  if (error) {
+    const mensaje = /rate|seconds|security/i.test(error.message)
+      ? 'Demasiados intentos. Espera unos minutos e inténtalo de nuevo.'
+      : 'No se pudo enviar el correo. Verifica la dirección.'
+    return { ok: false, mensaje }
+  }
+  return {
+    ok: true,
+    mensaje: 'Te enviamos un enlace para restablecer tu contraseña. Revisa tu correo (y la carpeta de spam).',
+  }
+}
+
+// Cambia la contraseña del usuario en la sesión de recuperación actual.
+export async function actualizarContrasena(nueva: string): Promise<Resultado> {
+  if (!supabase) return { ok: false, mensaje: 'Requiere Supabase.' }
+  const { error } = await supabase.auth.updateUser({ password: nueva })
+  if (error) {
+    const mensaje = /6|short|weak|password|least/i.test(error.message)
+      ? 'La contraseña no cumple los requisitos (mínimo 6 caracteres).'
+      : 'No se pudo actualizar. Abre de nuevo el enlace del correo e inténtalo otra vez.'
+    return { ok: false, mensaje }
+  }
+  return { ok: true, mensaje: 'Contraseña actualizada. Ya puedes iniciar sesión.' }
+}

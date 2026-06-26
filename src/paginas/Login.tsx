@@ -76,6 +76,9 @@ export function Login() {
         </form>
 
         <p className="auth-pie">
+          ¿Olvidaste tu contraseña? <Link to="/recuperar">Recupérala</Link>
+        </p>
+        <p className="auth-pie">
           ¿No tienes cuenta? <Link to="/registro">Regístrate</Link>
         </p>
 

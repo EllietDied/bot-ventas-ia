@@ -15,6 +15,8 @@ import { Asistente } from './paginas/Asistente'
 import { PanelVendedor } from './paginas/PanelVendedor'
 import { Mensajes } from './paginas/Mensajes'
 import { Estadisticas } from './paginas/Estadisticas'
+import { Recuperar } from './paginas/Recuperar'
+import { Restablecer } from './paginas/Restablecer'
 
 // Define las rutas (pantallas) de la aplicación.
 export default function App() {
@@ -23,7 +25,10 @@ export default function App() {
   // El fondo global ambiental va solo en las páginas de la app (con sesión).
   // Intro, login y registro tienen su propio hero a sangre (.inka-auth-bg).
   const esAuth =
-    ubicacion.pathname === '/login' || ubicacion.pathname === '/registro'
+    ubicacion.pathname === '/login' ||
+    ubicacion.pathname === '/registro' ||
+    ubicacion.pathname === '/recuperar' ||
+    ubicacion.pathname === '/restablecer'
   return (
     <>
       {usuarioActual && !esAuth && (
@@ -39,6 +44,8 @@ export default function App() {
           {/* Rutas públicas */}
           <Route path="/login" element={<Login />} />
           <Route path="/registro" element={<Registro />} />
+          <Route path="/recuperar" element={<Recuperar />} />
+          <Route path="/restablecer" element={<Restablecer />} />
 
           {/* Raíz: visitante ve la Intro pública; con sesión, la app (Asistente) */}
           <Route path="/" element={usuarioActual ? <Asistente /> : <Intro />} />
