@@ -92,7 +92,7 @@ export function Asistente() {
     ? {
         id: 'A-0',
         emisor: 'bot',
-        texto: `¡Hola${primerNombre ? ', ' + primerNombre : ''}! Soy tu asistente de gestión. Puedo ayudarte a agregar un producto nuevo o a modificar uno existente. Usa los botones de abajo o escríbeme.`,
+        texto: `¡Hola${primerNombre ? ', ' + primerNombre : ''}! 👋 Qué gusto tenerte por aquí. Soy tu asistente para gestionar tu tienda: puedo ayudarte a agregar, modificar o eliminar productos, mostrarte los que ya tienes o resolverte cualquier duda. Cuéntame qué necesitas o usa los botones de abajo.`,
         acciones: MENU_VENDEDOR,
       }
     : {
@@ -509,13 +509,67 @@ export function Asistente() {
     }
   }
 
-  // Envía un texto o una elección (botón) del vendedor al flujo guiado.
+  // Envía un texto o una elección (botón) del vendedor.
+  // Los botones, los comandos de gestión y los pasos de un flujo en curso los maneja la
+  // máquina de pasos; el texto libre lo responde la IA (cálida y por su nombre).
   function enviarVendedor(textoMostrado: string, valor?: string) {
     const mostrado = textoMostrado.trim()
     if (mostrado === '') return
     agregarMensaje({ id: idUnico(), emisor: 'usuario', texto: mostrado })
     setTexto('')
-    procesarVendedor(valor ?? textoMostrado)
+
+    const entrada = (valor ?? textoMostrado).toLowerCase()
+    const hayFlujo = flujo.modo !== 'inactivo'
+    const esComando =
+      /agregar|publicar|nuevo|crear|modificar|editar|cambiar|actualizar|eliminar|borrar|quitar|mis productos|ver|lista|cancelar|salir/.test(
+        entrada,
+      )
+    if (valor || hayFlujo || esComando) {
+      procesarVendedor(valor ?? textoMostrado)
+    } else {
+      responderVendedorIA(mostrado)
+    }
+  }
+
+  // Respuesta CONVERSACIONAL del asistente del vendedor (IA real; si falla, respaldo
+  // cálido local). Se usa cuando el vendedor escribe texto libre que no es un comando.
+  async function responderVendedorIA(mensaje: string) {
+    if (cargando) return
+    setCargando(true)
+    const idBot = idUnico()
+    agregarMensaje({
+      id: idBot,
+      emisor: 'bot',
+      texto: usarIAReal() ? 'IA InkaShop está pensando' : 'Pensando',
+      pensando: true,
+    })
+    const inicio = Date.now()
+
+    const historial: MensajeHistorial[] = mensajes
+      .filter((m) => !m.pensando)
+      .slice(-10)
+      .map((m) => ({ rol: m.emisor, texto: m.texto }))
+    const contexto = {
+      productos: misProductos,
+      categoriasConsultadas: [],
+      nombreCliente: primerNombre,
+      carrito: [],
+      totalCarrito: 0,
+      historial,
+    }
+
+    const resultado = await obtenerRespuestaAsistente(mensaje, contexto, 'vendedor')
+
+    // Pequeña sensación de "trabajo" antes de mostrar la respuesta.
+    const transcurrido = Date.now() - inicio
+    if (transcurrido < 900) await new Promise((res) => setTimeout(res, 900 - transcurrido))
+
+    // Tras conversar, dejamos a mano los botones de gestión.
+    actualizarMensaje(idBot, { texto: resultado.mensaje, pensando: false, acciones: MENU_VENDEDOR })
+    setCargando(false)
+    if (resultado.falloIA) {
+      toast.info('No pude conectar con la IA, pero sigo aquí para ayudarte por los botones.')
+    }
   }
 
   // El vendedor sube una foto dentro del flujo (al agregar o al modificar).

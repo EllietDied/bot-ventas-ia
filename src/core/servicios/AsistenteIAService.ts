@@ -16,6 +16,9 @@ export type AccionSugerida =
   | 'CONSULTAR_VENDEDOR'
   | 'NINGUNA'
 
+// Rol de quien usa el asistente: el comprador (ventas) o el vendedor (gestión).
+export type RolAsistente = 'comprador' | 'vendedor'
+
 // Un mensaje del historial que se envía como contexto a la IA.
 export interface MensajeHistorial {
   rol: 'usuario' | 'bot'
@@ -107,8 +110,23 @@ export function resolverProductos(ids: string[], productos: Producto[]): Product
     .filter((p): p is Producto => p !== undefined)
 }
 
-// Respuesta del MODO SIMULADO (chatbot académico, sin conexión).
-function respuestaLocal(mensaje: string, ctx: ContextoAsistente): ResultadoAsistente {
+// Respuesta del MODO SIMULADO (sin conexión): respaldo cuando no hay IA real.
+function respuestaLocal(
+  mensaje: string,
+  ctx: ContextoAsistente,
+  rol: RolAsistente = 'comprador',
+): ResultadoAsistente {
+  // Al vendedor no le recomendamos productos: le damos una respuesta cálida que lo
+  // orienta a las opciones de gestión (es el respaldo si la IA real no responde).
+  if (rol === 'vendedor') {
+    const nombre = ctx.nombreCliente ? ', ' + ctx.nombreCliente : ''
+    return {
+      mensaje: `¡Aquí estoy${nombre}! 😊 Puedo ayudarte a agregar, modificar o eliminar un producto, o mostrarte los que ya tienes publicados. ¿Con cuál seguimos?`,
+      productosRecomendados: [],
+      accionSugerida: 'NINGUNA',
+      fuente: 'local',
+    }
+  }
   const texto = bot.responderConsulta(mensaje, ctx.productos, ctx.nombreCliente)
   const recomendados = mensaje.toLowerCase().includes('gracias')
     ? []
@@ -125,10 +143,17 @@ function respuestaLocal(mensaje: string, ctx: ContextoAsistente): ResultadoAsist
 async function consultarClaude(
   mensaje: string,
   ctx: ContextoAsistente,
+  rol: RolAsistente = 'comprador',
 ): Promise<RespuestaAsistenteIA> {
   const presupuesto = detectarPresupuesto(mensaje)
   const categoria = detectarCategoria(mensaje, ctx.productos)
-  const productos = filtrarRelevantes(mensaje, ctx.productos, presupuesto, categoria).map((p) => ({
+  // Al comprador le mandamos los productos relevantes a su consulta; al vendedor,
+  // sus propios productos (sin filtrar por stock ni presupuesto, para gestionarlos).
+  const elegidos =
+    rol === 'vendedor'
+      ? ctx.productos.slice(0, 12)
+      : filtrarRelevantes(mensaje, ctx.productos, presupuesto, categoria)
+  const productos = elegidos.map((p) => ({
     id: p.id,
     nombre: p.nombre,
     categoria: p.categoria,
@@ -148,6 +173,7 @@ async function consultarClaude(
     presupuesto,
     categoria,
     nombreCliente: ctx.nombreCliente,
+    rol, // el servidor elige el "cerebro": ventas (comprador) o gestión (vendedor)
   }
 
   // Cancelamos si tarda demasiado (evita esperas eternas).
@@ -194,29 +220,30 @@ async function consultarClaude(
 export async function obtenerRespuestaAsistente(
   mensaje: string,
   ctx: ContextoAsistente,
+  rol: RolAsistente = 'comprador',
 ): Promise<ResultadoAsistente> {
   const limpio = mensaje.trim()
 
   // No enviamos mensajes vacíos.
-  if (limpio === '') return respuestaLocal(limpio, ctx)
+  if (limpio === '') return respuestaLocal(limpio, ctx, rol)
 
   // Modo simulado directo si la IA real está desactivada.
-  if (!usarIAReal()) return respuestaLocal(limpio, ctx)
+  if (!usarIAReal()) return respuestaLocal(limpio, ctx, rol)
 
   // Evitamos repetir el mismo mensaje mientras hay una solicitud en curso.
   if (solicitudEnCurso && limpio === ultimoEnviado) {
-    return respuestaLocal(limpio, ctx)
+    return respuestaLocal(limpio, ctx, rol)
   }
 
   solicitudEnCurso = true
   ultimoEnviado = limpio
   try {
-    const r = await consultarClaude(limpio, ctx)
+    const r = await consultarClaude(limpio, ctx, rol)
     return { ...r, fuente: 'ia' }
   } catch {
-    // Si la IA real falla, usamos automáticamente el chatbot simulado.
+    // Si la IA real falla, usamos automáticamente el modo simulado.
     console.error('No se pudo utilizar la IA real; se usó el modo local.')
-    return { ...respuestaLocal(limpio, ctx), falloIA: true }
+    return { ...respuestaLocal(limpio, ctx, rol), falloIA: true }
   } finally {
     solicitudEnCurso = false
   }
