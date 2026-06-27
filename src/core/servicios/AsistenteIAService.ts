@@ -47,7 +47,10 @@ export interface ResultadoAsistente extends RespuestaAsistenteIA {
 
 const MAX_MENSAJE = 1000
 const MAX_HISTORIAL = 10
-const TIEMPO_LIMITE = 20000 // ms de espera máxima a la API antes de usar el respaldo
+// ms de espera máxima a la API antes de usar el respaldo. Es alto porque el modelo
+// v4-pro "piensa" antes de responder y puede tardar bastante; debe ser algo menor
+// que el maxDuration de la función en vercel.json (60s) para darle tiempo a responder.
+const TIEMPO_LIMITE = 55000
 
 // Chatbot simulado (académico): modo sin conexión y respaldo de la IA real.
 const bot = new ChatBotIA()

@@ -8,7 +8,11 @@ import type { VercelRequest, VercelResponse } from '@vercel/node'
 
 // Proveedor de IA: DeepSeek (compatible con OpenAI).
 const DEEPSEEK_URL = 'https://api.deepseek.com/chat/completions'
-const MODELO = 'deepseek-chat'
+// Modelo de DeepSeek. Por defecto el nuevo "v4-pro" (razona antes de responder:
+// respuestas mejores, pero más lentas). Se puede cambiar SIN tocar el código con la
+// variable de entorno DEEPSEEK_MODELO (p. ej. DEEPSEEK_MODELO=deepseek-chat para
+// volver al modelo anterior al instante, sin redesplegar).
+const MODELO = process.env.DEEPSEEK_MODELO || 'deepseek-v4-pro'
 // Límite de tokens de la respuesta (un asistente de ventas responde corto).
 const MAX_TOKENS = 1024
 // Límite de caracteres del mensaje del usuario.
@@ -155,6 +159,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         model: MODELO,
         max_tokens: MAX_TOKENS,
         temperature: 0.8,
+        // "Pensamiento" del modelo v4-pro: razona internamente antes de responder
+        // (respuestas más cuidadas, pero más lentas). DeepSeek ignora estos
+        // parámetros si el modelo elegido no los soporta (no da error).
+        thinking: { type: 'enabled' },
+        reasoning_effort: 'high',
         response_format: { type: 'json_object' },
         messages: [{ role: 'system', content: SISTEMA + '\n\n' + contexto }, ...mensajes],
       }),
