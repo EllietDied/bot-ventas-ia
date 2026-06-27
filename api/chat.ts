@@ -169,7 +169,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }),
     })
     if (!respuesta.ok) {
-      return res.status(502).json({ error: 'No se pudo obtener respuesta del asistente IA.' })
+      // Leemos el detalle del error del proveedor SOLO para los logs del servidor
+      // (el cuerpo de error de DeepSeek no contiene la clave; igual nunca va al cliente).
+      let detalle = ''
+      try {
+        detalle = await respuesta.text()
+      } catch {
+        /* puede no traer cuerpo */
+      }
+      console.error('Fallo la llamada a DeepSeek:', respuesta.status, detalle.slice(0, 500))
+      // Al cliente: mensaje genérico + el código de estado del proveedor (un número,
+      // no es dato sensible) para poder diagnosticar (401=clave, 402=saldo, 404=modelo).
+      return res.status(502).json({
+        error: 'No se pudo obtener respuesta del asistente IA.',
+        proveedorStatus: respuesta.status,
+      })
     }
 
     const datos = await respuesta.json()
