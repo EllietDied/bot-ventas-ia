@@ -39,6 +39,7 @@ const FORM_INICIAL: DatosRegistro = {
   confirmar: '',
   ubicacion: UBICACION_VACIA,
   rol: 'comprador',
+  sexo: '',
 }
 
 // Etiqueta visible según la fuerza de la contraseña.
@@ -53,6 +54,7 @@ const ETIQUETA_FUERZA: Record<string, string> = {
 const SELECTOR_CAMPO: Record<string, string> = {
   nombre: '#reg-nombre',
   apellido: '#reg-apellido',
+  sexo: '#reg-sexo',
   telefono: '#reg-telefono',
   documentoNumero: '.doc-numero',
   correo: '#reg-correo',
@@ -163,6 +165,7 @@ export function Registro() {
     setTocado({
       nombre: true,
       apellido: true,
+      sexo: true,
       telefono: true,
       documentoNumero: true,
       correo: true,
@@ -231,7 +234,7 @@ export function Registro() {
             />
 
             {/* País: fuente de verdad del registro (define prefijo telefónico, documento y dirección) */}
-            <label className="campo span-2">
+            <label className="campo">
               <span>País *</span>
               <SelectorPais id="reg-pais" value={form.countryCode} onChange={cambiarPais} describedBy="pais-ayuda" />
               <span id="pais-ayuda" className="form-ayuda">
@@ -240,7 +243,7 @@ export function Registro() {
             </label>
 
             {/* Teléfono: prefijo automático según el país + número nacional */}
-            <label className="campo span-2">
+            <label className="campo">
               <span>Teléfono *</span>
               <div className="tel-grupo">
                 <span className="tel-prefijo">{form.callingCode}</span>
@@ -286,6 +289,36 @@ export function Registro() {
               />
             </div>
 
+            {/* Sexo y Rol: dos selectores cortos en la misma línea */}
+            <label className="campo">
+              <span>Sexo *</span>
+              <select
+                id="reg-sexo"
+                value={form.sexo}
+                aria-invalid={Boolean(errorDe('sexo'))}
+                onChange={(e) => cambiar('sexo', e.target.value)}
+                onBlur={() => marcar('sexo')}
+              >
+                <option value="">Selecciona...</option>
+                <option value="masculino">Masculino</option>
+                <option value="femenino">Femenino</option>
+              </select>
+              {errorDe('sexo') && (
+                <p className="form-error" role="alert">
+                  {errorDe('sexo')}
+                </p>
+              )}
+            </label>
+
+            <label className="campo">
+              <span>Rol *</span>
+              <select value={form.rol} onChange={(e) => cambiar('rol', e.target.value as Rol)}>
+                <option value="comprador">Comprador</option>
+                <option value="vendedor">Vendedor</option>
+              </select>
+            </label>
+
+            {/* Correo: a todo el ancho (es largo) */}
             <CampoTexto
               id="reg-correo"
               etiqueta="Correo *"
@@ -296,15 +329,8 @@ export function Registro() {
               error={errorDe('correo')}
               onChange={(v) => cambiar('correo', v)}
               onBlur={() => marcar('correo')}
+              span2
             />
-
-            <label className="campo">
-              <span>Rol *</span>
-              <select value={form.rol} onChange={(e) => cambiar('rol', e.target.value as Rol)}>
-                <option value="comprador">Comprador</option>
-                <option value="vendedor">Vendedor</option>
-              </select>
-            </label>
 
             {/* Contraseña + medidor de fuerza */}
             <label className="campo">
@@ -396,6 +422,7 @@ function CampoTexto({
   tipo = 'text',
   inputMode,
   placeholder,
+  span2,
 }: {
   id: string
   etiqueta: string
@@ -406,10 +433,11 @@ function CampoTexto({
   tipo?: string
   inputMode?: 'text' | 'numeric' | 'email'
   placeholder?: string
+  span2?: boolean
 }) {
   const mostrarError = Boolean(error)
   return (
-    <label className="campo">
+    <label className={span2 ? 'campo span-2' : 'campo'}>
       <span>{etiqueta}</span>
       <input
         id={id}

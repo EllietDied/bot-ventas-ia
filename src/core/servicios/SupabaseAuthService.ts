@@ -3,7 +3,7 @@
 // (modo local con localStorage). La contraseña la maneja Supabase Auth: nunca se
 // guarda en la app.
 import { supabase } from '../datos/supabase'
-import { Usuario, Rol } from '../modelos/Usuario'
+import { Usuario, Rol, Sexo } from '../modelos/Usuario'
 import { Resultado } from './AuthService'
 
 // Una fila de la tabla "perfiles" (todas sus columnas son texto o null).
@@ -29,6 +29,7 @@ export function mapPerfilAUsuario(perfil: FilaPerfil, correo: string): Usuario {
     distrito: perfil.nivel3_nombre || perfil.nivel2_nombre || '',
     departamento: perfil.nivel1_nombre ?? '',
     rol: (perfil.rol as Rol) ?? 'comprador',
+    sexo: (perfil.sexo as Sexo) || undefined,
     estado: perfil.estado ?? 'activo',
     paisCodigo: perfil.pais_codigo ?? undefined,
     paisNombre: perfil.pais_nombre ?? undefined,

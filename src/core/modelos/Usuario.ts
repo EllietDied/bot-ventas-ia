@@ -3,6 +3,9 @@ import { Persona } from './Persona'
 // Rol que se elige al registrarse.
 export type Rol = 'comprador' | 'vendedor'
 
+// Sexo del usuario (se elige al registrarse).
+export type Sexo = 'masculino' | 'femenino'
+
 // Usuario HEREDA de Persona (relación de herencia del UML).
 // 'extends' representa esa herencia en TypeScript.
 export interface Usuario extends Persona {
@@ -13,6 +16,7 @@ export interface Usuario extends Persona {
   distrito: string
   departamento: string
   rol: Rol
+  sexo?: Sexo // 'masculino' | 'femenino' (opcional por compatibilidad con cuentas previas)
   estado: string // 'activo' | 'inactivo'
   // Datos internacionales del registro (opcionales, por compatibilidad con cuentas previas).
   paisCodigo?: string // ISO del país (PE, CL...)

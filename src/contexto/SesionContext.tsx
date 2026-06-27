@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
-import { Usuario, Rol } from '../core/modelos/Usuario'
+import { Usuario, Rol, Sexo } from '../core/modelos/Usuario'
 import { iniciarSesion, Resultado } from '../core/servicios/AuthService'
 import { validarRegistroCompleto } from '../utils/validacionesRegistro'
 import { validateIdentityDocument } from '../utils/validateIdentityDocument'
@@ -37,6 +37,7 @@ export interface DatosRegistro {
   // Dirección territorial dinámica según el país (Fase 2).
   ubicacion: Ubicacion
   rol: Rol
+  sexo: Sexo | '' // '' = aún no elegido (lo valida el registro)
 }
 
 // Qué expone el contexto de sesión.
@@ -144,6 +145,7 @@ export function SesionProvider({ children }: { children: ReactNode }) {
         prefijo_telefonico: datos.callingCode,
         telefono_internacional: (datos.callingCode || '') + telNacional,
         rol: datos.rol,
+        sexo: datos.sexo || '',
         pais_codigo: datos.countryCode,
         pais_nombre: datos.countryName,
         tipo_documento: datos.tipoDocumento,
@@ -182,6 +184,7 @@ export function SesionProvider({ children }: { children: ReactNode }) {
       distrito: (u.nivel3?.nombre || u.nivel2.nombre || '').trim(),
       departamento: u.nivel1.nombre.trim(),
       rol: datos.rol,
+      sexo: datos.sexo || undefined,
       estado: 'activo',
       paisCodigo: datos.countryCode,
       paisNombre: datos.countryName,

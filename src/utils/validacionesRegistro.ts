@@ -76,6 +76,7 @@ export interface DatosRegistroValidar {
   correo: string
   contrasena: string
   confirmar: string
+  sexo: string
 }
 
 export interface ResultadoValidacion {
@@ -96,6 +97,7 @@ export function validarRegistroCompleto(
   const orden: (keyof DatosRegistroValidar)[] = [
     'nombre',
     'apellido',
+    'sexo',
     'telefono',
     'documentoNumero',
     'correo',
@@ -108,6 +110,11 @@ export function validarRegistroCompleto(
   }
   if (!esNombreValido(d.apellido)) {
     errores.apellido = 'El apellido solo debe contener letras.'
+  }
+
+  // Sexo: obligatorio, solo masculino o femenino.
+  if (d.sexo !== 'masculino' && d.sexo !== 'femenino') {
+    errores.sexo = 'Selecciona tu sexo.'
   }
 
   // Teléfono: país elegido + número (longitud exacta si el país la define; si no, 6 a 15 dígitos).

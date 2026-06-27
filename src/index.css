@@ -1614,11 +1614,22 @@ a:hover {
   flex: 1 1 auto;
   min-width: 0;
 }
-/* Documento de identidad adaptable. */
+/* Documento de identidad adaptable: tipo y número lado a lado (2 columnas);
+   la ayuda/contador y el error van debajo, a todo el ancho. */
 .campo-documento {
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem 0.9rem;
+  align-items: start;
+}
+.campo-documento .doc-pie,
+.campo-documento > .form-error {
+  grid-column: 1 / -1;
+}
+@media (max-width: 600px) {
+  .campo-documento {
+    grid-template-columns: 1fr;
+  }
 }
 .doc-fila {
   display: flex;

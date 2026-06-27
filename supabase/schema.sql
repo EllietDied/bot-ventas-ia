@@ -19,6 +19,7 @@ create table if not exists public.perfiles (
   prefijo_telefonico text,
   telefono_internacional text,
   rol text not null default 'comprador' check (rol in ('comprador','vendedor')),
+  sexo text check (sexo in ('masculino','femenino')),
   estado text not null default 'activo',
   -- País y documento de identidad
   pais_codigo text,
@@ -118,7 +119,7 @@ security definer set search_path = public
 as $$
 begin
   insert into public.perfiles (
-    id, correo, nombre, apellido, telefono, prefijo_telefonico, telefono_internacional, rol,
+    id, correo, nombre, apellido, telefono, prefijo_telefonico, telefono_internacional, rol, sexo,
     pais_codigo, pais_nombre, tipo_documento, documento_numero, documento_display,
     documento_complemento, codigo_postal,
     nivel1_tipo, nivel1_codigo, nivel1_nombre,
@@ -133,6 +134,7 @@ begin
     new.raw_user_meta_data->>'prefijo_telefonico',
     new.raw_user_meta_data->>'telefono_internacional',
     coalesce(new.raw_user_meta_data->>'rol','comprador'),
+    nullif(new.raw_user_meta_data->>'sexo',''),
     new.raw_user_meta_data->>'pais_codigo',
     new.raw_user_meta_data->>'pais_nombre',
     new.raw_user_meta_data->>'tipo_documento',
