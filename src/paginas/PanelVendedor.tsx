@@ -8,6 +8,7 @@ import { useToast } from '../contexto/ToastContext'
 import { ImagenProducto } from '../componentes/ImagenProducto'
 import { Icono } from '../componentes/Icono'
 import { comprimirImagen } from '../util/imagen'
+import { codigoProducto } from '../core/modelos/Producto'
 
 // Pantalla del vendedor: publicar productos y actualizar stock.
 export function PanelVendedor() {
@@ -258,7 +259,10 @@ export function PanelVendedor() {
                       onChange={(e) => alCambiarImagen(e, p.id)}
                     />
                   </label>
-                  <span className="fila-nombre">{p.nombre}</span>
+                  <span className="fila-nombre">
+                    {p.nombre}
+                    <small className="fila-codigo">{codigoProducto(p)}</small>
+                  </span>
                   <span className="texto-tenue">S/ {p.precio.toFixed(2)}</span>
                   <ControlStock
                     stockActual={p.stock}

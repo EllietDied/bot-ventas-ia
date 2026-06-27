@@ -8,7 +8,7 @@ import { esComprador } from '../core/modelos/Comprador'
 import { LogoUSS } from '../componentes/LogoUSS'
 import { ImagenProducto } from '../componentes/ImagenProducto'
 import { Icono } from '../componentes/Icono'
-import { Producto } from '../core/modelos/Producto'
+import { Producto, codigoProducto } from '../core/modelos/Producto'
 import { esVendedor } from '../core/modelos/Vendedor'
 import { comprimirImagen } from '../util/imagen'
 import { cargar, guardar } from '../core/datos/almacenamiento'
@@ -557,9 +557,9 @@ export function Asistente() {
     agregarMensaje({
       id: idUnico(),
       emisor: 'bot',
-      texto: `${p.nombre}${p.marca ? ' · ' + p.marca : ''} — ${p.categoria}\n${
-        p.descripcion
-      }\nPrecio: S/ ${p.precio.toFixed(2)} · Stock: ${p.stock}`,
+      texto: `${p.nombre}${p.marca ? ' · ' + p.marca : ''} — ${p.categoria}\nCódigo: ${codigoProducto(
+        p,
+      )}\n${p.descripcion}\nPrecio: S/ ${p.precio.toFixed(2)} · Stock: ${p.stock}`,
     })
   }
 
@@ -817,6 +817,7 @@ function TarjetaChat({
             {producto.categoria}
             {producto.marca ? ' · ' + producto.marca : ''}
           </div>
+          <div className="tarjeta-chat-codigo">{codigoProducto(producto)}</div>
         </div>
       </div>
       <div className="tarjeta-chat-precio">

@@ -1,4 +1,4 @@
-import { Producto } from '../core/modelos/Producto'
+import { Producto, codigoProducto } from '../core/modelos/Producto'
 import { ImagenProducto } from './ImagenProducto'
 
 interface Props {
@@ -20,6 +20,7 @@ export function TarjetaProducto({ producto, alAgregar, textoBoton }: Props) {
         <ImagenProducto imagen={producto.imagen} nombre={producto.nombre} />
       </div>
       <span className="tarjeta-categoria">{producto.categoria}</span>
+      <span className="tarjeta-codigo" title="Código del producto">{codigoProducto(producto)}</span>
       <h3 className="tarjeta-nombre">{producto.nombre}</h3>
       {producto.marca && <p className="tarjeta-marca texto-tenue">Marca: {producto.marca}</p>}
       <p className="tarjeta-descripcion">{producto.descripcion}</p>

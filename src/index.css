@@ -1089,6 +1089,30 @@ a:hover {
   color: var(--primario);
   font-weight: 700;
 }
+/* Código del producto (ej. PER-001): discreto y en tipografía monoespaciada. */
+.tarjeta-codigo {
+  margin-left: 0.4rem;
+  font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  opacity: 0.55;
+}
+.tarjeta-chat-codigo {
+  margin-top: 0.1rem;
+  font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+  font-size: 0.66rem;
+  font-weight: 600;
+  opacity: 0.55;
+}
+.fila-codigo {
+  display: block;
+  margin-top: 0.1rem;
+  font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+  font-size: 0.66rem;
+  font-weight: 600;
+  opacity: 0.55;
+}
 .tarjeta-nombre {
   font-size: 1rem;
 }
