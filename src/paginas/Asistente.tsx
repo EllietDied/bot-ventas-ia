@@ -616,10 +616,15 @@ export function Asistente() {
           <p>Compra con respaldo, vende con innovación.</p>
           <span
             className="ia-modo-badge"
-            title="Modo del asistente IA"
+            title={esVendedorActual ? 'Modo del asistente' : 'Modo del asistente IA'}
             style={{ fontSize: '0.72rem', opacity: 0.65 }}
           >
-            {usarIAReal() ? '● IA real' : '○ IA simulada'}
+            {/* El vendedor gestiona su catálogo (sin IA); el comprador sí usa la IA. */}
+            {esVendedorActual
+              ? '⚙ Gestión de catálogo'
+              : usarIAReal()
+                ? '● IA real'
+                : '○ IA simulada'}
           </span>
         </div>
       </header>
