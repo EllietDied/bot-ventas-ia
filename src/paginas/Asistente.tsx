@@ -9,6 +9,13 @@ import { LogoUSS } from '../componentes/LogoUSS'
 import { ImagenProducto } from '../componentes/ImagenProducto'
 import { Icono } from '../componentes/Icono'
 import { Producto, codigoProducto } from '../core/modelos/Producto'
+import {
+  quiereCancelar,
+  operacionMencionada,
+  esIntencionDeCambio,
+  pareceDuda,
+  etiquetaOperacion,
+} from '../core/servicios/IntencionVendedor'
 import { esVendedor } from '../core/modelos/Vendedor'
 import { comprimirImagen } from '../util/imagen'
 import { cargar, guardar } from '../core/datos/almacenamiento'
@@ -293,10 +300,12 @@ export function Asistente() {
   }
 
   // Máquina de pasos: según el estado actual (flujo), procesa la entrada y avanza.
-  function procesarVendedor(valor: string) {
+  // flujoActual permite forzar el estado del flujo (p. ej. iniciar una operación nueva
+  // justo después de cancelar otra, sin esperar a que React actualice el estado).
+  function procesarVendedor(valor: string, flujoActual: FlujoVendedor = flujo) {
     const v = valor.trim()
     const t = v.toLowerCase()
-    const f = flujo
+    const f = flujoActual
 
     if (t === 'cancelar' || t === 'salir') {
       setFlujo(FLUJO_INICIAL)
@@ -510,21 +519,47 @@ export function Asistente() {
   }
 
   // Envía un texto o una elección (botón) del vendedor.
-  // Los botones, los comandos de gestión y los pasos de un flujo en curso los maneja la
-  // máquina de pasos; el texto libre lo responde la IA (cálida y por su nombre).
+  // A mitad de un proceso guiado cuidamos los errores y cambios de opinión: no tomamos
+  // como "dato" un arrepentimiento ("me equivoqué") ni un cambio de operación.
   function enviarVendedor(textoMostrado: string, valor?: string) {
     const mostrado = textoMostrado.trim()
     if (mostrado === '') return
     agregarMensaje({ id: idUnico(), emisor: 'usuario', texto: mostrado })
     setTexto('')
 
-    const entrada = (valor ?? textoMostrado).toLowerCase()
-    const hayFlujo = flujo.modo !== 'inactivo'
+    const entrada = valor ?? textoMostrado
+
+    // --- A mitad de un proceso guiado ---
+    if (flujo.modo !== 'inactivo') {
+      // 1) Quiere cancelar.
+      if (quiereCancelar(entrada)) {
+        setFlujo(FLUJO_INICIAL)
+        return responderVendedor('Listo, cancelé eso. ¿Qué te gustaría hacer?', MENU_VENDEDOR)
+      }
+      // 2) Quiere cambiar de operación (por botón o por una frase clara de cambio).
+      const op = operacionMencionada(entrada)
+      if (op && (valor || esIntencionDeCambio(entrada))) {
+        setFlujo(FLUJO_INICIAL)
+        responderVendedor(`Claro, dejamos eso. Vamos a ${etiquetaOperacion(op)}. 👍`)
+        return procesarVendedor(op, FLUJO_INICIAL)
+      }
+      // 3) Duda o arrepentimiento ambiguo (texto, no botón): que lo interprete la IA,
+      //    dejando a mano cancelar o cambiar; el flujo sigue por si quiere continuar.
+      if (!valor && pareceDuda(entrada)) {
+        return responderVendedorIA(mostrado, true)
+      }
+      // 4) Si no, es un dato normal del paso actual.
+      return procesarVendedor(valor ?? textoMostrado)
+    }
+
+    // --- Sin proceso activo ---
+    // Botones, comandos de gestión y "cancelar/salir" van a la máquina de pasos; el
+    // texto libre lo responde la IA conversacional (cálida y por su nombre).
     const esComando =
-      /agregar|publicar|nuevo|crear|modificar|editar|cambiar|actualizar|eliminar|borrar|quitar|mis productos|ver|lista|cancelar|salir/.test(
-        entrada,
-      )
-    if (valor || hayFlujo || esComando) {
+      !!valor ||
+      operacionMencionada(entrada) !== null ||
+      /\b(cancelar|salir)\b/.test(entrada.toLowerCase())
+    if (esComando) {
       procesarVendedor(valor ?? textoMostrado)
     } else {
       responderVendedorIA(mostrado)
@@ -533,7 +568,7 @@ export function Asistente() {
 
   // Respuesta CONVERSACIONAL del asistente del vendedor (IA real; si falla, respaldo
   // cálido local). Se usa cuando el vendedor escribe texto libre que no es un comando.
-  async function responderVendedorIA(mensaje: string) {
+  async function responderVendedorIA(mensaje: string, enDuda = false) {
     if (cargando) return
     setCargando(true)
     const idBot = idUnico()
@@ -564,8 +599,12 @@ export function Asistente() {
     const transcurrido = Date.now() - inicio
     if (transcurrido < 900) await new Promise((res) => setTimeout(res, 900 - transcurrido))
 
-    // Tras conversar, dejamos a mano los botones de gestión.
-    actualizarMensaje(idBot, { texto: resultado.mensaje, pensando: false, acciones: MENU_VENDEDOR })
+    // Tras conversar dejamos a mano los botones de gestión; si fue una duda a mitad de
+    // un proceso, agregamos también un botón para cancelar lo que estaba haciendo.
+    const acciones = enDuda
+      ? [...MENU_VENDEDOR, { label: 'Cancelar lo que hacía', valor: 'cancelar' }]
+      : MENU_VENDEDOR
+    actualizarMensaje(idBot, { texto: resultado.mensaje, pensando: false, acciones })
     setCargando(false)
     if (resultado.falloIA) {
       toast.info('No pude conectar con la IA, pero sigo aquí para ayudarte por los botones.')
