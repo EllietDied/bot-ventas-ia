@@ -15,6 +15,7 @@ import { Asistente } from './paginas/Asistente'
 import { PanelVendedor } from './paginas/PanelVendedor'
 import { Mensajes } from './paginas/Mensajes'
 import { Estadisticas } from './paginas/Estadisticas'
+import { Billetera } from './paginas/Billetera'
 import { Recuperar } from './paginas/Recuperar'
 import { Restablecer } from './paginas/Restablecer'
 
@@ -66,6 +67,14 @@ export default function App() {
             element={
               <RutaProtegida rol="comprador">
                 <Checkout />
+              </RutaProtegida>
+            }
+          />
+          <Route
+            path="/billetera"
+            element={
+              <RutaProtegida rol="comprador">
+                <Billetera />
               </RutaProtegida>
             }
           />

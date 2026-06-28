@@ -1113,6 +1113,91 @@ a:hover {
   font-weight: 600;
   opacity: 0.55;
 }
+
+/* ===== Billetera ===== */
+.billetera-cabecera {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin-bottom: 1rem;
+}
+.billetera-saldo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+.billetera-saldo-label {
+  font-size: 0.85rem;
+  color: var(--texto-tenue);
+}
+.billetera-saldo-monto {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--primario);
+}
+.billetera-titulo {
+  font-size: 1.05rem;
+  margin: 0 0 0.6rem;
+}
+.billetera-montos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 0.6rem;
+}
+.billetera-cip {
+  text-align: center;
+}
+.billetera-cip-codigo {
+  font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+  font-size: 1.8rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  margin: 0.3rem 0;
+}
+.billetera-qr {
+  width: 180px;
+  height: 180px;
+  object-fit: contain;
+  display: block;
+  margin: 0.6rem auto;
+  background: #fff;
+  border-radius: 10px;
+  padding: 6px;
+}
+.billetera-movimientos {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+.billetera-mov {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0.2rem;
+  border-bottom: 1px solid var(--borde);
+}
+.billetera-mov-detalle {
+  font-weight: 600;
+}
+.billetera-mov-fecha {
+  display: block;
+  font-size: 0.74rem;
+  color: var(--texto-tenue);
+}
+.billetera-mov-monto {
+  font-weight: 700;
+  white-space: nowrap;
+}
+.billetera-mov-monto.recarga {
+  color: #16a34a;
+}
+.billetera-mov-monto.compra {
+  color: var(--error);
+}
 .tarjeta-nombre {
   font-size: 1rem;
 }

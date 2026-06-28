@@ -49,6 +49,7 @@ export function BarraNavegacion() {
                 )}
               </Link>
             )}
+            {!esVendedor(usuarioActual) && <Link to="/billetera">Billetera</Link>}
 
             {/* Solo el vendedor ve su panel y sus estadísticas */}
             {esVendedor(usuarioActual) && <Link to="/vendedor">Panel Vendedor</Link>}
