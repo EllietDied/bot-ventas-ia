@@ -86,18 +86,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       })
       const d = await respuesta.json()
       if (!respuesta.ok || !d?.id) {
-        // DIAGNÓSTICO TEMPORAL: pista de la clave (sin exponerla) para depurar el 401.
-        const k = process.env.CULQI_SECRET_KEY || ''
-        return res.status(502).json({
-          error: 'No se pudo generar el código de pago.',
-          proveedorStatus: respuesta.status,
-          detalleCulqi: d?.user_message || d?.merchant_message || d?.message || null,
-          pistaClave: {
-            largo: k.length,
-            empiezaBien: k.startsWith('sk_test_'),
-            tieneEspacios: k !== k.trim(),
-          },
-        })
+        return res
+          .status(502)
+          .json({ error: 'No se pudo generar el código de pago.', proveedorStatus: respuesta.status })
       }
       return res.status(200).json({
         tipo: 'pagoefectivo',
