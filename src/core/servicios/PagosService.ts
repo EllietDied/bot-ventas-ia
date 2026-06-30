@@ -2,6 +2,7 @@
 // Cliente del frontend para la pasarela de pagos (Culqi), a través de la función
 // serverless /api/pago-crear (la llave secreta vive en el servidor, nunca aquí).
 // Si VITE_USAR_PAGOS_REALES no está en 'true', la app usa el modo simulado.
+import { supabase } from '../datos/supabase'
 
 // ¿Está activado el cobro real con la pasarela?
 export function usarPagosReales(): boolean {
@@ -31,12 +32,20 @@ export interface PagoEfectivo {
 export async function crearPagoEfectivo(datos: {
   monto: number
   concepto: 'recarga' | 'compra'
-  usuarioId: string
   cliente: ClientePago
 }): Promise<PagoEfectivo> {
+  // El servidor identifica al usuario por su token de sesión (no enviamos su id).
+  let token = ''
+  if (supabase) {
+    const { data } = await supabase.auth.getSession()
+    token = data.session?.access_token ?? ''
+  }
   const respuesta = await fetch('/api/pago-crear', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: 'Bearer ' + token } : {}),
+    },
     body: JSON.stringify({ metodo: 'pagoefectivo', ...datos }),
   })
   if (!respuesta.ok) throw new Error('No se pudo generar el código de pago.')

@@ -43,7 +43,6 @@ export function Billetera() {
         const pago = await crearPagoEfectivo({
           monto: valor,
           concepto: 'recarga',
-          usuarioId: idUsuario,
           cliente: {
             nombre: usuarioActual?.nombre,
             apellido: usuarioActual?.apellido,

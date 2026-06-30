@@ -46,12 +46,31 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
     const amount = Math.round(soles * 100)
 
-    // 4) Concepto (recarga de billetera o compra) y a quién pertenece el pago.
-    //    Esto viaja como "metadata" para que el WEBHOOK sepa qué hacer al confirmarse.
-    //    (Seguridad: por ahora se confía en el usuarioId que envía el cliente; en la
-    //     fase de seguridad se validará con el token de sesión de Supabase.)
+    // 4) Concepto y a quién pertenece el pago (la metadata la usa el webhook).
     const concepto = cuerpo.concepto === 'compra' ? 'compra' : 'recarga'
-    const usuarioId = typeof cuerpo.usuarioId === 'string' ? cuerpo.usuarioId.slice(0, 64) : ''
+
+    // SEGURIDAD: NO confiamos en el navegador para saber QUIÉN paga. Tomamos el token
+    // de sesión de Supabase (header Authorization), lo verificamos en el servidor y de
+    // ahí sale el usuario_id; así nadie puede acreditar/operar a nombre de otro.
+    const auth = typeof req.headers.authorization === 'string' ? req.headers.authorization : ''
+    const token = auth.startsWith('Bearer ') ? auth.slice(7).trim() : ''
+    const SUPA_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || ''
+    const SUPA_ANON = process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || ''
+    let usuarioId = ''
+    if (token && SUPA_URL && SUPA_ANON) {
+      const u = await fetch(SUPA_URL + '/auth/v1/user', {
+        headers: { apikey: SUPA_ANON, Authorization: 'Bearer ' + token },
+      })
+      if (u.ok) {
+        const ud = await u.json().catch(() => null)
+        usuarioId = ud && typeof ud.id === 'string' ? ud.id : ''
+      }
+    }
+    if (!usuarioId) {
+      return res.status(401).json({ error: 'Sesión no válida. Vuelve a iniciar sesión.' })
+    }
+    // (Para una COMPRA por pasarela, el monto debe calcularse en el servidor a partir
+    //  del pedido en la BD, nunca del cliente. La recarga sí la define el usuario.)
     const pedidoId = typeof cuerpo.pedidoId === 'string' ? cuerpo.pedidoId.slice(0, 64) : ''
     const cliente: ClienteCtx = cuerpo.cliente ?? {}
     const email = String(cliente.email || 'cliente@inkashop.com').slice(0, 100)
