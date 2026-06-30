@@ -2,23 +2,21 @@
 //   GET  /api/mensajes   -> lista mensajes (ordenados por fecha).
 //   POST /api/mensajes   -> envía un mensaje (JSON en el cuerpo).
 // Respuestas en JSON. Códigos: 200, 201, 400, 405, 500.
+// Habla con Supabase por fetch (ver api/_supabase.ts), sin el SDK.
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import { supabaseApi, leerBody } from './_supabase'
+import { pedir, leerBody, supabaseConfigurado, RETORNAR } from './_supabase'
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (!supabaseApi) {
+  if (!supabaseConfigurado) {
     return res.status(500).json({ error: 'Supabase no está configurado en el servidor.' })
   }
 
   try {
     // ----- GET: listar -----
     if (req.method === 'GET') {
-      const { data, error } = await supabaseApi
-        .from('mensajes')
-        .select('*')
-        .order('creado_en', { ascending: true })
-      if (error) return res.status(500).json({ error: error.message })
-      return res.status(200).json({ mensajes: data ?? [] })
+      const { ok, datos } = await pedir('mensajes?select=*&order=creado_en.asc')
+      if (!ok) return res.status(500).json({ error: 'No se pudieron leer los mensajes.' })
+      return res.status(200).json({ mensajes: datos ?? [] })
     }
 
     // ----- POST: enviar -----
@@ -36,9 +34,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       const tipo = b.tipo ?? b.tipoMensaje ?? 'consulta'
 
-      const { data, error } = await supabaseApi
-        .from('mensajes')
-        .insert({
+      const { ok, datos } = await pedir('mensajes', {
+        method: 'POST',
+        headers: RETORNAR,
+        body: JSON.stringify({
           producto_id: b.producto_id ?? b.idProducto ?? null,
           nombre_producto: b.nombre_producto ?? b.nombreProducto ?? '',
           de_usuario: deUsuario,
@@ -48,11 +47,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           tipo: tipo === 'respuesta' ? 'respuesta' : 'consulta',
           texto,
           leido: false,
-        })
-        .select()
-        .single()
-      if (error) return res.status(500).json({ error: error.message })
-      return res.status(201).json({ mensaje: data })
+        }),
+      })
+      const mensaje = Array.isArray(datos) ? datos[0] : datos
+      if (!ok || !mensaje) {
+        return res.status(500).json({ error: 'No se pudo enviar el mensaje.' })
+      }
+      return res.status(201).json({ mensaje })
     }
 
     res.setHeader('Allow', 'GET, POST')

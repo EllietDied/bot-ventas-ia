@@ -2,23 +2,21 @@
 //   GET  /api/productos        -> lista todos los productos.
 //   POST /api/productos        -> crea un producto (JSON en el cuerpo).
 // Respuestas en JSON. Códigos: 200, 201, 400, 405, 500.
+// Habla con Supabase por fetch (ver api/_supabase.ts), sin el SDK.
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import { supabaseApi, leerBody } from './_supabase'
+import { pedir, leerBody, supabaseConfigurado, RETORNAR } from './_supabase'
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (!supabaseApi) {
+  if (!supabaseConfigurado) {
     return res.status(500).json({ error: 'Supabase no está configurado en el servidor.' })
   }
 
   try {
     // ----- GET: listar -----
     if (req.method === 'GET') {
-      const { data, error } = await supabaseApi
-        .from('productos')
-        .select('*')
-        .order('id', { ascending: true })
-      if (error) return res.status(500).json({ error: error.message })
-      return res.status(200).json({ productos: data ?? [] })
+      const { ok, datos } = await pedir('productos?select=*&order=id.asc')
+      if (!ok) return res.status(500).json({ error: 'No se pudieron leer los productos.' })
+      return res.status(200).json({ productos: datos ?? [] })
     }
 
     // ----- POST: crear -----
@@ -45,13 +43,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       let idVendedor = b.idVendedor ?? b.id_vendedor
       let vendedorNombre = b.vendedorNombre ?? b.vendedor_nombre ?? ''
       if (!idVendedor) {
-        const { data: v } = await supabaseApi
-          .from('perfiles')
-          .select('id, nombre, apellido')
-          .eq('rol', 'vendedor')
-          .order('creado_en', { ascending: true })
-          .limit(1)
-          .maybeSingle()
+        const { datos: vs } = await pedir(
+          'perfiles?select=id,nombre,apellido&rol=eq.vendedor&order=creado_en.asc&limit=1',
+        )
+        const v = Array.isArray(vs) ? vs[0] : null
         if (!v) {
           return res
             .status(400)
@@ -61,9 +56,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         vendedorNombre = `${v.nombre ?? ''} ${v.apellido ?? ''}`.trim()
       }
 
-      const { data, error } = await supabaseApi
-        .from('productos')
-        .insert({
+      const { ok, datos } = await pedir('productos', {
+        method: 'POST',
+        headers: RETORNAR,
+        body: JSON.stringify({
           nombre: String(b.nombre).trim(),
           marca: b.marca ? String(b.marca) : null,
           descripcion: b.descripcion ? String(b.descripcion) : '',
@@ -74,11 +70,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           imagen: b.imagen ? String(b.imagen) : '📦',
           id_vendedor: idVendedor,
           vendedor_nombre: vendedorNombre,
-        })
-        .select()
-        .single()
-      if (error) return res.status(500).json({ error: error.message })
-      return res.status(201).json({ producto: data })
+        }),
+      })
+      const producto = Array.isArray(datos) ? datos[0] : datos
+      if (!ok || !producto) {
+        return res.status(500).json({ error: 'No se pudo crear el producto.' })
+      }
+      return res.status(201).json({ producto })
     }
 
     res.setHeader('Allow', 'GET, POST')

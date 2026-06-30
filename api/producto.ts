@@ -3,11 +3,12 @@
 //   PUT    /api/producto?id=1   -> actualiza (solo los campos enviados).
 //   DELETE /api/producto?id=1   -> elimina un producto.
 // Respuestas en JSON. Códigos: 200, 400, 404, 405, 500.
+// Habla con Supabase por fetch (ver api/_supabase.ts), sin el SDK.
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import { supabaseApi, leerBody, leerId } from './_supabase'
+import { pedir, leerBody, leerId, supabaseConfigurado, RETORNAR } from './_supabase'
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (!supabaseApi) {
+  if (!supabaseConfigurado) {
     return res.status(500).json({ error: 'Supabase no está configurado en el servidor.' })
   }
 
@@ -19,14 +20,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     // ----- GET: obtener por id -----
     if (req.method === 'GET') {
-      const { data, error } = await supabaseApi
-        .from('productos')
-        .select('*')
-        .eq('id', id)
-        .maybeSingle()
-      if (error) return res.status(500).json({ error: error.message })
-      if (!data) return res.status(404).json({ error: 'Producto no encontrado.' })
-      return res.status(200).json({ producto: data })
+      const { ok, datos } = await pedir(`productos?id=eq.${id}&select=*`)
+      if (!ok) return res.status(500).json({ error: 'No se pudo leer el producto.' })
+      const producto = Array.isArray(datos) ? datos[0] : null
+      if (!producto) return res.status(404).json({ error: 'Producto no encontrado.' })
+      return res.status(200).json({ producto })
     }
 
     // ----- PUT: actualizar (solo los campos enviados) -----
@@ -65,28 +63,27 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return res.status(400).json({ error: 'No se enviaron campos para actualizar.' })
       }
 
-      const { data, error } = await supabaseApi
-        .from('productos')
-        .update(cambios)
-        .eq('id', id)
-        .select()
-        .maybeSingle()
-      if (error) return res.status(500).json({ error: error.message })
-      if (!data) return res.status(404).json({ error: 'Producto no encontrado.' })
-      return res.status(200).json({ producto: data })
+      const { ok, datos } = await pedir(`productos?id=eq.${id}`, {
+        method: 'PATCH',
+        headers: RETORNAR,
+        body: JSON.stringify(cambios),
+      })
+      if (!ok) return res.status(500).json({ error: 'No se pudo actualizar el producto.' })
+      const producto = Array.isArray(datos) ? datos[0] : null
+      if (!producto) return res.status(404).json({ error: 'Producto no encontrado.' })
+      return res.status(200).json({ producto })
     }
 
     // ----- DELETE: eliminar -----
     if (req.method === 'DELETE') {
-      const { data, error } = await supabaseApi
-        .from('productos')
-        .delete()
-        .eq('id', id)
-        .select()
-        .maybeSingle()
-      if (error) return res.status(500).json({ error: error.message })
-      if (!data) return res.status(404).json({ error: 'Producto no encontrado.' })
-      return res.status(200).json({ ok: true, eliminado: data })
+      const { ok, datos } = await pedir(`productos?id=eq.${id}`, {
+        method: 'DELETE',
+        headers: RETORNAR,
+      })
+      if (!ok) return res.status(500).json({ error: 'No se pudo eliminar el producto.' })
+      const eliminado = Array.isArray(datos) ? datos[0] : null
+      if (!eliminado) return res.status(404).json({ error: 'Producto no encontrado.' })
+      return res.status(200).json({ ok: true, eliminado })
     }
 
     res.setHeader('Allow', 'GET, PUT, DELETE')

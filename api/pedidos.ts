@@ -2,23 +2,23 @@
 //   GET  /api/pedidos   -> lista pedidos (con sus líneas de detalle).
 //   POST /api/pedidos   -> registra un pedido (pago SIMULADO; no se cobra nada real).
 // Respuestas en JSON. Códigos: 200, 201, 400, 405, 500.
+// Habla con Supabase por fetch (ver api/_supabase.ts), sin el SDK.
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import { supabaseApi, leerBody } from './_supabase'
+import { pedir, leerBody, supabaseConfigurado, RETORNAR } from './_supabase'
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (!supabaseApi) {
+  if (!supabaseConfigurado) {
     return res.status(500).json({ error: 'Supabase no está configurado en el servidor.' })
   }
 
   try {
     // ----- GET: listar (con detalle embebido) -----
     if (req.method === 'GET') {
-      const { data, error } = await supabaseApi
-        .from('pedidos')
-        .select('*, detalle_pedido(*)')
-        .order('creado_en', { ascending: false })
-      if (error) return res.status(500).json({ error: error.message })
-      return res.status(200).json({ pedidos: data ?? [] })
+      const { ok, datos } = await pedir(
+        'pedidos?select=*,detalle_pedido(*)&order=creado_en.desc',
+      )
+      if (!ok) return res.status(500).json({ error: 'No se pudieron leer los pedidos.' })
+      return res.status(200).json({ pedidos: datos ?? [] })
     }
 
     // ----- POST: registrar -----
@@ -45,9 +45,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const descuento = Number(b.descuento ?? 0)
       const total = Number(b.total ?? subtotal - descuento)
 
-      const { data: pedido, error } = await supabaseApi
-        .from('pedidos')
-        .insert({
+      const { ok, datos } = await pedir('pedidos', {
+        method: 'POST',
+        headers: RETORNAR,
+        body: JSON.stringify({
           id_comprador: idComprador,
           correo_comprador: b.correoComprador ?? b.correo_comprador ?? '',
           subtotal,
@@ -57,11 +58,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           banco: b.banco ?? null,
           estado: 'pendiente',
           estado_pago: 'aprobado', // pago simulado
-        })
-        .select()
-        .single()
-      if (error || !pedido) {
-        return res.status(500).json({ error: error?.message ?? 'No se pudo registrar el pedido.' })
+        }),
+      })
+      const pedido = Array.isArray(datos) ? datos[0] : datos
+      if (!ok || !pedido) {
+        return res.status(500).json({ error: 'No se pudo registrar el pedido.' })
       }
 
       const detalle = items.map((i: any) => ({
@@ -71,7 +72,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         cantidad: Number(i.cantidad ?? 1),
         precio: Number(i.precio ?? 0),
       }))
-      await supabaseApi.from('detalle_pedido').insert(detalle)
+      await pedir('detalle_pedido', { method: 'POST', body: JSON.stringify(detalle) })
 
       return res.status(201).json({ pedido: { ...pedido, detalle_pedido: detalle } })
     }
