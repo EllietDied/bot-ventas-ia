@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useCarrito } from '../contexto/CarritoContext'
 import { usePedidos } from '../contexto/PedidosContext'
@@ -9,6 +9,8 @@ import { MetodoPago } from '../core/modelos/Pago'
 import { ImagenProducto } from '../componentes/ImagenProducto'
 import { Icono } from '../componentes/Icono'
 import { cargarBilletera, guardarBilletera, aplicarCompra } from '../core/servicios/BilleteraLocal'
+import { usarSupabase } from '../core/datos/supabase'
+import { pagarConSaldoServidor, cargarSaldoServidor } from '../core/servicios/BilleteraSupabase'
 
 // Los 4 pasos que el asistente "ejecuta" al pagar (efecto visual guiado).
 const PASOS_PAGO = [
@@ -104,6 +106,15 @@ export function Checkout() {
   const idUsuario = usuarioActual?.idUsuario ?? ''
   const [billetera, setBilletera] = useState(() => cargarBilletera(idUsuario))
 
+  // En modo Supabase (producción) el saldo REAL vive en la base, no en el navegador.
+  const enSupabase = usarSupabase()
+  const [saldoServidor, setSaldoServidor] = useState<number | null>(null)
+  useEffect(() => {
+    if (enSupabase) cargarSaldoServidor().then(setSaldoServidor)
+  }, [enSupabase])
+  // Saldo que mostramos y validamos: el de la base en Supabase, el local en modo prueba.
+  const saldoDisponible = enSupabase ? saldoServidor ?? 0 : billetera.saldo
+
   // ----- Confirmación final (después de los pasos guiados) -----
   if (pagado) {
     return (
@@ -186,8 +197,9 @@ export function Checkout() {
       return
     }
 
-    // Pagar con billetera: el saldo debe alcanzar para el total.
-    if (metodoPago === 'billetera' && billetera.saldo < total) {
+    // Pagar con billetera (modo prueba/local): el saldo local debe alcanzar.
+    // En modo Supabase, quien valida el saldo es el servidor (función segura).
+    if (metodoPago === 'billetera' && !enSupabase && billetera.saldo < total) {
       setError('Tu saldo no alcanza. Recarga tu billetera para continuar.')
       toast.error('Saldo insuficiente en tu billetera')
       return
@@ -201,6 +213,12 @@ export function Checkout() {
         toast.error(`Sin stock suficiente de ${item.producto.nombre}`)
         return
       }
+    }
+
+    // En modo Supabase, el pago con billetera lo procesa el SERVIDOR (seguro y atómico).
+    if (metodoPago === 'billetera' && enSupabase) {
+      pagarEnServidor()
+      return
     }
 
     // Iniciamos la secuencia visual de pasos.
@@ -248,6 +266,38 @@ export function Checkout() {
       setPagado(true)
       toast.exito('¡Pedido registrado correctamente!')
     }, 2700)
+  }
+
+  // Pago con billetera en PRODUCCIÓN: la función del servidor calcula el total con
+  // los precios reales, valida el saldo, descuenta y crea el pedido (todo atómico).
+  async function pagarEnServidor() {
+    const espera = (ms: number) => new Promise((r) => setTimeout(r, ms))
+    setTotalPagado(total)
+    setProcesando(true)
+    setPasoActual(0)
+    await espera(400)
+    setPasoActual(1)
+    await espera(400)
+    setPasoActual(2)
+    await espera(400)
+    setPasoActual(3)
+    const res = await pagarConSaldoServidor(
+      items.map((it) => ({
+        producto_id: Number(it.producto.id),
+        nombre: it.producto.nombre,
+        cantidad: it.cantidad,
+      })),
+    )
+    if (!res.ok) {
+      setProcesando(false)
+      setError(res.error || 'No se pudo completar el pago.')
+      toast.error(res.error || 'No se pudo completar el pago.')
+      return
+    }
+    setPasoActual(4)
+    vaciarCarrito()
+    setPagado(true)
+    toast.exito('¡Pedido registrado correctamente!')
   }
 
   return (
@@ -332,9 +382,9 @@ export function Checkout() {
           {metodoPago === 'billetera' && (
             <div className="billetera-pago">
               <p>
-                Saldo disponible: <strong>S/ {billetera.saldo.toFixed(2)}</strong>
+                Saldo disponible: <strong>S/ {saldoDisponible.toFixed(2)}</strong>
               </p>
-              {billetera.saldo < total && (
+              {saldoDisponible < total && (
                 <p className="mensaje-error">
                   Tu saldo no alcanza. <Link to="/billetera">Recargar billetera</Link>
                 </p>
