@@ -18,6 +18,8 @@ import { Estadisticas } from './paginas/Estadisticas'
 import { Billetera } from './paginas/Billetera'
 import { Recuperar } from './paginas/Recuperar'
 import { Restablecer } from './paginas/Restablecer'
+import { Terminos } from './paginas/Terminos'
+import { Privacidad } from './paginas/Privacidad'
 
 // Define las rutas (pantallas) de la aplicación.
 export default function App() {
@@ -49,6 +51,10 @@ export default function App() {
           <Route path="/restablecer" element={<Restablecer />} />
           {/* Catálogo público: el visitante puede mirar sin iniciar sesión */}
           <Route path="/catalogo" element={<Catalogo />} />
+
+          {/* Páginas legales públicas (requisito de la pasarela de pagos) */}
+          <Route path="/terminos" element={<Terminos />} />
+          <Route path="/privacidad" element={<Privacidad />} />
 
           {/* Raíz: visitante ve la Intro pública; con sesión, la app (Asistente) */}
           <Route path="/" element={usuarioActual ? <Asistente /> : <Intro />} />

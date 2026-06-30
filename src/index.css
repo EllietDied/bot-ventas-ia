@@ -1206,6 +1206,23 @@ a:hover {
   border-radius: 10px;
   font-size: 0.92rem;
 }
+/* Páginas legales (Términos y Privacidad): ancho cómodo para leer. */
+.pagina-legal {
+  max-width: 760px;
+}
+.pagina-legal section {
+  margin: 1rem 0;
+}
+.pagina-legal h2 {
+  font-size: 1.05rem;
+  margin-bottom: 0.3rem;
+}
+/* Enlaces legales en el pie de página. */
+.pie-enlaces {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
 .tarjeta-nombre {
   font-size: 1rem;
 }
