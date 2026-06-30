@@ -2,13 +2,45 @@
 //   GET  /api/productos        -> lista todos los productos.
 //   POST /api/productos        -> crea un producto (JSON en el cuerpo).
 // Respuestas en JSON. Códigos: 200, 201, 400, 405, 500.
-// Habla con Supabase por fetch (ver api/_supabase.ts), sin el SDK.
+//
+// Habla con Supabase por su API REST (PostgREST) vía fetch NATIVO, con el ayudante
+// DENTRO del archivo (igual que api/pago-webhook.ts). No usamos el SDK ni un módulo
+// compartido importado, porque eso hace fallar la función serverless en Vercel.
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import { pedir, leerBody, supabaseConfigurado, RETORNAR } from './_supabase'
 
-// Esta función habla con la base por fetch (helper en _supabase.ts), nunca por el SDK.
+const SUPA_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || ''
+const SUPA_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY || ''
+const SUPA_OK = !!(SUPA_URL && SUPA_KEY)
+const RETORNAR = { Prefer: 'return=representation' }
+
+function leerBody(body: unknown): Record<string, any> {
+  if (!body) return {}
+  if (typeof body === 'string') {
+    try { return JSON.parse(body) } catch { return {} }
+  }
+  return body as Record<string, any>
+}
+
+async function pedir(path: string, init: RequestInit = {}) {
+  const r = await fetch(`${SUPA_URL}/rest/v1/${path}`, {
+    ...init,
+    headers: {
+      apikey: SUPA_KEY,
+      Authorization: 'Bearer ' + SUPA_KEY,
+      'Content-Type': 'application/json',
+      ...(init.headers || {}),
+    },
+  })
+  const txt = await r.text().catch(() => '')
+  let datos: any = null
+  if (txt) {
+    try { datos = JSON.parse(txt) } catch { datos = null }
+  }
+  return { ok: r.ok, status: r.status, datos }
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (!supabaseConfigurado) {
+  if (!SUPA_OK) {
     return res.status(500).json({ error: 'Supabase no está configurado en el servidor.' })
   }
 
