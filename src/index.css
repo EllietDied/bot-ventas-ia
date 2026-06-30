@@ -1198,6 +1198,14 @@ a:hover {
 .billetera-mov-monto.compra {
   color: var(--error);
 }
+/* Recuadro del saldo dentro del checkout (al pagar con la billetera). */
+.billetera-pago {
+  margin: 0.4rem 0 0.8rem;
+  padding: 0.7rem 0.9rem;
+  background: var(--superficie);
+  border-radius: 10px;
+  font-size: 0.92rem;
+}
 .tarjeta-nombre {
   font-size: 1rem;
 }

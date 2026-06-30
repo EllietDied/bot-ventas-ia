@@ -8,6 +8,7 @@ import { useToast } from '../contexto/ToastContext'
 import { MetodoPago } from '../core/modelos/Pago'
 import { ImagenProducto } from '../componentes/ImagenProducto'
 import { Icono } from '../componentes/Icono'
+import { cargarBilletera, guardarBilletera, aplicarCompra } from '../core/servicios/BilleteraLocal'
 
 // Los 4 pasos que el asistente "ejecuta" al pagar (efecto visual guiado).
 const PASOS_PAGO = [
@@ -71,6 +72,7 @@ const METODOS: { id: MetodoPago; nombre: string; color: string; icono: JSX.Eleme
   { id: 'pagoefectivo', nombre: 'PagoEfectivo', color: '#ef5b0c', icono: IC.voucher },
   { id: 'paypal', nombre: 'PayPal', color: '#0070ba', icono: IC.wallet },
   { id: 'mercadopago', nombre: 'Mercado Pago', color: '#00a6e0', icono: IC.coins },
+  { id: 'billetera', nombre: 'Mi billetera', color: '#16a34a', icono: IC.wallet },
 ]
 
 // Bancos para la transferencia, con su color característico.
@@ -97,6 +99,10 @@ export function Checkout() {
   const [pasoActual, setPasoActual] = useState(0)
   const [pagado, setPagado] = useState(false)
   const [totalPagado, setTotalPagado] = useState(0)
+
+  // Billetera del comprador (saldo en modo local), para poder pagar con el saldo.
+  const idUsuario = usuarioActual?.idUsuario ?? ''
+  const [billetera, setBilletera] = useState(() => cargarBilletera(idUsuario))
 
   // ----- Confirmación final (después de los pasos guiados) -----
   if (pagado) {
@@ -180,6 +186,13 @@ export function Checkout() {
       return
     }
 
+    // Pagar con billetera: el saldo debe alcanzar para el total.
+    if (metodoPago === 'billetera' && billetera.saldo < total) {
+      setError('Tu saldo no alcanza. Recarga tu billetera para continuar.')
+      toast.error('Saldo insuficiente en tu billetera')
+      return
+    }
+
     // 0) El asistente revalida que haya stock suficiente (antes de la animación).
     for (const item of items) {
       const actual = productos.find((p) => p.id === item.producto.id)
@@ -214,6 +227,18 @@ export function Checkout() {
         metodoPago,
         banco: metodoPago === 'transferencia' ? banco : undefined,
       })
+      // Si pagó con la billetera, descontamos el total de su saldo.
+      if (metodoPago === 'billetera') {
+        const nuevo = aplicarCompra(
+          billetera,
+          total,
+          'Compra en InkaShop',
+          'mov-' + Date.now(),
+          new Date().toISOString(),
+        )
+        setBilletera(nuevo)
+        guardarBilletera(idUsuario, nuevo)
+      }
       setPasoActual(4)
       vaciarCarrito()
     }, 2000)
@@ -300,6 +325,20 @@ export function Checkout() {
                   </button>
                 ))}
               </div>
+            </div>
+          )}
+
+          {/* Al elegir Mi billetera: mostramos el saldo y si alcanza para el total */}
+          {metodoPago === 'billetera' && (
+            <div className="billetera-pago">
+              <p>
+                Saldo disponible: <strong>S/ {billetera.saldo.toFixed(2)}</strong>
+              </p>
+              {billetera.saldo < total && (
+                <p className="mensaje-error">
+                  Tu saldo no alcanza. <Link to="/billetera">Recargar billetera</Link>
+                </p>
+              )}
             </div>
           )}
 

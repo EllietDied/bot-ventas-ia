@@ -7,6 +7,7 @@ export type MetodoPago =
   | 'pagoefectivo'
   | 'paypal'
   | 'mercadopago'
+  | 'billetera'
 
 // Nombre "bonito" de cada método (para mostrarlo en la UI).
 export const NOMBRE_METODO: Record<MetodoPago, string> = {
@@ -17,6 +18,7 @@ export const NOMBRE_METODO: Record<MetodoPago, string> = {
   pagoefectivo: 'PagoEfectivo',
   paypal: 'PayPal',
   mercadopago: 'Mercado Pago',
+  billetera: 'Mi billetera',
 }
 
 // Bancos disponibles para la transferencia.
