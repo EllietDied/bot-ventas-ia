@@ -647,12 +647,12 @@ export function Asistente() {
 
   // ---- Acciones de las tarjetas de producto dentro del chat ----
   function verDetalle(p: Producto) {
+    // El código del producto es información interna: solo se muestra al vendedor.
+    const lineaCodigo = esVendedorActual ? `\nCódigo: ${codigoProducto(p)}` : ''
     agregarMensaje({
       id: idUnico(),
       emisor: 'bot',
-      texto: `${p.nombre}${p.marca ? ' · ' + p.marca : ''} — ${p.categoria}\nCódigo: ${codigoProducto(
-        p,
-      )}\n${p.descripcion}\nPrecio: S/ ${p.precio.toFixed(2)} · Stock: ${p.stock}`,
+      texto: `${p.nombre}${p.marca ? ' · ' + p.marca : ''} — ${p.categoria}${lineaCodigo}\n${p.descripcion}\nPrecio: S/ ${p.precio.toFixed(2)} · Stock: ${p.stock}`,
     })
   }
 
@@ -759,6 +759,7 @@ export function Asistente() {
                         key={p.id}
                         producto={p}
                         puedeComprar={puedeComprar}
+                        mostrarCodigo={esVendedorActual}
                         onDetalle={() => verDetalle(p)}
                         onAgregar={() => agregar(p)}
                         onComparar={() => compararProducto(p)}
@@ -884,6 +885,7 @@ export function Asistente() {
 function TarjetaChat({
   producto,
   puedeComprar,
+  mostrarCodigo,
   onDetalle,
   onAgregar,
   onComparar,
@@ -891,6 +893,7 @@ function TarjetaChat({
 }: {
   producto: Producto
   puedeComprar: boolean
+  mostrarCodigo: boolean
   onDetalle: () => void
   onAgregar: () => void
   onComparar: () => void
@@ -910,7 +913,9 @@ function TarjetaChat({
             {producto.categoria}
             {producto.marca ? ' · ' + producto.marca : ''}
           </div>
-          <div className="tarjeta-chat-codigo">{codigoProducto(producto)}</div>
+          {mostrarCodigo && (
+            <div className="tarjeta-chat-codigo">{codigoProducto(producto)}</div>
+          )}
         </div>
       </div>
       <div className="tarjeta-chat-precio">
