@@ -9,6 +9,7 @@ import { pedir, leerBody, leerId, supabaseConfigurado, RETORNAR } from './_supab
 
 const ESTADOS = ['pendiente', 'atendido']
 
+// Esta función habla con la base por fetch (helper en _supabase.ts), nunca por el SDK.
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!supabaseConfigurado) {
     return res.status(500).json({ error: 'Supabase no está configurado en el servidor.' })
