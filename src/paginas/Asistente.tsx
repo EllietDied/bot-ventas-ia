@@ -8,6 +8,8 @@ import { esComprador } from '../core/modelos/Comprador'
 import { LogoUSS } from '../componentes/LogoUSS'
 import { ImagenProducto } from '../componentes/ImagenProducto'
 import { Icono } from '../componentes/Icono'
+import { BotonBuscarFoto } from '../componentes/BotonBuscarFoto'
+import { type ResultadoBusquedaVisual } from '../core/servicios/BusquedaVisualService'
 import { Producto, codigoProducto } from '../core/modelos/Producto'
 import {
   quiereCancelar,
@@ -666,6 +668,27 @@ export function Asistente() {
     })
   }
 
+  // Búsqueda por foto: el cliente sube una foto y el asistente responde con similares.
+  function manejarFotoComprador(r: ResultadoBusquedaVisual) {
+    agregarMensaje({ id: idUnico(), emisor: 'usuario', texto: '📷 Te envié una foto' })
+    if (r.productos.length > 0) {
+      agregarMensaje({
+        id: idUnico(),
+        emisor: 'bot',
+        texto: `Identifiqué ${r.etiqueta || 'tu producto'}. Esto es lo que tengo parecido:`,
+        productos: r.productos,
+      })
+      if (r.termino) registrarConsulta(r.termino, '')
+    } else {
+      agregarMensaje({
+        id: idUnico(),
+        emisor: 'bot',
+        texto:
+          'No pude identificar bien el producto en la foto. ¿Puedes probar con otra más clara o decirme qué buscas?',
+      })
+    }
+  }
+
   function compararProducto(p: Producto) {
     setComparar((prev) => {
       if (prev.find((x) => x.id === p.id)) return prev
@@ -827,6 +850,9 @@ export function Asistente() {
                     <Icono nombre={b.icono} size={15} /> {b.label}
                   </button>
                 ))}
+            {puedeComprar && (
+              <BotonBuscarFoto onResultado={manejarFotoComprador} className="chip" />
+            )}
             {puedeComprar && (
               <button className="chip" onClick={() => navegar('/carrito')}>
                 <Icono nombre="carrito" size={15} /> Ver mi carrito

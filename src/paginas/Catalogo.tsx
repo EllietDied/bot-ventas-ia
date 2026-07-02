@@ -10,6 +10,8 @@ import { Icono } from '../componentes/Icono'
 import { ChatBotIA } from '../core/modelos/ChatBotIA'
 import { Producto } from '../core/modelos/Producto'
 import { esComprador } from '../core/modelos/Comprador'
+import { BotonBuscarFoto } from '../componentes/BotonBuscarFoto'
+import { type ResultadoBusquedaVisual } from '../core/servicios/BusquedaVisualService'
 
 // Instancia del bot para generar recomendaciones.
 const bot = new ChatBotIA()
@@ -25,6 +27,18 @@ export function Catalogo() {
 
   const [termino, setTermino] = useState('')
   const [categoria, setCategoria] = useState('')
+  const [foto, setFoto] = useState<ResultadoBusquedaVisual | null>(null)
+
+  // Al identificar una foto, guardamos su resultado (para mostrar los similares).
+  function manejarFoto(r: ResultadoBusquedaVisual) {
+    setFoto(r)
+    if (r.termino) registrarConsulta(r.termino, '')
+    if (r.productos.length > 0) {
+      toast.exito(`Encontré ${r.productos.length} producto(s) similar(es) a tu foto.`)
+    } else {
+      toast.info('No pude identificar el producto. Intenta con otra foto más clara.')
+    }
+  }
 
   // Un visitante (sin sesión) puede MIRAR el catálogo, pero no comprar.
   const esVisitante = !usuarioActual
@@ -89,6 +103,12 @@ export function Catalogo() {
         </button>
       </form>
 
+      {/* Buscar por foto */}
+      <div className="buscador-foto">
+        <BotonBuscarFoto onResultado={manejarFoto} className="btn btn-secundario" />
+        <span className="texto-tenue">Toma o sube una foto y te muestro productos similares.</span>
+      </div>
+
       {/* Filtro por categoría */}
       <div className="filtros">
         <button
@@ -107,6 +127,37 @@ export function Catalogo() {
           </button>
         ))}
       </div>
+
+      {/* Resultados de la búsqueda por foto */}
+      {foto && (
+        <section className="seccion-foto">
+          <div className="foto-aviso">
+            <span>
+              <Icono nombre="camara" size={16} /> Resultados de tu foto
+              {foto.etiqueta ? `: ${foto.etiqueta}` : ''}
+            </span>
+            <button className="chip" onClick={() => setFoto(null)}>
+              ✕ Limpiar
+            </button>
+          </div>
+          {foto.productos.length === 0 ? (
+            <p className="texto-tenue">
+              No pude identificar el producto. Prueba con otra foto más clara o usa el buscador.
+            </p>
+          ) : (
+            <div className="grid-productos">
+              {foto.productos.map((p) => (
+                <TarjetaProducto
+                  key={p.id}
+                  producto={p}
+                  alAgregar={mostrarBoton ? intentarComprar : undefined}
+                  textoBoton={esVisitante ? 'Inicia sesión para comprar' : undefined}
+                />
+              ))}
+            </div>
+          )}
+        </section>
+      )}
 
       {/* Recomendaciones del bot */}
       {recomendados.length > 0 && (
