@@ -10,6 +10,7 @@ export function PieInstitucional() {
       <span className="pie-enlaces">
         <Link to="/terminos">Términos y Condiciones</Link>
         <Link to="/privacidad">Política de Privacidad</Link>
+        <Link to="/libro-reclamaciones">📕 Libro de Reclamaciones</Link>
       </span>
     </footer>
   )

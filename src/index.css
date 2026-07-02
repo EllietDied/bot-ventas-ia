@@ -1223,6 +1223,17 @@ a:hover {
   flex-wrap: wrap;
   gap: 1rem;
 }
+/* Opciones tipo radio/checkbox (Libro de Reclamaciones). */
+.campo-radio {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin: 0.5rem 0;
+  font-size: 0.92rem;
+}
+.campo-radio input {
+  margin-top: 0.2rem;
+}
 .tarjeta-nombre {
   font-size: 1rem;
 }
