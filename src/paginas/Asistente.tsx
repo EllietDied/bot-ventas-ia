@@ -668,24 +668,66 @@ export function Asistente() {
     })
   }
 
-  // Búsqueda por foto: el cliente sube una foto y el asistente responde con similares.
-  function manejarFotoComprador(r: ResultadoBusquedaVisual) {
+  // Búsqueda por foto HÍBRIDA: MobileNet identifica el TIPO (visión, en el navegador)
+  // y luego DeepSeek RAZONA sobre el catálogo para recomendar las mejores opciones.
+  async function manejarFotoComprador(r: ResultadoBusquedaVisual) {
     agregarMensaje({ id: idUnico(), emisor: 'usuario', texto: '📷 Te envié una foto' })
-    if (r.productos.length > 0) {
-      agregarMensaje({
-        id: idUnico(),
-        emisor: 'bot',
-        texto: `Identifiqué ${r.etiqueta || 'tu producto'}. Esto es lo que tengo parecido:`,
-        productos: r.productos,
-      })
-      if (r.termino) registrarConsulta(r.termino, '')
-    } else {
+
+    // Si MobileNet no reconoció el tipo, no pasamos a la IA de razonamiento.
+    if (!r.termino) {
       agregarMensaje({
         id: idUnico(),
         emisor: 'bot',
         texto:
           'No pude identificar bien el producto en la foto. ¿Puedes probar con otra más clara o decirme qué buscas?',
       })
+      return
+    }
+
+    registrarConsulta(r.termino, '')
+    setCargando(true)
+
+    // Mensaje "pensando": MobileNet ya vio la foto; ahora DeepSeek razona.
+    const idBot = idUnico()
+    agregarMensaje({
+      id: idBot,
+      emisor: 'bot',
+      texto: `Identifiqué ${r.etiqueta || 'tu producto'} en tu foto. Déjame recomendarte…`,
+      pensando: true,
+    })
+    const inicio = Date.now()
+
+    const historial: MensajeHistorial[] = mensajes
+      .filter((m) => !m.pensando)
+      .slice(-10)
+      .map((m) => ({ rol: m.emisor, texto: m.texto }))
+    const contexto = {
+      productos,
+      categoriasConsultadas,
+      nombreCliente: primerNombre,
+      carrito: items.map((i) => ({
+        nombre: i.producto.nombre,
+        cantidad: i.cantidad,
+        precio: i.producto.precio,
+      })),
+      totalCarrito: total,
+      historial,
+    }
+
+    // DeepSeek (o el modo local, si falla/está apagado) razona sobre el tipo detectado.
+    const consulta = `El cliente subió una foto y la identifiqué como ${r.etiqueta || r.termino}. Recomiéndale y compara las mejores opciones de ${r.termino} disponibles en el catálogo.`
+    const resultado = await obtenerRespuestaAsistente(consulta, contexto)
+
+    const transcurrido = Date.now() - inicio
+    if (transcurrido < 1100) await new Promise((res) => setTimeout(res, 1100 - transcurrido))
+
+    // Preferimos los productos que eligió la IA; si no devolvió, usamos los de MobileNet.
+    const recomendados = resolverProductos(resultado.productosRecomendados, productos)
+    const finales = recomendados.length > 0 ? recomendados : r.productos
+    actualizarMensaje(idBot, { texto: resultado.mensaje, productos: finales, pensando: false })
+    setCargando(false)
+    if (resultado.falloIA) {
+      toast.info('No pude conectar con la IA; usé el modo local para la recomendación.')
     }
   }
 
