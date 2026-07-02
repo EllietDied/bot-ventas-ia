@@ -7,8 +7,8 @@
 export const DATOS_NEGOCIO = {
   nombre: 'Inkashop',
   ruc: '10739379933',
-  direccion: '[DIRECCIÓN — la de tu RUC en SUNAT]',
-  telefono: '[TELÉFONO]',
-  correo: '[CORREO]',
+  direccion: 'Los Curacas 166, Urb. Latina, Chiclayo',
+  telefono: '949080417',
+  correo: 'beryher.agip@gmail.com',
   horario: 'Lunes a sábado, 9:00 a 18:00',
 }
