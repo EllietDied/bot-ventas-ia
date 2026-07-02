@@ -1,16 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { enviarReclamacion } from '../core/servicios/ReclamacionesService'
-
-// Datos del comercio (proveedor). INDECOPI exige identificarlo en la hoja de reclamación.
-// 👉 Reemplaza los marcadores [ ... ] por tus datos reales (los de tu RUC en SUNAT).
-const NEGOCIO = {
-  nombre: 'Inkashop',
-  ruc: '10739379933',
-  direccion: '[DIRECCIÓN — la de tu RUC en SUNAT]',
-  telefono: '[TELÉFONO]',
-  correo: '[CORREO]',
-}
+import { DATOS_NEGOCIO as NEGOCIO } from '../core/datos/negocio'
 
 // Página pública del Libro de Reclamaciones (integrado, sin enlaces externos).
 export function LibroReclamaciones() {

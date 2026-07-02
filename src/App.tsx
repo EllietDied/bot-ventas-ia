@@ -21,6 +21,8 @@ import { Restablecer } from './paginas/Restablecer'
 import { Terminos } from './paginas/Terminos'
 import { Privacidad } from './paginas/Privacidad'
 import { LibroReclamaciones } from './paginas/LibroReclamaciones'
+import { Devoluciones } from './paginas/Devoluciones'
+import { Contacto } from './paginas/Contacto'
 
 // Define las rutas (pantallas) de la aplicación.
 export default function App() {
@@ -57,6 +59,8 @@ export default function App() {
           <Route path="/terminos" element={<Terminos />} />
           <Route path="/privacidad" element={<Privacidad />} />
           <Route path="/libro-reclamaciones" element={<LibroReclamaciones />} />
+          <Route path="/devoluciones" element={<Devoluciones />} />
+          <Route path="/contacto" element={<Contacto />} />
 
           {/* Raíz: visitante ve la Intro pública; con sesión, la app (Asistente) */}
           <Route path="/" element={usuarioActual ? <Asistente /> : <Intro />} />
