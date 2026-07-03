@@ -13,8 +13,8 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 
 const CULQI_API = 'https://api.culqi.com/v2'
-const MIN_MONTO = 1 // S/ mínimo por operación
-const MAX_MONTO = 5000 // S/ tope de seguridad por operación (sandbox)
+const MIN_MONTO = 10 // S/ mínimo por operación (PagoEfectivo en producción exige S/ 10)
+const MAX_MONTO = 5000 // S/ tope de seguridad por operación
 
 // Datos del cliente que la orden de Culqi necesita (nada sensible).
 interface ClienteCtx {

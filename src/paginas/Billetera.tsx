@@ -35,6 +35,11 @@ export function Billetera() {
       toast.error('Ingresa un monto válido.')
       return
     }
+    // En modo real, PagoEfectivo exige un mínimo de S/ 10.
+    if (pagosReales && valor < 10) {
+      toast.error('El monto mínimo para recargar por PagoEfectivo es S/ 10.')
+      return
+    }
     setCip(null)
     setCargando(true)
     try {
