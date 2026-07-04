@@ -128,6 +128,7 @@ export function Asistente() {
   const [flujo, setFlujo] = useState<FlujoVendedor>(FLUJO_INICIAL)
   const [cargando, setCargando] = useState(false) // mientras esperamos la respuesta del asistente
   const finRef = useRef<HTMLDivElement>(null)
+  const idFotoBot = useRef('') // id del mensaje "analizando…" de la búsqueda por foto
 
   // Con Supabase: al entrar, cargamos el historial del chat desde la nube.
   useEffect(() => {
@@ -668,32 +669,45 @@ export function Asistente() {
     })
   }
 
-  // Búsqueda por foto HÍBRIDA: MobileNet identifica el TIPO (visión, en el navegador)
-  // y luego DeepSeek RAZONA sobre el catálogo para recomendar las mejores opciones.
-  async function manejarFotoComprador(r: ResultadoBusquedaVisual) {
+  // Al ELEGIR la foto (antes de analizarla): mostramos el mensaje del usuario y un
+  // "analizando…" en el chat, para que la espera (la visión puede tardar) se sienta bien.
+  function iniciarFotoComprador() {
     agregarMensaje({ id: idUnico(), emisor: 'usuario', texto: '📷 Te envié una foto' })
+    const idBot = idUnico()
+    idFotoBot.current = idBot
+    agregarMensaje({ id: idBot, emisor: 'bot', texto: '🔍 Analizando tu foto', pensando: true })
+    setCargando(true)
+  }
 
-    // Si MobileNet no reconoció el tipo, no pasamos a la IA de razonamiento.
+  // Búsqueda por foto HÍBRIDA: la visión (Gemma/MobileNet) identifica el producto y
+  // luego DeepSeek RAZONA sobre el catálogo para recomendar. Actualiza el "analizando…".
+  async function manejarFotoComprador(r: ResultadoBusquedaVisual) {
+    // Reusamos el mensaje "analizando…" que se mostró al elegir la foto (o creamos uno).
+    let idBot = idFotoBot.current
+    if (!idBot) {
+      agregarMensaje({ id: idUnico(), emisor: 'usuario', texto: '📷 Te envié una foto' })
+      idBot = idUnico()
+      agregarMensaje({ id: idBot, emisor: 'bot', texto: '🔍 Analizando tu foto', pensando: true })
+      setCargando(true)
+    }
+    idFotoBot.current = ''
+
+    // Si la visión no reconoció el tipo, no pasamos a la IA de razonamiento.
     if (!r.termino) {
-      agregarMensaje({
-        id: idUnico(),
-        emisor: 'bot',
+      actualizarMensaje(idBot, {
         texto:
           'No pude identificar bien el producto en la foto. ¿Puedes probar con otra más clara o decirme qué buscas?',
+        pensando: false,
       })
+      setCargando(false)
       return
     }
 
     registrarConsulta(r.termino, '')
-    setCargando(true)
 
-    // Mensaje "pensando": MobileNet ya vio la foto; ahora DeepSeek razona.
-    const idBot = idUnico()
-    agregarMensaje({
-      id: idBot,
-      emisor: 'bot',
+    // La visión ya vio la foto; ahora DeepSeek razona.
+    actualizarMensaje(idBot, {
       texto: `Identifiqué ${r.etiqueta || 'tu producto'} en tu foto. Déjame recomendarte…`,
-      pensando: true,
     })
     const inicio = Date.now()
 
@@ -896,7 +910,11 @@ export function Asistente() {
                   </button>
                 ))}
             {puedeComprar && (
-              <BotonBuscarFoto onResultado={manejarFotoComprador} className="chip" />
+              <BotonBuscarFoto
+                onResultado={manejarFotoComprador}
+                onInicio={iniciarFotoComprador}
+                className="chip"
+              />
             )}
             {puedeComprar && (
               <button className="chip" onClick={() => navegar('/carrito')}>

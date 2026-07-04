@@ -7,6 +7,8 @@ import { Icono } from './Icono'
 interface Props {
   // Se llama con el resultado de identificar la foto y filtrar el catálogo.
   onResultado: (r: ResultadoBusquedaVisual) => void
+  // Se llama al EMPEZAR a analizar (para mostrar feedback tipo "analizando…").
+  onInicio?: () => void
   // Clase del botón (para reusarlo con distintos estilos: chip, btn, etc.).
   className?: string
 }
@@ -14,7 +16,7 @@ interface Props {
 // Botón "Buscar por foto": abre un menú con dos opciones —elegir una foto de la
 // galería o tomarla con la cámara—. La IA identifica el producto (MobileNet en el
 // navegador, o la nube) y devuelve los productos del catálogo similares.
-export function BotonBuscarFoto({ onResultado, className }: Props) {
+export function BotonBuscarFoto({ onResultado, onInicio, className }: Props) {
   const { productos } = useProductos()
   const [analizando, setAnalizando] = useState(false)
   const [menu, setMenu] = useState(false)
@@ -30,6 +32,7 @@ export function BotonBuscarFoto({ onResultado, className }: Props) {
   }, [menu])
 
   async function alElegir(file: File) {
+    onInicio?.() // avisa al chat que ya empezamos (muestra "analizando…")
     setAnalizando(true)
     try {
       const dataURL = await comprimirImagen(file)
