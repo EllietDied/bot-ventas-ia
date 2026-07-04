@@ -103,8 +103,7 @@ export function Checkout() {
   const [pasoActual, setPasoActual] = useState(0)
   const [pagado, setPagado] = useState(false)
   const [totalPagado, setTotalPagado] = useState(0)
-  const [pedidoId, setPedidoId] = useState('')
-  const [envioConfirmado, setEnvioConfirmado] = useState(false)
+  const [direccionEnvio, setDireccionEnvio] = useState<Direccion | null>(null)
 
   // Billetera del comprador (saldo en modo local), para poder pagar con el saldo.
   const idUsuario = usuarioActual?.idUsuario ?? ''
@@ -118,39 +117,6 @@ export function Checkout() {
   }, [enSupabase])
   // Saldo que mostramos y validamos: el de la base en Supabase, el local en modo prueba.
   const saldoDisponible = enSupabase ? saldoServidor ?? 0 : billetera.saldo
-
-  // Tras el pago, guardamos la dirección de envío elegida en el pedido.
-  function confirmarEnvio(dir: Direccion) {
-    if (pedidoId) actualizarEnvio(pedidoId, dir)
-    setEnvioConfirmado(true)
-    toast.exito('¡Dirección de envío guardada!')
-  }
-
-  // ----- Tras pagar: pedimos a dónde enviar el pedido -----
-  if (pagado && !envioConfirmado) {
-    return (
-      <div className="pagina">
-        <h1>Pago</h1>
-        <div className="checkout-confirmacion">
-          <h2>
-            <Icono nombre="check" size={22} /> ¡Pago procesado!
-          </h2>
-          <p className="texto-tenue">Solo falta un paso: dinos a dónde enviarlo.</p>
-          <SelectorEnvio
-            idUsuario={idUsuario}
-            prefill={{
-              receptor: usuarioActual
-                ? `${usuarioActual.nombre} ${usuarioActual.apellido}`.trim()
-                : '',
-              telefono: usuarioActual?.telefono,
-              direccion: usuarioActual?.direccion,
-            }}
-            onConfirmar={confirmarEnvio}
-          />
-        </div>
-      </div>
-    )
-  }
 
   // ----- Confirmación final -----
   if (pagado) {
@@ -231,6 +197,13 @@ export function Checkout() {
       return
     }
 
+    // Primero la dirección de envío: no se paga sin ella.
+    if (!direccionEnvio) {
+      setError('Elige o agrega una dirección de envío antes de pagar.')
+      toast.error('Elige una dirección de envío')
+      return
+    }
+
     // Pagar con billetera (modo prueba/local): el saldo local debe alcanzar.
     // En modo Supabase, quien valida el saldo es el servidor (función segura).
     if (metodoPago === 'billetera' && !enSupabase && billetera.saldo < total) {
@@ -279,7 +252,7 @@ export function Checkout() {
         metodoPago,
         banco: metodoPago === 'transferencia' ? banco : undefined,
       })
-      if (creado) setPedidoId(creado.idPedido)
+      if (creado && direccionEnvio) actualizarEnvio(creado.idPedido, direccionEnvio)
       // Si pagó con la billetera, descontamos el total de su saldo.
       if (metodoPago === 'billetera') {
         const nuevo = aplicarCompra(
@@ -329,7 +302,7 @@ export function Checkout() {
       toast.error(res.error || 'No se pudo completar el pago.')
       return
     }
-    if (res.pedidoId) setPedidoId(String(res.pedidoId))
+    if (res.pedidoId && direccionEnvio) actualizarEnvio(String(res.pedidoId), direccionEnvio)
     setPasoActual(4)
     vaciarCarrito()
     setPagado(true)
@@ -365,6 +338,19 @@ export function Checkout() {
 
         {/* Método de pago y total */}
         <aside className="resumen">
+          <h2>Datos de envío</h2>
+          <SelectorEnvio
+            idUsuario={idUsuario}
+            prefill={{
+              receptor: usuarioActual
+                ? `${usuarioActual.nombre} ${usuarioActual.apellido}`.trim()
+                : '',
+              telefono: usuarioActual?.telefono,
+              direccion: usuarioActual?.direccion,
+            }}
+            onSeleccionar={setDireccionEnvio}
+          />
+
           <h2>Método de pago</h2>
           <p className="metodos-pago-titulo">Selecciona un método de pago</p>
           <div className="metodos-pago">

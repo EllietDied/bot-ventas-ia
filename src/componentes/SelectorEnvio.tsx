@@ -10,12 +10,13 @@ interface Props {
   idUsuario: string
   // Datos para pre-llenar una dirección nueva (los del perfil del cliente).
   prefill?: { receptor?: string; telefono?: string; direccion?: string }
-  onConfirmar: (dir: Direccion) => void
+  // Se llama cada vez que cambia la dirección elegida (o null si aún no hay ninguna).
+  onSeleccionar: (dir: Direccion | null) => void
 }
 
-// Tras el pago: el cliente elige una de sus direcciones guardadas (hasta 3) o agrega
-// una nueva. Al confirmar, devuelve la dirección elegida.
-export function SelectorEnvio({ idUsuario, prefill, onConfirmar }: Props) {
+// El cliente elige una de sus direcciones guardadas (hasta 3) o agrega una nueva,
+// ANTES de pagar. Cada cambio se notifica al checkout con onSeleccionar.
+export function SelectorEnvio({ idUsuario, prefill, onSeleccionar }: Props) {
   const [direcciones, setDirecciones] = useState<Direccion[]>([])
   const [elegida, setElegida] = useState('')
   const [agregando, setAgregando] = useState(false)
@@ -28,17 +29,29 @@ export function SelectorEnvio({ idUsuario, prefill, onConfirmar }: Props) {
     referencia: '',
   })
 
-  // Al montar, cargamos las direcciones guardadas del cliente.
+  // Al montar, cargamos las direcciones guardadas y preseleccionamos la primera.
   useEffect(() => {
     listarDirecciones(idUsuario).then((ds) => {
       setDirecciones(ds)
-      if (ds.length > 0) setElegida(ds[0].id)
-      else setAgregando(true) // si no tiene ninguna, mostramos el formulario directo
+      if (ds.length > 0) {
+        setElegida(ds[0].id)
+        onSeleccionar(ds[0])
+      } else {
+        setAgregando(true)
+        onSeleccionar(null)
+      }
     })
+    // onSeleccionar viene de un useState del padre (estable); no va en deps.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [idUsuario])
 
   function set(k: keyof typeof form, v: string) {
     setForm((f) => ({ ...f, [k]: v }))
+  }
+
+  function elegir(d: Direccion) {
+    setElegida(d.id)
+    onSeleccionar(d)
   }
 
   async function guardarNueva() {
@@ -61,19 +74,13 @@ export function SelectorEnvio({ idUsuario, prefill, onConfirmar }: Props) {
     }
     setDirecciones((prev) => [...prev, nueva])
     setElegida(nueva.id)
+    onSeleccionar(nueva)
     setAgregando(false)
     setForm({ receptor: '', telefono: '', direccion: '', referencia: '' })
   }
 
-  function confirmar() {
-    const dir = direcciones.find((d) => d.id === elegida)
-    if (dir) onConfirmar(dir)
-  }
-
   return (
     <div className="selector-envio">
-      <h2>¿A dónde enviamos tu pedido?</h2>
-
       {/* Direcciones guardadas (elige una) */}
       {direcciones.length > 0 && (
         <div className="direcciones-lista">
@@ -83,7 +90,7 @@ export function SelectorEnvio({ idUsuario, prefill, onConfirmar }: Props) {
                 type="radio"
                 name="dir"
                 checked={elegida === d.id}
-                onChange={() => setElegida(d.id)}
+                onChange={() => elegir(d)}
               />
               <span>
                 <strong>{d.receptor}</strong> — {d.direccion}
@@ -145,17 +152,6 @@ export function SelectorEnvio({ idUsuario, prefill, onConfirmar }: Props) {
             + Agregar otra dirección
           </button>
         )
-      )}
-
-      {/* Confirmar el envío a la dirección elegida */}
-      {!agregando && direcciones.length > 0 && (
-        <button
-          className="btn btn-primario btn-bloque"
-          style={{ marginTop: '1rem' }}
-          onClick={confirmar}
-        >
-          Confirmar envío a esta dirección
-        </button>
       )}
     </div>
   )
