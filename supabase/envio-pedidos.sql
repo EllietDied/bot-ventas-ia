@@ -7,11 +7,16 @@
 -- ============================================================
 
 alter table public.pedidos
-  add column if not exists envio_receptor  text,
-  add column if not exists envio_telefono   text,
-  add column if not exists envio_direccion  text,
-  add column if not exists envio_referencia text;
+  add column if not exists envio_receptor     text,
+  add column if not exists envio_telefono     text,
+  add column if not exists envio_direccion    text,
+  add column if not exists envio_referencia   text,
+  add column if not exists envio_dni          text,
+  add column if not exists envio_departamento text,
+  add column if not exists envio_provincia    text,
+  add column if not exists envio_distrito     text,
+  add column if not exists envio_correo       text;
 
 -- ============================================================
--- Fin. La app las escribe tras el pago (actualizarEnvioSupabase).
+-- Fin. La app las escribe tras elegir la dirección (actualizarEnvioSupabase).
 -- ============================================================

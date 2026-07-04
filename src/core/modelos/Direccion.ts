@@ -5,4 +5,10 @@ export interface Direccion {
   telefono: string
   direccion: string
   referencia?: string // indicaciones para llegar (opcional)
+  // Datos para un envío más seguro y confiable:
+  dni?: string // documento de quien recibe (verificación al entregar)
+  departamento?: string // departamento / región
+  provincia?: string
+  distrito?: string
+  correo?: string // avisos y seguimiento del envío
 }

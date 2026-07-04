@@ -103,10 +103,14 @@ function TarjetaPedido({ pedido }: { pedido: Pedido }) {
 
       {pedido.envio && (
         <div className="pedido-envio">
-          <Icono nombre="caja" size={15} /> Envío a <strong>{pedido.envio.receptor}</strong> —{' '}
-          {pedido.envio.direccion}
+          <Icono nombre="caja" size={15} /> Envío a <strong>{pedido.envio.receptor}</strong>
+          {pedido.envio.dni ? ` (DNI ${pedido.envio.dni})` : ''} — {pedido.envio.direccion}
+          {[pedido.envio.distrito, pedido.envio.provincia, pedido.envio.departamento]
+            .filter(Boolean)
+            .map((x) => ', ' + x)
+            .join('')}
           {pedido.envio.referencia ? ` (${pedido.envio.referencia})` : ''}
-          {pedido.envio.telefono ? ` · ${pedido.envio.telefono}` : ''}
+          {pedido.envio.telefono ? ` · 📞 ${pedido.envio.telefono}` : ''}
         </div>
       )}
     </div>

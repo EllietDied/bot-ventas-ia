@@ -21,6 +21,11 @@ function mapFila(d: any): Direccion {
     telefono: d.telefono ?? '',
     direccion: d.direccion ?? '',
     referencia: d.referencia ?? '',
+    dni: d.dni ?? '',
+    departamento: d.departamento ?? '',
+    provincia: d.provincia ?? '',
+    distrito: d.distrito ?? '',
+    correo: d.correo ?? '',
   }
 }
 
@@ -57,6 +62,11 @@ export async function agregarDireccion(
         telefono: dir.telefono,
         direccion: dir.direccion,
         referencia: dir.referencia ?? null,
+        dni: dir.dni ?? null,
+        departamento: dir.departamento ?? null,
+        provincia: dir.provincia ?? null,
+        distrito: dir.distrito ?? null,
+        correo: dir.correo ?? null,
       })
       .select()
       .single()

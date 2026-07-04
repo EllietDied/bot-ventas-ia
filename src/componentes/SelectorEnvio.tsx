@@ -28,6 +28,11 @@ export function SelectorEnvio({ idUsuario, prefill, onSeleccionar }: Props) {
     telefono: prefill?.telefono ?? '',
     direccion: prefill?.direccion ?? '',
     referencia: '',
+    dni: '',
+    departamento: '',
+    provincia: '',
+    distrito: '',
+    correo: '',
   })
 
   useEffect(() => {
@@ -68,6 +73,11 @@ export function SelectorEnvio({ idUsuario, prefill, onSeleccionar }: Props) {
       telefono: form.telefono.trim(),
       direccion: form.direccion.trim(),
       referencia: form.referencia.trim(),
+      dni: form.dni.trim(),
+      departamento: form.departamento.trim(),
+      provincia: form.provincia.trim(),
+      distrito: form.distrito.trim(),
+      correo: form.correo.trim(),
     })
     setGuardando(false)
     if (!nueva) {
@@ -78,7 +88,10 @@ export function SelectorEnvio({ idUsuario, prefill, onSeleccionar }: Props) {
     setElegida(nueva.id)
     onSeleccionar(nueva)
     setAgregando(false)
-    setForm({ receptor: '', telefono: '', direccion: '', referencia: '' })
+    setForm({
+      receptor: '', telefono: '', direccion: '', referencia: '',
+      dni: '', departamento: '', provincia: '', distrito: '', correo: '',
+    })
   }
 
   return (
@@ -133,12 +146,52 @@ export function SelectorEnvio({ idUsuario, prefill, onSeleccionar }: Props) {
             <input value={form.receptor} onChange={(e) => set('receptor', e.target.value)} />
           </label>
           <label className="campo">
+            <span>DNI / documento de quien recibe</span>
+            <input
+              value={form.dni}
+              placeholder="Se pide al entregar, para tu seguridad"
+              onChange={(e) => set('dni', e.target.value)}
+            />
+          </label>
+          <label className="campo">
             <span>Teléfono</span>
             <input value={form.telefono} onChange={(e) => set('telefono', e.target.value)} />
           </label>
           <label className="campo">
+            <span>Correo (avisos del envío)</span>
+            <input type="email" value={form.correo} onChange={(e) => set('correo', e.target.value)} />
+          </label>
+          <label className="campo">
             <span>Dirección *</span>
-            <input value={form.direccion} onChange={(e) => set('direccion', e.target.value)} />
+            <input
+              value={form.direccion}
+              placeholder="Calle / Av. y número"
+              onChange={(e) => set('direccion', e.target.value)}
+            />
+          </label>
+          <label className="campo">
+            <span>Departamento / Región</span>
+            <input
+              value={form.departamento}
+              placeholder="Ej. Lambayeque"
+              onChange={(e) => set('departamento', e.target.value)}
+            />
+          </label>
+          <label className="campo">
+            <span>Provincia</span>
+            <input
+              value={form.provincia}
+              placeholder="Ej. Chiclayo"
+              onChange={(e) => set('provincia', e.target.value)}
+            />
+          </label>
+          <label className="campo">
+            <span>Distrito</span>
+            <input
+              value={form.distrito}
+              placeholder="Ej. La Victoria"
+              onChange={(e) => set('distrito', e.target.value)}
+            />
           </label>
           <label className="campo">
             <span>Referencia</span>

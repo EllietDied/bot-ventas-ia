@@ -22,6 +22,11 @@ interface FilaPedido {
   envio_telefono?: string | null
   envio_direccion?: string | null
   envio_referencia?: string | null
+  envio_dni?: string | null
+  envio_departamento?: string | null
+  envio_provincia?: string | null
+  envio_distrito?: string | null
+  envio_correo?: string | null
 }
 
 interface FilaDetalle {
@@ -69,6 +74,11 @@ function mapPedido(fila: FilaPedido, detalles: FilaDetalle[]): Pedido {
           telefono: fila.envio_telefono ?? '',
           direccion: fila.envio_direccion,
           referencia: fila.envio_referencia ?? '',
+          dni: fila.envio_dni ?? '',
+          departamento: fila.envio_departamento ?? '',
+          provincia: fila.envio_provincia ?? '',
+          distrito: fila.envio_distrito ?? '',
+          correo: fila.envio_correo ?? '',
         }
       : undefined,
   }
@@ -156,6 +166,11 @@ export async function actualizarEnvioSupabase(id: number, envio: Direccion): Pro
       envio_telefono: envio.telefono,
       envio_direccion: envio.direccion,
       envio_referencia: envio.referencia ?? null,
+      envio_dni: envio.dni ?? null,
+      envio_departamento: envio.departamento ?? null,
+      envio_provincia: envio.provincia ?? null,
+      envio_distrito: envio.distrito ?? null,
+      envio_correo: envio.correo ?? null,
     })
     .eq('id', id)
 }

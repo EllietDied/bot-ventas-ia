@@ -10,9 +10,23 @@ create table if not exists public.direcciones (
   telefono text,
   direccion text not null,
   referencia text,
+  -- Datos para un envío más seguro y confiable:
+  dni text,
+  departamento text,
+  provincia text,
+  distrito text,
+  correo text,
   creado_en timestamptz not null default now()
 );
 create index if not exists idx_direcciones_usuario on public.direcciones (usuario_id);
+
+-- Si ya habías creado la tabla antes, añade las columnas nuevas (idempotente).
+alter table public.direcciones
+  add column if not exists dni          text,
+  add column if not exists departamento text,
+  add column if not exists provincia    text,
+  add column if not exists distrito     text,
+  add column if not exists correo       text;
 
 -- SEGURIDAD (RLS): cada quien gestiona SOLO sus propias direcciones.
 alter table public.direcciones enable row level security;
