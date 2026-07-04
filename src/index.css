@@ -1288,6 +1288,9 @@ a:hover {
   margin-bottom: 0.4rem;
   object-fit: cover;
 }
+.chat-foto-enviada:last-child {
+  margin-bottom: 0; /* si la foto va sola (sin texto), sin espacio sobrante */
+}
 .seccion-foto {
   margin-bottom: 1.2rem;
 }

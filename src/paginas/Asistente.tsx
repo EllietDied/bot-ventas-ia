@@ -693,7 +693,14 @@ export function Asistente() {
   // Al ELEGIR la foto (antes de analizarla): mostramos el mensaje del usuario y un
   // "analizando…" en el chat, para que la espera (la visión puede tardar) se sienta bien.
   function iniciarFotoComprador(dataURL: string) {
-    agregarMensaje({ id: idUnico(), emisor: 'usuario', texto: 'Te envié una foto', imagen: dataURL })
+    // Si hay foto, la mostramos SOLA (sin texto). Solo si falló la compresión
+    // usamos un texto de respaldo para que la burbuja no quede vacía.
+    agregarMensaje({
+      id: idUnico(),
+      emisor: 'usuario',
+      texto: dataURL ? '' : 'Te envié una foto',
+      imagen: dataURL,
+    })
     const idBot = idUnico()
     idFotoBot.current = idBot
     agregarMensaje({ id: idBot, emisor: 'bot', texto: '🔍 Analizando tu foto', pensando: true })
