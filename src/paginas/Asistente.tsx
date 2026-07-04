@@ -701,8 +701,11 @@ export function Asistente() {
       .filter((m) => !m.pensando)
       .slice(-10)
       .map((m) => ({ rol: m.emisor, texto: m.texto }))
+    // Le pasamos a la IA los productos que la VISIÓN ya identificó (así los "ve" seguro
+    // y no dice que no hay); si no encontró ninguno, le damos el catálogo completo.
+    const productosParaIA = r.productos.length > 0 ? r.productos : productos
     const contexto = {
-      productos,
+      productos: productosParaIA,
       categoriasConsultadas,
       nombreCliente: primerNombre,
       carrito: items.map((i) => ({
@@ -715,7 +718,7 @@ export function Asistente() {
     }
 
     // DeepSeek (o el modo local, si falla/está apagado) razona sobre el tipo detectado.
-    const consulta = `El cliente subió una foto y la identifiqué como ${r.etiqueta || r.termino}. Recomiéndale y compara las mejores opciones de ${r.termino} disponibles en el catálogo.`
+    const consulta = `El cliente subió una foto y la identifiqué como ${r.etiqueta || r.termino}. De estos productos del catálogo, recomiéndale y compara las mejores opciones.`
     const resultado = await obtenerRespuestaAsistente(consulta, contexto)
 
     const transcurrido = Date.now() - inicio
