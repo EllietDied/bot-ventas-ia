@@ -1296,28 +1296,114 @@ a:hover {
   text-align: left;
   margin-top: 0.9rem;
 }
+.envio-ayuda {
+  font-size: 0.9rem;
+  opacity: 0.85;
+  margin: 0.2rem 0 0.5rem;
+}
 .direcciones-lista {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  margin: 0.7rem 0;
+  margin: 0.3rem 0;
 }
-.direccion-item {
+/* Tarjeta de dirección (toda clickeable). */
+.direccion-card {
   display: flex;
-  align-items: flex-start;
-  gap: 0.6rem;
-  padding: 0.7rem 0.9rem;
-  border: 1px solid var(--superficie);
-  border-radius: 10px;
+  align-items: center;
+  gap: 0.7rem;
+  width: 100%;
+  text-align: left;
+  padding: 0.7rem 0.85rem;
+  border: 1.5px solid var(--superficie);
+  border-radius: 12px;
   background: var(--superficie);
+  color: inherit;
   cursor: pointer;
-  font-size: 0.92rem;
+  transition: border-color 0.15s, transform 0.1s, background 0.15s;
 }
-.direccion-item.activo {
-  outline: 2px solid #16a34a;
+.direccion-card:hover {
+  transform: translateY(-1px);
 }
-.direccion-item input {
-  margin-top: 0.2rem;
+.direccion-card.activa {
+  border-color: #16a34a;
+  background: rgba(22, 163, 74, 0.1);
+}
+.direccion-pin {
+  color: #16a34a;
+  display: flex;
+  flex-shrink: 0;
+}
+.direccion-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  flex: 1;
+  font-size: 0.88rem;
+  line-height: 1.35;
+  min-width: 0;
+}
+.direccion-info strong {
+  font-size: 0.95rem;
+}
+.direccion-check {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.78rem;
+  color: #fff;
+  flex-shrink: 0;
+  border: 1.5px solid rgba(128, 128, 128, 0.4);
+}
+.direccion-card.activa .direccion-check {
+  background: #16a34a;
+  border-color: #16a34a;
+}
+.envio-confirmado {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0.55rem 0;
+  font-size: 0.85rem;
+  color: #16a34a;
+  font-weight: 600;
+}
+.direccion-form {
+  margin-top: 0.6rem;
+  padding: 0.9rem;
+  border-radius: 12px;
+  background: var(--superficie);
+  border: 1px dashed rgba(128, 128, 128, 0.4);
+}
+.direccion-form h3 {
+  margin: 0 0 0.5rem;
+  font-size: 0.98rem;
+}
+.direccion-form-botones {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.4rem;
+  flex-wrap: wrap;
+}
+.btn-agregar-dir {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+  padding: 0.5rem 0.9rem;
+  border: 1.5px dashed #16a34a;
+  border-radius: 10px;
+  background: transparent;
+  color: #16a34a;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+.btn-agregar-dir:hover {
+  background: rgba(22, 163, 74, 0.1);
 }
 .pedido-envio {
   margin-top: 0.5rem;

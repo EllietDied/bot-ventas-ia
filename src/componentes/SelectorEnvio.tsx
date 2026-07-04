@@ -5,6 +5,7 @@ import {
   agregarDireccion,
   MAX_DIRECCIONES,
 } from '../core/servicios/DireccionesService'
+import { Icono } from './Icono'
 
 interface Props {
   idUsuario: string
@@ -15,7 +16,7 @@ interface Props {
 }
 
 // El cliente elige una de sus direcciones guardadas (hasta 3) o agrega una nueva,
-// ANTES de pagar. Cada cambio se notifica al checkout con onSeleccionar.
+// ANTES de pagar. Da feedback claro de a dónde se enviará el pedido.
 export function SelectorEnvio({ idUsuario, prefill, onSeleccionar }: Props) {
   const [direcciones, setDirecciones] = useState<Direccion[]>([])
   const [elegida, setElegida] = useState('')
@@ -29,7 +30,6 @@ export function SelectorEnvio({ idUsuario, prefill, onSeleccionar }: Props) {
     referencia: '',
   })
 
-  // Al montar, cargamos las direcciones guardadas y preseleccionamos la primera.
   useEffect(() => {
     listarDirecciones(idUsuario).then((ds) => {
       setDirecciones(ds)
@@ -44,6 +44,8 @@ export function SelectorEnvio({ idUsuario, prefill, onSeleccionar }: Props) {
     // onSeleccionar viene de un useState del padre (estable); no va en deps.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [idUsuario])
+
+  const elegidaObj = direcciones.find((d) => d.id === elegida) ?? null
 
   function set(k: keyof typeof form, v: string) {
     setForm((f) => ({ ...f, [k]: v }))
@@ -81,32 +83,51 @@ export function SelectorEnvio({ idUsuario, prefill, onSeleccionar }: Props) {
 
   return (
     <div className="selector-envio">
-      {/* Direcciones guardadas (elige una) */}
       {direcciones.length > 0 && (
-        <div className="direcciones-lista">
-          {direcciones.map((d) => (
-            <label key={d.id} className={'direccion-item' + (elegida === d.id ? ' activo' : '')}>
-              <input
-                type="radio"
-                name="dir"
-                checked={elegida === d.id}
-                onChange={() => elegir(d)}
-              />
-              <span>
-                <strong>{d.receptor}</strong> — {d.direccion}
-                {d.referencia ? ` (${d.referencia})` : ''}
-                <br />
-                <span className="texto-tenue">{d.telefono}</span>
-              </span>
-            </label>
-          ))}
-        </div>
+        <>
+          <p className="envio-ayuda">Elige a dónde te lo enviamos:</p>
+          <div className="direcciones-lista">
+            {direcciones.map((d) => (
+              <button
+                type="button"
+                key={d.id}
+                className={'direccion-card' + (elegida === d.id ? ' activa' : '')}
+                onClick={() => elegir(d)}
+              >
+                <span className="direccion-pin">
+                  <Icono nombre="caja" size={18} />
+                </span>
+                <span className="direccion-info">
+                  <strong>{d.receptor}</strong>
+                  <span>
+                    {d.direccion}
+                    {d.referencia ? ` · ${d.referencia}` : ''}
+                  </span>
+                  {d.telefono && <span className="texto-tenue">📞 {d.telefono}</span>}
+                </span>
+                <span className="direccion-check">{elegida === d.id ? '✓' : ''}</span>
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+
+      {elegidaObj && !agregando && (
+        <p className="envio-confirmado">
+          <Icono nombre="check" size={14} /> Perfecto, lo enviaremos a{' '}
+          <strong>{elegidaObj.receptor}</strong>.
+        </p>
       )}
 
       {/* Formulario para una dirección nueva */}
       {agregando ? (
-        <div className="tarjeta" style={{ padding: '1rem', marginTop: '0.6rem' }}>
-          <h3>Nueva dirección</h3>
+        <div className="direccion-form">
+          <h3>
+            {direcciones.length > 0 ? 'Agregar dirección' : 'Tu dirección de envío'}{' '}
+            <span className="texto-tenue">
+              ({direcciones.length}/{MAX_DIRECCIONES})
+            </span>
+          </h3>
           <label className="campo">
             <span>Quién recibe *</span>
             <input value={form.receptor} onChange={(e) => set('receptor', e.target.value)} />
@@ -121,10 +142,14 @@ export function SelectorEnvio({ idUsuario, prefill, onSeleccionar }: Props) {
           </label>
           <label className="campo">
             <span>Referencia</span>
-            <input value={form.referencia} onChange={(e) => set('referencia', e.target.value)} />
+            <input
+              value={form.referencia}
+              placeholder="Ej. frente al parque, casa azul…"
+              onChange={(e) => set('referencia', e.target.value)}
+            />
           </label>
           {error && <p className="mensaje-error">{error}</p>}
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <div className="direccion-form-botones">
             <button className="btn btn-primario" disabled={guardando} onClick={guardarNueva}>
               {guardando ? 'Guardando…' : 'Guardar dirección'}
             </button>
@@ -143,13 +168,8 @@ export function SelectorEnvio({ idUsuario, prefill, onSeleccionar }: Props) {
         </div>
       ) : (
         direcciones.length < MAX_DIRECCIONES && (
-          <button
-            type="button"
-            className="chip"
-            onClick={() => setAgregando(true)}
-            style={{ marginTop: '0.6rem' }}
-          >
-            + Agregar otra dirección
+          <button type="button" className="btn-agregar-dir" onClick={() => setAgregando(true)}>
+            <Icono nombre="agregar" size={16} /> Agregar otra dirección
           </button>
         )
       )}
