@@ -22,6 +22,7 @@ import { esVendedor } from '../core/modelos/Vendedor'
 import { comprimirImagen } from '../util/imagen'
 import { cargar, guardar } from '../core/datos/almacenamiento'
 import { usarSupabase } from '../core/datos/supabase'
+import { CATEGORIAS } from '../core/datos/categorias'
 import { cargarChatSupabase, guardarChatSupabase } from '../core/servicios/ChatService'
 import { useToast } from '../contexto/ToastContext'
 import {
@@ -373,11 +374,16 @@ export function Asistente() {
         if (t !== 'omitir') b.descripcion = v
         setFlujo({ ...f, paso: 'categoria', borrador: b })
         return responderVendedor(
-          '¿En qué categoría va?',
-          [...new Set(productos.map((p) => p.categoria))].map((c) => ({ label: c, valor: c })),
+          '¿En qué categoría va? Elige una:',
+          CATEGORIAS.map((c) => ({ label: c, valor: c })),
         )
       }
       if (f.paso === 'categoria') {
+        if (!(CATEGORIAS as readonly string[]).includes(v))
+          return responderVendedor(
+            'Por favor elige una categoría de la lista:',
+            CATEGORIAS.map((c) => ({ label: c, valor: c })),
+          )
         b.categoria = v
         setFlujo({ ...f, paso: 'precio', borrador: b })
         return responderVendedor('¿Cuál es el precio en soles? (ej. 199.90)')
@@ -437,6 +443,13 @@ export function Asistente() {
           setFlujo({ ...f, paso: 'valor', campo: 'imagen' })
           return responderVendedor(`Sube la nueva foto de "${prod.nombre}".`, undefined, true)
         }
+        if (t === 'categoria') {
+          setFlujo({ ...f, paso: 'valor', campo: 'categoria' })
+          return responderVendedor(
+            `Categoría actual: ${prod.categoria}. Elige la nueva:`,
+            CATEGORIAS.map((c) => ({ label: c, valor: c })),
+          )
+        }
         if (!['precio', 'stock', 'nombre', 'marca', 'descripcion', 'categoria'].includes(t))
           return responderVendedor('Elige un campo de la lista, por favor.')
         const actual =
@@ -469,7 +482,14 @@ export function Asistente() {
         } else if (campo === 'nombre') cambios.nombre = v
         else if (campo === 'marca') cambios.marca = v
         else if (campo === 'descripcion') cambios.descripcion = v
-        else if (campo === 'categoria') cambios.categoria = v
+        else if (campo === 'categoria') {
+          if (!(CATEGORIAS as readonly string[]).includes(v))
+            return responderVendedor(
+              'Elige una categoría de la lista, por favor.',
+              CATEGORIAS.map((c) => ({ label: c, valor: c })),
+            )
+          cambios.categoria = v
+        }
         else return responderVendedor('No sé qué campo cambiar. Empecemos de nuevo.', MENU_VENDEDOR)
 
         editarProducto(prod.id, cambios)

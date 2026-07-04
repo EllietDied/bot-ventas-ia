@@ -9,6 +9,7 @@ import { ImagenProducto } from '../componentes/ImagenProducto'
 import { Icono } from '../componentes/Icono'
 import { comprimirImagen } from '../util/imagen'
 import { codigoProducto } from '../core/modelos/Producto'
+import { CATEGORIAS } from '../core/datos/categorias'
 
 // Pantalla del vendedor: publicar productos y actualizar stock.
 export function PanelVendedor() {
@@ -187,11 +188,14 @@ export function PanelVendedor() {
             </label>
             <label className="campo">
               <span>Categoría *</span>
-              <input
-                value={categoria}
-                onChange={(e) => setCategoria(e.target.value)}
-                placeholder="Ej. Periféricos, Componentes..."
-              />
+              <select value={categoria} onChange={(e) => setCategoria(e.target.value)}>
+                <option value="">Elige una categoría…</option>
+                {CATEGORIAS.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
             </label>
             <div className="form-grid">
               <label className="campo">
