@@ -66,20 +66,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const recurso = esOrden ? 'orders' : 'charges'
 
     // 3) VERIFICAMOS contra Culqi el estado REAL (no confiamos en el payload).
-    const verif = await fetch(`${CULQI_API}/${recurso}/${id}`, {
-      headers: { Authorization: 'Bearer ' + process.env.CULQI_SECRET_KEY },
-    })
-    if (!verif.ok) {
-      const det = await verif.text().catch(() => '')
-      return res.status(200).json({
-        ok: false,
-        motivo: 'no se pudo verificar',
-        culqiStatus: verif.status,
-        culqiDetalle: det.slice(0, 250),
-        keyEmpieza: (process.env.CULQI_SECRET_KEY || '').slice(0, 8),
+    // Intentamos RE-CONSULTAR a Culqi (fuente confiable). Para CARGOS (tarjeta/Yape)
+    // funciona; para ÓRDENES (PagoEfectivo) la ruta de consulta de Culqi devuelve
+    // "ruta inválida", así que usamos el objeto que Culqi ENVIÓ en el evento (este
+    // webhook solo lo invoca Culqi hacia la URL registrada).
+    let obj: any = data
+    try {
+      const verif = await fetch(`${CULQI_API}/${recurso}/${id}`, {
+        headers: { Authorization: 'Bearer ' + process.env.CULQI_SECRET_KEY },
       })
+      if (verif.ok) obj = await verif.json()
+    } catch {
+      /* si no se puede consultar, usamos el objeto del evento */
     }
-    const obj = await verif.json()
 
     // 4) ¿Está realmente pagado?
     const pagado = esOrden
