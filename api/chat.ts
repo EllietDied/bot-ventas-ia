@@ -100,9 +100,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
     mensaje = mensaje.trim().slice(0, MAX_MENSAJE)
 
-    // 4) Tomamos SOLO lo necesario del catálogo (sin datos privados).
+    // 4) Tomamos SOLO lo necesario del catálogo (sin datos privados). Enviamos hasta
+    //    40 productos: con menos, la IA "no veía" parte del catálogo y respondía que
+    //    no tenía productos que en realidad sí existen.
     const productos: ProductoCtx[] = Array.isArray(cuerpo.productos)
-      ? cuerpo.productos.slice(0, 12).map((p: any) => ({
+      ? cuerpo.productos.slice(0, 40).map((p: any) => ({
           id: p.id,
           nombre: String(p.nombre ?? ''),
           categoria: String(p.categoria ?? ''),
