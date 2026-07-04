@@ -49,6 +49,7 @@ interface MensajeAsistente {
   acciones?: { label: string; valor: string; icono?: string }[] // botones de elección (flujo del vendedor)
   pedirFoto?: boolean // muestra un selector de foto dentro del chat
   pensando?: boolean // mientras el asistente "procesa" la consulta
+  imagen?: string // foto que el cliente envió (búsqueda por foto), para mostrarla en el chat
 }
 
 // Botones rápidos: lo que se muestra (label) y lo que se le envía al bot (query).
@@ -671,8 +672,8 @@ export function Asistente() {
 
   // Al ELEGIR la foto (antes de analizarla): mostramos el mensaje del usuario y un
   // "analizando…" en el chat, para que la espera (la visión puede tardar) se sienta bien.
-  function iniciarFotoComprador() {
-    agregarMensaje({ id: idUnico(), emisor: 'usuario', texto: '📷 Te envié una foto' })
+  function iniciarFotoComprador(dataURL: string) {
+    agregarMensaje({ id: idUnico(), emisor: 'usuario', texto: 'Te envié una foto', imagen: dataURL })
     const idBot = idUnico()
     idFotoBot.current = idBot
     agregarMensaje({ id: idBot, emisor: 'bot', texto: '🔍 Analizando tu foto', pensando: true })
@@ -823,6 +824,9 @@ export function Asistente() {
                       : 'burbuja usuario'
                   }
                 >
+                  {m.imagen && (
+                    <img className="chat-foto-enviada" src={m.imagen} alt="Foto que enviaste" />
+                  )}
                   {m.texto}
                   {m.pensando && (
                     <span className="puntos-pensando">

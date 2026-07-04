@@ -7,8 +7,8 @@ import { Icono } from './Icono'
 interface Props {
   // Se llama con el resultado de identificar la foto y filtrar el catálogo.
   onResultado: (r: ResultadoBusquedaVisual) => void
-  // Se llama al EMPEZAR a analizar (para mostrar feedback tipo "analizando…").
-  onInicio?: () => void
+  // Se llama al EMPEZAR a analizar, con la foto (dataURL) para mostrarla en el chat.
+  onInicio?: (dataURL: string) => void
   // Clase del botón (para reusarlo con distintos estilos: chip, btn, etc.).
   className?: string
 }
@@ -32,10 +32,15 @@ export function BotonBuscarFoto({ onResultado, onInicio, className }: Props) {
   }, [menu])
 
   async function alElegir(file: File) {
-    onInicio?.() // avisa al chat que ya empezamos (muestra "analizando…")
+    let dataURL = ''
+    try {
+      dataURL = await comprimirImagen(file)
+    } catch {
+      /* si falla la compresión, la búsqueda caerá al aviso de abajo */
+    }
+    onInicio?.(dataURL) // muestra la foto y el "analizando…" en el chat
     setAnalizando(true)
     try {
-      const dataURL = await comprimirImagen(file)
       const resultado = await buscarPorFoto(dataURL, productos)
       onResultado(resultado)
     } catch {

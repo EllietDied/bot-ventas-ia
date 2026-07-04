@@ -1279,6 +1279,15 @@ a:hover {
 .foto-menu-item:hover {
   background: var(--superficie);
 }
+/* Foto que el cliente envía en el chat (búsqueda por foto). */
+.chat-foto-enviada {
+  display: block;
+  max-width: 170px;
+  max-height: 170px;
+  border-radius: 10px;
+  margin-bottom: 0.4rem;
+  object-fit: cover;
+}
 .seccion-foto {
   margin-bottom: 1.2rem;
 }
