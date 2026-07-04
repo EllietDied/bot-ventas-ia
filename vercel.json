@@ -4,6 +4,7 @@
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ],
   "functions": {
-    "api/chat.ts": { "maxDuration": 60 }
+    "api/chat.ts": { "maxDuration": 60 },
+    "api/vision.ts": { "maxDuration": 60 }
   }
 }
