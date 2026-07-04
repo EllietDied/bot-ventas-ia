@@ -1246,6 +1246,39 @@ a:hover {
   margin: -0.3rem 0 0.9rem;
   flex-wrap: wrap;
 }
+/* Menú de "Buscar por foto" (galería / cámara). */
+.foto-wrap {
+  position: relative;
+  display: inline-block;
+}
+.foto-menu {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 4px);
+  left: 0;
+  min-width: 230px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.3rem;
+  background: var(--tarjeta, #242424);
+  border: 1px solid var(--superficie);
+  border-radius: 10px;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.28);
+}
+.foto-menu-item {
+  text-align: left;
+  padding: 0.55rem 0.7rem;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-size: 0.92rem;
+}
+.foto-menu-item:hover {
+  background: var(--superficie);
+}
 .seccion-foto {
   margin-bottom: 1.2rem;
 }
