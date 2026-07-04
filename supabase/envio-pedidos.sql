@@ -15,7 +15,8 @@ alter table public.pedidos
   add column if not exists envio_departamento text,
   add column if not exists envio_provincia    text,
   add column if not exists envio_distrito     text,
-  add column if not exists envio_correo       text;
+  add column if not exists envio_correo       text,
+  add column if not exists envio_empresa      text;
 
 -- ============================================================
 -- Fin. La app las escribe tras elegir la dirección (actualizarEnvioSupabase).

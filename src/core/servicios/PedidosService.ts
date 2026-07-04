@@ -27,6 +27,7 @@ interface FilaPedido {
   envio_provincia?: string | null
   envio_distrito?: string | null
   envio_correo?: string | null
+  envio_empresa?: string | null
 }
 
 interface FilaDetalle {
@@ -81,6 +82,7 @@ function mapPedido(fila: FilaPedido, detalles: FilaDetalle[]): Pedido {
           correo: fila.envio_correo ?? '',
         }
       : undefined,
+    empresaEnvio: fila.envio_empresa ?? undefined,
   }
 }
 
@@ -157,7 +159,11 @@ export async function atenderPedidoSupabase(id: number): Promise<void> {
 }
 
 // Guarda la dirección de envío elegida en el pedido.
-export async function actualizarEnvioSupabase(id: number, envio: Direccion): Promise<void> {
+export async function actualizarEnvioSupabase(
+  id: number,
+  envio: Direccion,
+  empresa?: string,
+): Promise<void> {
   if (!supabase) return
   await supabase
     .from('pedidos')
@@ -171,6 +177,7 @@ export async function actualizarEnvioSupabase(id: number, envio: Direccion): Pro
       envio_provincia: envio.provincia ?? null,
       envio_distrito: envio.distrito ?? null,
       envio_correo: envio.correo ?? null,
+      envio_empresa: empresa ?? null,
     })
     .eq('id', id)
 }

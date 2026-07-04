@@ -1405,6 +1405,38 @@ a:hover {
 .btn-agregar-dir:hover {
   background: rgba(22, 163, 74, 0.1);
 }
+/* Selector de empresa de envío (Shalom / Olva). */
+.empresas-envio {
+  display: flex;
+  gap: 0.5rem;
+  margin: 0.3rem 0 0.6rem;
+}
+.empresa-envio {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.7rem;
+  border: 1.5px solid var(--superficie);
+  border-radius: 12px;
+  background: var(--superficie);
+  color: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s, transform 0.1s;
+}
+.empresa-envio:hover {
+  transform: translateY(-1px);
+}
+.empresa-envio.activo {
+  font-weight: 700;
+}
+.empresa-icono {
+  font-size: 1.35rem;
+}
+.empresa-nombre {
+  font-size: 0.9rem;
+}
 .pedido-envio {
   margin-top: 0.5rem;
   font-size: 0.88rem;

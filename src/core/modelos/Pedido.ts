@@ -17,4 +17,5 @@ export interface Pedido {
   estado: EstadoPedido
   pago?: Pago
   envio?: Direccion // dirección de envío elegida tras el pago
+  empresaEnvio?: string // empresa de courier elegida (Shalom / Olva)
 }

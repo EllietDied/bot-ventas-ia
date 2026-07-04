@@ -30,7 +30,7 @@ interface PedidosContextType {
   pedidos: Pedido[]
   pedidosPendientes: Pedido[] // en orden FIFO (el más antiguo primero)
   registrarPedido: (datos: DatosPedido) => Promise<Pedido | undefined>
-  actualizarEnvio: (idPedido: string, envio: Direccion) => void
+  actualizarEnvio: (idPedido: string, envio: Direccion, empresa?: string) => void
   atenderSiguiente: () => Pedido | undefined
   pedidosDe: (correo: string) => Pedido[]
 }
@@ -99,9 +99,11 @@ export function PedidosProvider({ children }: { children: ReactNode }) {
   }
 
   // Guarda la dirección de envío elegida en un pedido ya registrado.
-  function actualizarEnvio(idPedido: string, envio: Direccion) {
-    if (usarSupabase()) actualizarEnvioSupabase(Number(idPedido), envio)
-    setPedidos((prev) => prev.map((p) => (p.idPedido === idPedido ? { ...p, envio } : p)))
+  function actualizarEnvio(idPedido: string, envio: Direccion, empresa?: string) {
+    if (usarSupabase()) actualizarEnvioSupabase(Number(idPedido), envio, empresa)
+    setPedidos((prev) =>
+      prev.map((p) => (p.idPedido === idPedido ? { ...p, envio, empresaEnvio: empresa } : p)),
+    )
   }
 
   // Atiende el primer pedido pendiente usando la cola FIFO.

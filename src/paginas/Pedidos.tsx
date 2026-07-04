@@ -111,6 +111,7 @@ function TarjetaPedido({ pedido }: { pedido: Pedido }) {
             .join('')}
           {pedido.envio.referencia ? ` (${pedido.envio.referencia})` : ''}
           {pedido.envio.telefono ? ` · 📞 ${pedido.envio.telefono}` : ''}
+          {pedido.empresaEnvio ? ` · 🚚 ${pedido.empresaEnvio}` : ''}
         </div>
       )}
     </div>

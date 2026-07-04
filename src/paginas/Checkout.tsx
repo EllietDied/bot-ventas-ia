@@ -87,6 +87,12 @@ const BANCOS_INFO = [
   { nombre: 'BBVA', color: '#004481' },
 ]
 
+// Empresas de courier disponibles para el envío (el cliente elige una).
+const EMPRESAS = [
+  { id: 'Shalom', nombre: 'Shalom', color: '#dc2626' },
+  { id: 'Olva', nombre: 'Olva Courier', color: '#f37021' },
+]
+
 // Pantalla de pago (simulado), guiada paso a paso por el asistente IA.
 export function Checkout() {
   const { items, subtotal, descuento, total, vaciarCarrito } = useCarrito()
@@ -104,6 +110,7 @@ export function Checkout() {
   const [pagado, setPagado] = useState(false)
   const [totalPagado, setTotalPagado] = useState(0)
   const [direccionEnvio, setDireccionEnvio] = useState<Direccion | null>(null)
+  const [empresaEnvio, setEmpresaEnvio] = useState('')
 
   // Billetera del comprador (saldo en modo local), para poder pagar con el saldo.
   const idUsuario = usuarioActual?.idUsuario ?? ''
@@ -204,6 +211,13 @@ export function Checkout() {
       return
     }
 
+    // Y la empresa de envío (Shalom u Olva).
+    if (!empresaEnvio) {
+      setError('Elige la empresa de envío (Shalom u Olva).')
+      toast.error('Elige la empresa de envío')
+      return
+    }
+
     // Pagar con billetera (modo prueba/local): el saldo local debe alcanzar.
     // En modo Supabase, quien valida el saldo es el servidor (función segura).
     if (metodoPago === 'billetera' && !enSupabase && billetera.saldo < total) {
@@ -252,7 +266,7 @@ export function Checkout() {
         metodoPago,
         banco: metodoPago === 'transferencia' ? banco : undefined,
       })
-      if (creado && direccionEnvio) actualizarEnvio(creado.idPedido, direccionEnvio)
+      if (creado && direccionEnvio) actualizarEnvio(creado.idPedido, direccionEnvio, empresaEnvio)
       // Si pagó con la billetera, descontamos el total de su saldo.
       if (metodoPago === 'billetera') {
         const nuevo = aplicarCompra(
@@ -302,7 +316,8 @@ export function Checkout() {
       toast.error(res.error || 'No se pudo completar el pago.')
       return
     }
-    if (res.pedidoId && direccionEnvio) actualizarEnvio(String(res.pedidoId), direccionEnvio)
+    if (res.pedidoId && direccionEnvio)
+      actualizarEnvio(String(res.pedidoId), direccionEnvio, empresaEnvio)
     setPasoActual(4)
     vaciarCarrito()
     setPagado(true)
@@ -350,6 +365,26 @@ export function Checkout() {
             }}
             onSeleccionar={setDireccionEnvio}
           />
+
+          <h2>Empresa de envío</h2>
+          <p className="metodos-pago-titulo">¿Con qué courier quieres recibirlo?</p>
+          <div className="empresas-envio">
+            {EMPRESAS.map((e) => (
+              <button
+                key={e.id}
+                type="button"
+                className={'empresa-envio' + (empresaEnvio === e.id ? ' activo' : '')}
+                style={empresaEnvio === e.id ? { borderColor: e.color, color: e.color } : undefined}
+                onClick={() => {
+                  setEmpresaEnvio(e.id)
+                  setError('')
+                }}
+              >
+                <span className="empresa-icono">🚚</span>
+                <span className="empresa-nombre">{e.nombre}</span>
+              </button>
+            ))}
+          </div>
 
           <h2>Método de pago</h2>
           <p className="metodos-pago-titulo">Selecciona un método de pago</p>
