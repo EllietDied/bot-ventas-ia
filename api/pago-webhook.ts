@@ -69,7 +69,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const verif = await fetch(`${CULQI_API}/${recurso}/${id}`, {
       headers: { Authorization: 'Bearer ' + process.env.CULQI_SECRET_KEY },
     })
-    if (!verif.ok) return res.status(200).json({ ok: false, motivo: 'no se pudo verificar' })
+    if (!verif.ok) {
+      const det = await verif.text().catch(() => '')
+      return res.status(200).json({
+        ok: false,
+        motivo: 'no se pudo verificar',
+        culqiStatus: verif.status,
+        culqiDetalle: det.slice(0, 250),
+        keyEmpieza: (process.env.CULQI_SECRET_KEY || '').slice(0, 8),
+      })
+    }
     const obj = await verif.json()
 
     // 4) ¿Está realmente pagado?
