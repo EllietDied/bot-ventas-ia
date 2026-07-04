@@ -8,6 +8,8 @@ import {
   type EstadoBilletera,
 } from '../core/servicios/BilleteraLocal'
 import { usarPagosReales, crearPagoEfectivo, type PagoEfectivo } from '../core/servicios/PagosService'
+import { usarSupabase } from '../core/datos/supabase'
+import { cargarSaldoServidor } from '../core/servicios/BilleteraSupabase'
 
 // Montos rápidos de recarga (soles).
 const MONTOS = [10, 20, 50, 100]
@@ -24,10 +26,27 @@ export function Billetera() {
   const [cargando, setCargando] = useState(false)
   const [cip, setCip] = useState<PagoEfectivo | null>(null)
 
-  // Cargamos la billetera del usuario actual al entrar.
+  // En modo Supabase el saldo REAL vive en la base (lo acredita el webhook al confirmarse
+  // el pago), NO en el navegador. Lo leemos de ahí; en modo local usamos localStorage.
+  const enSupabase = usarSupabase()
+  const [saldoReal, setSaldoReal] = useState<number | null>(null)
+  const [refrescando, setRefrescando] = useState(false)
+  const saldoMostrado = enSupabase ? saldoReal ?? 0 : billetera.saldo
+
+  async function refrescarSaldo() {
+    setRefrescando(true)
+    try {
+      setSaldoReal(await cargarSaldoServidor())
+    } finally {
+      setRefrescando(false)
+    }
+  }
+
+  // Al entrar cargamos la billetera local y, en Supabase, el saldo real de la base.
   useEffect(() => {
     setBilletera(cargarBilletera(idUsuario))
-  }, [idUsuario])
+    if (enSupabase) cargarSaldoServidor().then(setSaldoReal)
+  }, [idUsuario, enSupabase])
 
   async function recargar() {
     const valor = Number(monto)
@@ -90,7 +109,18 @@ export function Billetera() {
       {/* Saldo disponible */}
       <section className="tarjeta billetera-saldo">
         <span className="billetera-saldo-label">Saldo disponible</span>
-        <span className="billetera-saldo-monto">S/ {billetera.saldo.toFixed(2)}</span>
+        <span className="billetera-saldo-monto">S/ {saldoMostrado.toFixed(2)}</span>
+        {enSupabase && (
+          <button
+            type="button"
+            className="chip"
+            onClick={refrescarSaldo}
+            disabled={refrescando}
+            style={{ marginTop: '0.4rem' }}
+          >
+            {refrescando ? 'Actualizando…' : '↻ Actualizar saldo'}
+          </button>
+        )}
       </section>
 
       {/* Recargar */}
@@ -138,7 +168,8 @@ export function Billetera() {
           <p className="billetera-cip-codigo">{cip.cip}</p>
           <p className="texto-tenue">
             Paga S/ {cip.monto.toFixed(2)} en cualquier agente, banca móvil o app de tu banco. Tu
-            saldo se acreditará automáticamente al confirmarse el pago.
+            saldo se acreditará automáticamente al confirmarse el pago (puede tardar unos minutos;
+            luego usa “↻ Actualizar saldo” arriba).
           </p>
           {cip.qr && <img className="billetera-qr" src={cip.qr} alt="Código QR de PagoEfectivo" />}
           {cip.url && (
