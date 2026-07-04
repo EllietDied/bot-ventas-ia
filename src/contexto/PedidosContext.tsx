@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
 import { Pedido } from '../core/modelos/Pedido'
+import { Direccion } from '../core/modelos/Direccion'
 import { MetodoPago } from '../core/modelos/Pago'
 import { ItemCarrito } from '../core/modelos/Carrito'
 import { ColaPedidos } from '../core/estructuras/ColaPedidos'
@@ -10,6 +11,7 @@ import {
   listarPedidosSupabase,
   insertarPedidoSupabase,
   atenderPedidoSupabase,
+  actualizarEnvioSupabase,
 } from '../core/servicios/PedidosService'
 import { useSesion } from './SesionContext'
 
@@ -27,7 +29,8 @@ export interface DatosPedido {
 interface PedidosContextType {
   pedidos: Pedido[]
   pedidosPendientes: Pedido[] // en orden FIFO (el más antiguo primero)
-  registrarPedido: (datos: DatosPedido) => void
+  registrarPedido: (datos: DatosPedido) => Promise<Pedido | undefined>
+  actualizarEnvio: (idPedido: string, envio: Direccion) => void
   atenderSiguiente: () => Pedido | undefined
   pedidosDe: (correo: string) => Pedido[]
 }
@@ -73,7 +76,7 @@ export function PedidosProvider({ children }: { children: ReactNode }) {
   }, [])
 
   // ALGORITMO RegistrarPedido + ProcesarPago (pago simulado).
-  async function registrarPedido(datos: DatosPedido) {
+  async function registrarPedido(datos: DatosPedido): Promise<Pedido | undefined> {
     if (usarSupabase()) {
       const creado = await insertarPedidoSupabase({
         idComprador: usuarioActual?.idUsuario ?? '',
@@ -86,12 +89,19 @@ export function PedidosProvider({ children }: { children: ReactNode }) {
         banco: datos.banco,
       })
       if (creado) setPedidos((prev) => [creado, ...prev])
-      return
+      return creado ?? undefined
     }
 
     // Modo local (pago simulado). Lógica pura, reutilizable y testeable.
     const pedido = construirPedidoLocal(datos, Date.now())
     setPedidos((prev) => [pedido, ...prev]) // el más reciente va primero
+    return pedido
+  }
+
+  // Guarda la dirección de envío elegida en un pedido ya registrado.
+  function actualizarEnvio(idPedido: string, envio: Direccion) {
+    if (usarSupabase()) actualizarEnvioSupabase(Number(idPedido), envio)
+    setPedidos((prev) => prev.map((p) => (p.idPedido === idPedido ? { ...p, envio } : p)))
   }
 
   // Atiende el primer pedido pendiente usando la cola FIFO.
@@ -115,7 +125,14 @@ export function PedidosProvider({ children }: { children: ReactNode }) {
 
   return (
     <PedidosContext.Provider
-      value={{ pedidos, pedidosPendientes, registrarPedido, atenderSiguiente, pedidosDe }}
+      value={{
+        pedidos,
+        pedidosPendientes,
+        registrarPedido,
+        actualizarEnvio,
+        atenderSiguiente,
+        pedidosDe,
+      }}
     >
       {children}
     </PedidosContext.Provider>

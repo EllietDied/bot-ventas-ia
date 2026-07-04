@@ -100,6 +100,15 @@ function TarjetaPedido({ pedido }: { pedido: Pedido }) {
         </span>
         <span className="pedido-total">Total: S/ {pedido.total.toFixed(2)}</span>
       </div>
+
+      {pedido.envio && (
+        <div className="pedido-envio">
+          <Icono nombre="caja" size={15} /> Envío a <strong>{pedido.envio.receptor}</strong> —{' '}
+          {pedido.envio.direccion}
+          {pedido.envio.referencia ? ` (${pedido.envio.referencia})` : ''}
+          {pedido.envio.telefono ? ` · ${pedido.envio.telefono}` : ''}
+        </div>
+      )}
     </div>
   )
 }

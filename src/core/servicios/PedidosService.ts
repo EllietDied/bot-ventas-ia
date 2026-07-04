@@ -5,6 +5,7 @@ import { supabase } from '../datos/supabase'
 import { Pedido, EstadoPedido } from '../modelos/Pedido'
 import { ItemCarrito } from '../modelos/Carrito'
 import { MetodoPago } from '../modelos/Pago'
+import { Direccion } from '../modelos/Direccion'
 
 interface FilaPedido {
   id: number | string
@@ -17,6 +18,10 @@ interface FilaPedido {
   estado: string | null
   estado_pago: string | null
   creado_en: string | null
+  envio_receptor?: string | null
+  envio_telefono?: string | null
+  envio_direccion?: string | null
+  envio_referencia?: string | null
 }
 
 interface FilaDetalle {
@@ -57,6 +62,15 @@ function mapPedido(fila: FilaPedido, detalles: FilaDetalle[]): Pedido {
       estadoPago: fila.estado_pago ?? 'aprobado',
       fechaPago: fecha,
     },
+    envio: fila.envio_direccion
+      ? {
+          id: 'env-' + fila.id,
+          receptor: fila.envio_receptor ?? '',
+          telefono: fila.envio_telefono ?? '',
+          direccion: fila.envio_direccion,
+          referencia: fila.envio_referencia ?? '',
+        }
+      : undefined,
   }
 }
 
@@ -130,4 +144,18 @@ export async function insertarPedidoSupabase(p: {
 export async function atenderPedidoSupabase(id: number): Promise<void> {
   if (!supabase) return
   await supabase.from('pedidos').update({ estado: 'atendido' }).eq('id', id)
+}
+
+// Guarda la dirección de envío elegida en el pedido.
+export async function actualizarEnvioSupabase(id: number, envio: Direccion): Promise<void> {
+  if (!supabase) return
+  await supabase
+    .from('pedidos')
+    .update({
+      envio_receptor: envio.receptor,
+      envio_telefono: envio.telefono,
+      envio_direccion: envio.direccion,
+      envio_referencia: envio.referencia ?? null,
+    })
+    .eq('id', id)
 }

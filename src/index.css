@@ -1258,6 +1258,43 @@ a:hover {
   flex-wrap: wrap;
   font-weight: 600;
 }
+/* Selector de dirección de envío (tras el pago) + envío en el pedido. */
+.selector-envio {
+  text-align: left;
+  margin-top: 0.9rem;
+}
+.direcciones-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 0.7rem 0;
+}
+.direccion-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid var(--superficie);
+  border-radius: 10px;
+  background: var(--superficie);
+  cursor: pointer;
+  font-size: 0.92rem;
+}
+.direccion-item.activo {
+  outline: 2px solid #16a34a;
+}
+.direccion-item input {
+  margin-top: 0.2rem;
+}
+.pedido-envio {
+  margin-top: 0.5rem;
+  font-size: 0.88rem;
+  opacity: 0.85;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
 .tarjeta-nombre {
   font-size: 1rem;
 }

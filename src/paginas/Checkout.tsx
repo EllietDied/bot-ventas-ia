@@ -11,6 +11,8 @@ import { Icono } from '../componentes/Icono'
 import { cargarBilletera, guardarBilletera, aplicarCompra } from '../core/servicios/BilleteraLocal'
 import { usarSupabase } from '../core/datos/supabase'
 import { pagarConSaldoServidor, cargarSaldoServidor } from '../core/servicios/BilleteraSupabase'
+import { SelectorEnvio } from '../componentes/SelectorEnvio'
+import { Direccion } from '../core/modelos/Direccion'
 
 // Los 4 pasos que el asistente "ejecuta" al pagar (efecto visual guiado).
 const PASOS_PAGO = [
@@ -88,7 +90,7 @@ const BANCOS_INFO = [
 // Pantalla de pago (simulado), guiada paso a paso por el asistente IA.
 export function Checkout() {
   const { items, subtotal, descuento, total, vaciarCarrito } = useCarrito()
-  const { registrarPedido } = usePedidos()
+  const { registrarPedido, actualizarEnvio } = usePedidos()
   const { productos, actualizarStock } = useProductos()
   const { usuarioActual } = useSesion()
   const toast = useToast()
@@ -101,6 +103,8 @@ export function Checkout() {
   const [pasoActual, setPasoActual] = useState(0)
   const [pagado, setPagado] = useState(false)
   const [totalPagado, setTotalPagado] = useState(0)
+  const [pedidoId, setPedidoId] = useState('')
+  const [envioConfirmado, setEnvioConfirmado] = useState(false)
 
   // Billetera del comprador (saldo en modo local), para poder pagar con el saldo.
   const idUsuario = usuarioActual?.idUsuario ?? ''
@@ -115,7 +119,40 @@ export function Checkout() {
   // Saldo que mostramos y validamos: el de la base en Supabase, el local en modo prueba.
   const saldoDisponible = enSupabase ? saldoServidor ?? 0 : billetera.saldo
 
-  // ----- Confirmación final (después de los pasos guiados) -----
+  // Tras el pago, guardamos la dirección de envío elegida en el pedido.
+  function confirmarEnvio(dir: Direccion) {
+    if (pedidoId) actualizarEnvio(pedidoId, dir)
+    setEnvioConfirmado(true)
+    toast.exito('¡Dirección de envío guardada!')
+  }
+
+  // ----- Tras pagar: pedimos a dónde enviar el pedido -----
+  if (pagado && !envioConfirmado) {
+    return (
+      <div className="pagina">
+        <h1>Pago</h1>
+        <div className="checkout-confirmacion">
+          <h2>
+            <Icono nombre="check" size={22} /> ¡Pago procesado!
+          </h2>
+          <p className="texto-tenue">Solo falta un paso: dinos a dónde enviarlo.</p>
+          <SelectorEnvio
+            idUsuario={idUsuario}
+            prefill={{
+              receptor: usuarioActual
+                ? `${usuarioActual.nombre} ${usuarioActual.apellido}`.trim()
+                : '',
+              telefono: usuarioActual?.telefono,
+              direccion: usuarioActual?.direccion,
+            }}
+            onConfirmar={confirmarEnvio}
+          />
+        </div>
+      </div>
+    )
+  }
+
+  // ----- Confirmación final -----
   if (pagado) {
     return (
       <div className="pagina">
@@ -125,14 +162,11 @@ export function Checkout() {
             <Icono nombre="check" size={22} /> ¡Listo! Tu compra fue procesada
           </h2>
           <p className="paso-ia">
-            <Icono nombre="check" size={16} /> Stock validado.
-          </p>
-          <p className="paso-ia">
-            <Icono nombre="check" size={16} /> Subtotal, descuento y total calculados:{' '}
+            <Icono nombre="check" size={16} /> Total pagado:{' '}
             <strong>S/ {totalPagado.toFixed(2)}</strong>.
           </p>
           <p className="paso-ia">
-            <Icono nombre="check" size={16} /> Pedido registrado correctamente.
+            <Icono nombre="check" size={16} /> Pedido registrado y dirección de envío guardada.
           </p>
           <button className="btn btn-primario btn-bloque" onClick={() => navegar('/pedidos')}>
             Ver mis pedidos
@@ -231,12 +265,12 @@ export function Checkout() {
     setTimeout(() => setPasoActual(3), 1500) // descuento aplicado
 
     // Paso 4: aquí ocurre el trabajo real (descontar stock + registrar pedido).
-    setTimeout(() => {
+    setTimeout(async () => {
       for (const item of items) {
         const actual = productos.find((p) => p.id === item.producto.id)
         if (actual) actualizarStock(actual.id, actual.stock - item.cantidad)
       }
-      registrarPedido({
+      const creado = await registrarPedido({
         correoComprador: usuarioActual.correo,
         items,
         subtotal,
@@ -245,6 +279,7 @@ export function Checkout() {
         metodoPago,
         banco: metodoPago === 'transferencia' ? banco : undefined,
       })
+      if (creado) setPedidoId(creado.idPedido)
       // Si pagó con la billetera, descontamos el total de su saldo.
       if (metodoPago === 'billetera') {
         const nuevo = aplicarCompra(
@@ -294,6 +329,7 @@ export function Checkout() {
       toast.error(res.error || 'No se pudo completar el pago.')
       return
     }
+    if (res.pedidoId) setPedidoId(String(res.pedidoId))
     setPasoActual(4)
     vaciarCarrito()
     setPagado(true)
