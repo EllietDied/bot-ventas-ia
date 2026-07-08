@@ -720,59 +720,77 @@ export function Asistente() {
     }
     idFotoBot.current = ''
 
-    // Si la visión no reconoció el tipo, no pasamos a la IA de razonamiento.
-    if (!r.termino) {
+    // Red de seguridad: pase lo que pase (incluso si la visión o la IA fallan),
+    // el "analizando…" SIEMPRE se cierra (finally) para que el chat no se cuelgue.
+    try {
+      // Si la visión no reconoció el tipo, no pasamos a la IA de razonamiento.
+      if (!r.termino) {
+        actualizarMensaje(idBot, {
+          texto:
+            'No pude identificar bien el producto en la foto. ¿Puedes probar con otra más clara o decirme qué buscas?',
+          pensando: false,
+        })
+        return
+      }
+
+      // Si reconocí algo pero NO está en nuestro catálogo (p. ej. una cartuchera o
+      // ropa: no vendemos eso), lo decimos claro en vez de confundir a la IA.
+      if (r.productos.length === 0) {
+        actualizarMensaje(idBot, {
+          texto: `Parece ${r.etiqueta || r.termino}, pero no manejamos ese tipo de producto en la tienda (somos de tecnología). ¿Buscas algo como un mouse, teclado, laptop o audífonos?`,
+          pensando: false,
+        })
+        return
+      }
+
+      registrarConsulta(r.termino, '')
+
+      // La visión ya vio la foto; ahora DeepSeek razona.
+      actualizarMensaje(idBot, {
+        texto: `Identifiqué ${r.etiqueta || 'tu producto'} en tu foto. Déjame recomendarte…`,
+      })
+      const inicio = Date.now()
+
+      const historial: MensajeHistorial[] = mensajes
+        .filter((m) => !m.pensando)
+        .slice(-10)
+        .map((m) => ({ rol: m.emisor, texto: m.texto }))
+      const contexto = {
+        productos: r.productos, // los que la visión ya identificó (seguro que existen)
+        categoriasConsultadas,
+        nombreCliente: primerNombre,
+        carrito: items.map((i) => ({
+          nombre: i.producto.nombre,
+          cantidad: i.cantidad,
+          precio: i.producto.precio,
+        })),
+        totalCarrito: total,
+        historial,
+      }
+
+      // DeepSeek (o el modo local, si falla/está apagado) razona sobre el tipo detectado.
+      const consulta = `El cliente subió una foto y la identifiqué como ${r.etiqueta || r.termino}. De estos productos del catálogo, recomiéndale y compara las mejores opciones.`
+      const resultado = await obtenerRespuestaAsistente(consulta, contexto)
+
+      const transcurrido = Date.now() - inicio
+      if (transcurrido < 1100) await new Promise((res) => setTimeout(res, 1100 - transcurrido))
+
+      // Preferimos los productos que eligió la IA; si no devolvió, usamos los de MobileNet.
+      const recomendados = resolverProductos(resultado.productosRecomendados, productos)
+      const finales = recomendados.length > 0 ? recomendados : r.productos
+      actualizarMensaje(idBot, { texto: resultado.mensaje, productos: finales, pensando: false })
+      if (resultado.falloIA) {
+        toast.info('No pude conectar con la IA; usé el modo local para la recomendación.')
+      }
+    } catch {
+      // Si algo se rompe (visión colgada, red caída…), avisamos con calma.
       actualizarMensaje(idBot, {
         texto:
-          'No pude identificar bien el producto en la foto. ¿Puedes probar con otra más clara o decirme qué buscas?',
+          'Uy, no pude terminar de analizar la foto. Inténtalo de nuevo o dime con palabras qué producto buscas.',
         pensando: false,
       })
+    } finally {
       setCargando(false)
-      return
-    }
-
-    registrarConsulta(r.termino, '')
-
-    // La visión ya vio la foto; ahora DeepSeek razona.
-    actualizarMensaje(idBot, {
-      texto: `Identifiqué ${r.etiqueta || 'tu producto'} en tu foto. Déjame recomendarte…`,
-    })
-    const inicio = Date.now()
-
-    const historial: MensajeHistorial[] = mensajes
-      .filter((m) => !m.pensando)
-      .slice(-10)
-      .map((m) => ({ rol: m.emisor, texto: m.texto }))
-    // Le pasamos a la IA los productos que la VISIÓN ya identificó (así los "ve" seguro
-    // y no dice que no hay); si no encontró ninguno, le damos el catálogo completo.
-    const productosParaIA = r.productos.length > 0 ? r.productos : productos
-    const contexto = {
-      productos: productosParaIA,
-      categoriasConsultadas,
-      nombreCliente: primerNombre,
-      carrito: items.map((i) => ({
-        nombre: i.producto.nombre,
-        cantidad: i.cantidad,
-        precio: i.producto.precio,
-      })),
-      totalCarrito: total,
-      historial,
-    }
-
-    // DeepSeek (o el modo local, si falla/está apagado) razona sobre el tipo detectado.
-    const consulta = `El cliente subió una foto y la identifiqué como ${r.etiqueta || r.termino}. De estos productos del catálogo, recomiéndale y compara las mejores opciones.`
-    const resultado = await obtenerRespuestaAsistente(consulta, contexto)
-
-    const transcurrido = Date.now() - inicio
-    if (transcurrido < 1100) await new Promise((res) => setTimeout(res, 1100 - transcurrido))
-
-    // Preferimos los productos que eligió la IA; si no devolvió, usamos los de MobileNet.
-    const recomendados = resolverProductos(resultado.productosRecomendados, productos)
-    const finales = recomendados.length > 0 ? recomendados : r.productos
-    actualizarMensaje(idBot, { texto: resultado.mensaje, productos: finales, pensando: false })
-    setCargando(false)
-    if (resultado.falloIA) {
-      toast.info('No pude conectar con la IA; usé el modo local para la recomendación.')
     }
   }
 

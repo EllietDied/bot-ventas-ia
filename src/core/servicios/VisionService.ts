@@ -29,6 +29,24 @@ interface ModeloMobilenet {
 
 let modeloPromesa: Promise<ModeloMobilenet> | null = null
 
+// Rechaza la promesa si tarda más de `ms` milisegundos. Así ninguna espera se
+// queda colgada para siempre (que era la causa de que el chat se quedara cargando).
+function conLimite<T>(promesa: Promise<T>, ms: number, mensaje: string): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const t = setTimeout(() => reject(new Error(mensaje)), ms)
+    promesa.then(
+      (v) => {
+        clearTimeout(t)
+        resolve(v)
+      },
+      (e) => {
+        clearTimeout(t)
+        reject(e)
+      },
+    )
+  })
+}
+
 // Carga MobileNet una sola vez (importa las librerías de forma diferida).
 async function cargarModelo(): Promise<ModeloMobilenet> {
   if (!modeloPromesa) {
@@ -38,6 +56,11 @@ async function cargarModelo(): Promise<ModeloMobilenet> {
       const mobilenet = await import('@tensorflow-models/mobilenet')
       return (await mobilenet.load()) as unknown as ModeloMobilenet
     })()
+    // Si la carga falla, borramos la promesa para poder reintentar la próxima vez
+    // (si no, quedaría "pegada" en el error para siempre).
+    modeloPromesa.catch(() => {
+      modeloPromesa = null
+    })
   }
   return modeloPromesa
 }
@@ -60,9 +83,11 @@ function cargarImagen(src: string): Promise<HTMLImageElement> {
 
 // Identifica el producto de la foto con MobileNet, en el navegador.
 export async function identificarEnNavegador(dataURL: string): Promise<IdentificacionVisual> {
-  const modelo = await cargarModelo()
-  const img = await cargarImagen(dataURL)
-  const predicciones = await modelo.classify(img, 5)
+  // Límites de tiempo: si la descarga del modelo o la clasificación tardan
+  // demasiado, se rinden (y el flujo cae al modo manual) en vez de colgarse.
+  const modelo = await conLimite(cargarModelo(), 15000, 'La visión del navegador tardó demasiado')
+  const img = await conLimite(cargarImagen(dataURL), 8000, 'No se pudo cargar la imagen a tiempo')
+  const predicciones = await conLimite(modelo.classify(img, 5), 8000, 'La clasificación tardó demasiado')
   for (const p of predicciones) {
     const termino = terminoDeEtiqueta(p.className)
     if (termino) {

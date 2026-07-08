@@ -20,17 +20,27 @@ async function consultarVisionNube(
   dataURL: string,
   productos: Producto[],
 ): Promise<ResultadoBusquedaVisual | null> {
-  const resp = await fetch('/api/vision', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      imagen: dataURL,
-      productos: productos
-        .filter((p) => p.stock > 0)
-        .slice(0, 30)
-        .map((p) => ({ id: p.id, nombre: p.nombre, categoria: p.categoria, marca: p.marca })),
-    }),
-  })
+  // Cortamos la espera a los 55s (la función en Vercel dura máx. 60s): si la nube
+  // no responde, abortamos y seguimos con la visión del navegador en vez de colgarnos.
+  const controlador = new AbortController()
+  const temporizador = setTimeout(() => controlador.abort(), 55000)
+  let resp: Response
+  try {
+    resp = await fetch('/api/vision', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      signal: controlador.signal,
+      body: JSON.stringify({
+        imagen: dataURL,
+        productos: productos
+          .filter((p) => p.stock > 0)
+          .slice(0, 30)
+          .map((p) => ({ id: p.id, nombre: p.nombre, categoria: p.categoria, marca: p.marca })),
+      }),
+    })
+  } finally {
+    clearTimeout(temporizador)
+  }
   if (!resp.ok) return null
 
   const datos = await resp.json()
