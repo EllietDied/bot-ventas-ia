@@ -13,8 +13,10 @@ const DEEPSEEK_URL = 'https://api.deepseek.com/chat/completions'
 // variable de entorno DEEPSEEK_MODELO (p. ej. DEEPSEEK_MODELO=deepseek-chat para
 // volver al modelo anterior al instante, sin redesplegar).
 const MODELO = process.env.DEEPSEEK_MODELO || 'deepseek-v4-pro'
-// Límite de tokens de la respuesta (un asistente de ventas responde corto).
-const MAX_TOKENS = 1024
+// Límite de tokens de la respuesta. Debe ser holgado porque el modelo v4-pro
+// "piensa" antes de responder (ese razonamiento también consume tokens): si es
+// bajo, el mensaje final se corta a la mitad y llega un JSON incompleto.
+const MAX_TOKENS = 2000
 // Límite de caracteres del mensaje del usuario.
 const MAX_MENSAJE = 1000
 // Cuántos mensajes de historial conservamos como mucho.
@@ -264,8 +266,19 @@ function interpretar(texto: string, idsValidos: Set<string>) {
         : []
       return { mensaje, productosRecomendados: ids, accionSugerida: accion }
     } catch {
-      // Si el JSON viene mal, caemos al texto plano de abajo.
+      // Si el JSON viene mal, caemos al rescate de abajo.
     }
+  }
+  // Rescate: si el JSON quedó incompleto o mal formado (p. ej. la respuesta se cortó),
+  // extraemos el texto de "mensaje" para NUNCA mostrarle el JSON crudo al usuario.
+  const m = texto.match(/"mensaje"\s*:\s*"((?:[^"\\]|\\.)*)/)
+  if (m && m[1]) {
+    const mensaje = m[1]
+      .replace(/\\n/g, '\n')
+      .replace(/\\"/g, '"')
+      .replace(/\\\\/g, '\\')
+      .trim()
+    if (mensaje) return { mensaje, productosRecomendados: [] as string[], accionSugerida: 'NINGUNA' }
   }
   return {
     mensaje: texto.trim() || 'No pude generar una respuesta. ¿Puedes reformular tu consulta?',
