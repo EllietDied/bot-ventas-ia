@@ -16,6 +16,7 @@ import {
   obtenerUsuarioActual,
   escucharCambiosSesion,
 } from '../core/servicios/SupabaseAuthService'
+import { limpiarChatSupabase } from '../core/servicios/ChatService'
 
 // Datos completos que llegan del formulario de registro.
 export interface DatosRegistro {
@@ -211,6 +212,22 @@ export function SesionProvider({ children }: { children: ReactNode }) {
   }
 
   async function logout() {
+    // Borramos la conversación del asistente al salir (comprador y vendedor).
+    // En Supabase debe hacerse ANTES de cerrar sesión: mientras el token sigue
+    // activo, para que las reglas de seguridad (RLS) permitan el borrado.
+    if (usuarioActual) {
+      if (usarSupabase()) {
+        try {
+          await limpiarChatSupabase(usuarioActual.idUsuario)
+        } catch {
+          /* si el borrado falla, igual cerramos la sesión */
+        }
+      } else {
+        // Modo local: vaciamos los dos chats guardados en el navegador.
+        guardar('asistente_chat_comprador', [])
+        guardar('asistente_chat_vendedor', [])
+      }
+    }
     if (usarSupabase()) await logoutSupabase()
     setUsuarioActual(null)
   }

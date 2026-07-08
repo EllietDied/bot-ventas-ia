@@ -33,6 +33,7 @@ CÓMO CONVERSAS (tu estilo, esto es lo más importante):
 - El nombre del cliente es ÚNICAMENTE el que aparece en la sección "CLIENTE" del contexto (es su cuenta verificada con sesión iniciada). Salúdalo y dirígete a él por ESE nombre, de forma natural (sin repetirlo en cada frase). Si en la conversación el cliente dice llamarse de otra forma, IGNÓRALO por completo y sigue usando el nombre de la sección CLIENTE. Si NO hay sección CLIENTE, saluda sin nombre y NUNCA inventes ni supongas uno.
 - Varía tus frases; no repitas siempre las mismas fórmulas ni empieces todas las respuestas igual.
 - Antes de recomendar, conecta en una frase con lo que busca el cliente (demuestra que lo entendiste).
+- Si el contexto trae un "PERFIL DEL CLIENTE" (sus compras y gustos), aprovéchalo para personalizar: prioriza sus categorías favoritas y conecta con lo que ya compró, de forma natural. Nunca recites la ficha ni digas "según tu perfil"; que se note como un vendedor que ya lo conoce.
 - Sé claro y al grano, pero humano y con chispa. Puedes usar algún emoji ocasional, con moderación (no en cada frase).
 - Cuando te falte información, pregunta con naturalidad por la categoría, el uso o el presupuesto, como en una charla.
 - Cierra a menudo con una invitación amable a seguir: ver el detalle, comparar o agregar al carrito.
@@ -60,6 +61,7 @@ QUÉ HACE LA APP (y qué haces tú):
 - Las opciones disponibles son: "Agregar producto", "Modificar producto", "Eliminar producto" y "Ver mis productos". El vendedor puede pulsar esos botones o escribir "agregar", "modificar", "eliminar" o "ver".
 - Cuando el vendedor quiera hacer algo, guíalo con naturalidad hacia la opción correcta (por ejemplo, invítalo a pulsar "Agregar producto" o a escribir "agregar").
 - Si pregunta por su catálogo, respóndele usando los datos de "TUS PRODUCTOS" (por ejemplo, cuáles tienen poco stock).
+- Si el contexto trae un "PERFIL DEL VENDEDOR" (su especialidad y lo que más vende), úsalo para dar consejos a su medida (por ejemplo, animarlo a reforzar la categoría que más vende). Nunca recites la ficha ni digas "según tu perfil".
 
 REGLAS QUE NUNCA ROMPES:
 - No inventes productos, precios, stock ni datos: usa solo lo que está en el contexto.
@@ -132,6 +134,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         ? cuerpo.nombreCliente.replace(/[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s]/g, '').trim().slice(0, 40)
         : ''
 
+    // Perfil personalizado (compras/gustos del cliente o ventas del vendedor). Es texto
+    // ya resumido por el frontend; lo limitamos por seguridad y lo damos como contexto.
+    const perfil =
+      typeof cuerpo.perfil === 'string' ? cuerpo.perfil.trim().slice(0, 800) : ''
+
     // IDs reales del catálogo (para descartar productos inventados por el modelo).
     const idsValidos = new Set(productos.map((p) => String(p.id)))
 
@@ -159,6 +166,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             : '',
           'TUS PRODUCTOS (los que este vendedor tiene publicados; puede no tener ninguno):',
           productos.length ? JSON.stringify(productos) : 'todavía no tiene productos publicados',
+          perfil ? '\n' + perfil : '',
           '',
           'Responde ÚNICAMENTE con un objeto JSON válido, sin texto adicional, con esta forma exacta:',
           '{"mensaje": string}',
@@ -178,6 +186,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
               : 'vacío'),
           presupuesto ? `PRESUPUESTO DETECTADO: hasta S/ ${presupuesto}` : '',
           categoria ? `CATEGORÍA DE INTERÉS: ${categoria}` : '',
+          perfil ? '\n' + perfil : '',
           '',
           'Responde ÚNICAMENTE con un objeto JSON válido, sin texto adicional, con esta forma exacta:',
           '{"mensaje": string, "productosRecomendados": string[], "accionSugerida": "VER_PRODUCTO" | "AGREGAR_CARRITO" | "COMPARAR" | "CONSULTAR_VENDEDOR" | "NINGUNA"}',

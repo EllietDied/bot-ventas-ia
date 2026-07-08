@@ -31,3 +31,10 @@ export async function guardarChatSupabase(
     { onConflict: 'usuario_id,rol' },
   )
 }
+
+// Borra TODA la conversación del usuario (sus dos chats). Se llama al cerrar
+// sesión, para que el historial del chat no quede guardado tras salir.
+export async function limpiarChatSupabase(usuarioId: string): Promise<void> {
+  if (!supabase) return
+  await supabase.from('chats_asistente').delete().eq('usuario_id', usuarioId)
+}

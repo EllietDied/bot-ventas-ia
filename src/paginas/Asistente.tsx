@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useProductos } from '../contexto/ProductosContext'
 import { useCarrito } from '../contexto/CarritoContext'
 import { useConsultas } from '../contexto/ConsultasContext'
+import { usePedidos } from '../contexto/PedidosContext'
 import { useSesion } from '../contexto/SesionContext'
 import { esComprador } from '../core/modelos/Comprador'
 import { LogoUSS } from '../componentes/LogoUSS'
@@ -24,6 +25,7 @@ import { cargar, guardar } from '../core/datos/almacenamiento'
 import { usarSupabase } from '../core/datos/supabase'
 import { CATEGORIAS } from '../core/datos/categorias'
 import { cargarChatSupabase, guardarChatSupabase } from '../core/servicios/ChatService'
+import { perfilComprador, perfilVendedor } from '../core/servicios/PerfilAprendizajeService'
 import { useToast } from '../contexto/ToastContext'
 import {
   obtenerRespuestaAsistente,
@@ -84,6 +86,7 @@ export function Asistente() {
   const { productos, publicarProducto, editarProducto, eliminarProducto } = useProductos()
   const { agregarAlCarrito, cantidadTotal, items, total } = useCarrito()
   const { registrarConsulta, consultasRecientes, categoriasConsultadas } = useConsultas()
+  const { pedidos } = usePedidos()
   const { usuarioActual } = useSesion()
   const toast = useToast()
   const navegar = useNavigate()
@@ -94,6 +97,17 @@ export function Asistente() {
   const misProductos = usuarioActual
     ? productos.filter((p) => p.idVendedor === usuarioActual.idUsuario)
     : []
+
+  // Perfil de aprendizaje: una "ficha" personalizada que se le pasa a la IA para
+  // que responda según los gustos/compras del comprador o las ventas del vendedor.
+  // Sale de datos que ya existen (pedidos, búsquedas, productos), no de la charla.
+  const perfilIA = useMemo(() => {
+    if (!usuarioActual) return ''
+    if (esVendedorActual) return perfilVendedor(misProductos, pedidos)
+    const misCompras = pedidos.filter((p) => p.correoComprador === usuarioActual.correo)
+    return perfilComprador(misCompras, productos, categoriasConsultadas)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [usuarioActual, esVendedorActual, pedidos, productos, categoriasConsultadas])
 
   // Saludo personalizado con el nombre del usuario.
   const primerNombre = usuarioActual ? usuarioActual.nombre.split(' ')[0] : ''
@@ -227,6 +241,7 @@ export function Asistente() {
       })),
       totalCarrito: total,
       historial,
+      perfil: perfilIA,
     }
 
     // 5) Pedimos la respuesta (IA real o, si falla / está apagada, modo simulado).
@@ -615,6 +630,7 @@ export function Asistente() {
       carrito: [],
       totalCarrito: 0,
       historial,
+      perfil: perfilIA,
     }
 
     const resultado = await obtenerRespuestaAsistente(mensaje, contexto, 'vendedor')
@@ -766,6 +782,7 @@ export function Asistente() {
         })),
         totalCarrito: total,
         historial,
+        perfil: perfilIA,
       }
 
       // DeepSeek (o el modo local, si falla/está apagado) razona sobre el tipo detectado.

@@ -33,6 +33,7 @@ export interface ContextoAsistente {
   carrito: { nombre: string; cantidad: number; precio: number }[]
   totalCarrito: number
   historial: MensajeHistorial[]
+  perfil?: string // ficha personalizada del cliente/vendedor (compras, gustos, ventas…)
 }
 
 // Respuesta estructurada del asistente.
@@ -173,6 +174,7 @@ async function consultarClaude(
     presupuesto,
     categoria,
     nombreCliente: ctx.nombreCliente,
+    perfil: ctx.perfil, // ficha personalizada (compras/gustos del cliente o ventas del vendedor)
     rol, // el servidor elige el "cerebro": ventas (comprador) o gestión (vendedor)
   }
 
