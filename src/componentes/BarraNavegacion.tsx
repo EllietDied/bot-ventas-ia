@@ -18,8 +18,10 @@ export function BarraNavegacion() {
   // Mensajes recibidos sin leer del usuario actual (para el aviso).
   const noLeidos = usuarioActual ? noLeidosDe(usuarioActual.idUsuario) : 0
 
-  function cerrarSesion() {
-    logout()
+  async function cerrarSesion() {
+    // Esperamos a que logout TERMINE (borra el chat de la base y del navegador)
+    // antes de navegar; si no, la navegación corta el borrado a medias.
+    await logout()
     navegar('/login')
   }
 
