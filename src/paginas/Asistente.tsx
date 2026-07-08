@@ -747,40 +747,31 @@ export function Asistente() {
     // Red de seguridad: pase lo que pase (incluso si la visión o la IA fallan),
     // el "analizando…" SIEMPRE se cierra (finally) para que el chat no se cuelgue.
     try {
-      // Si la visión no reconoció el tipo, no pasamos a la IA de razonamiento.
-      if (!r.termino) {
+      // Lo que la IA "vio" en la foto (descripción rica de Gemma, o etiqueta/tipo).
+      const loQueVeo = r.descripcion || r.etiqueta || r.termino
+
+      // Caso 1: la visión no logró ver NADA reconocible en la foto.
+      if (!r.termino && !r.descripcion) {
         actualizarMensaje(idBot, {
           texto:
-            'No pude identificar bien el producto en la foto. ¿Puedes probar con otra más clara o decirme qué buscas?',
+            'Mmm, no logré ver bien qué hay en la foto 😅. ¿Puedes tomarla con más luz y de cerca, o contarme con palabras qué producto buscas?',
           pensando: false,
         })
         return
       }
 
-      // Si reconocí algo pero NO está en nuestro catálogo (p. ej. una cartuchera o
-      // ropa: no vendemos eso), lo decimos claro en vez de confundir a la IA.
-      if (r.productos.length === 0) {
-        actualizarMensaje(idBot, {
-          texto: `Parece ${r.etiqueta || r.termino}, pero no manejamos ese tipo de producto en la tienda (somos de tecnología). ¿Buscas algo como un mouse, teclado, laptop o audífonos?`,
-          pensando: false,
-        })
-        return
-      }
-
-      registrarConsulta(r.termino, '')
-
-      // La visión ya vio la foto; ahora DeepSeek razona.
-      actualizarMensaje(idBot, {
-        texto: `Identifiqué ${r.etiqueta || 'tu producto'} en tu foto. Déjame recomendarte…`,
-      })
-      const inicio = Date.now()
+      registrarConsulta(r.termino || loQueVeo, '')
 
       const historial: MensajeHistorial[] = mensajes
         .filter((m) => !m.pensando)
         .slice(-10)
         .map((m) => ({ rol: m.emisor, texto: m.texto }))
+      // ¿Hay productos del catálogo que coincidan con la foto?
+      const hayEnCatalogo = r.productos.length > 0
       const contexto = {
-        productos: r.productos, // los que la visión ya identificó (seguro que existen)
+        // Si hay coincidencias, las mandamos; si no, mandamos el catálogo para
+        // que la IA pueda ofrecer alternativas de tecnología.
+        productos: hayEnCatalogo ? r.productos : productos,
         categoriasConsultadas,
         nombreCliente: primerNombre,
         carrito: items.map((i) => ({
@@ -793,8 +784,11 @@ export function Asistente() {
         perfil: perfilIA,
       }
 
-      // DeepSeek (o el modo local, si falla/está apagado) razona sobre el tipo detectado.
-      const consulta = `El cliente subió una foto y la identifiqué como ${r.etiqueta || r.termino}. De estos productos del catálogo, recomiéndale y compara las mejores opciones.`
+      // Le pasamos a DeepSeek lo que la visión VIO, para que RAZONE y responda natural.
+      const consulta = hayEnCatalogo
+        ? `El cliente subió una foto. Al mirarla con atención, vi: "${loQueVeo}". En nuestro catálogo tenemos productos que coinciden. Reconoce con naturalidad lo que ves en la foto (que note que la miraste bien) y recomiéndale o compara las mejores opciones.`
+        : `El cliente subió una foto. Al mirarla con atención, vi: "${loQueVeo}". Ese tipo de producto NO está en nuestro catálogo (InkaShop es una tienda de tecnología). Responde de forma humana y cálida: comenta con naturalidad y detalle lo que ves en la foto (que note que la analizaste de verdad), dile con amabilidad que eso no lo vendemos y ofrécele con soltura las categorías de tecnología que sí tenemos, o pregúntale qué anda buscando. Nada de sonar robótico ni de frases hechas.`
+      const inicio = Date.now()
       const resultado = await obtenerRespuestaAsistente(consulta, contexto)
 
       const transcurrido = Date.now() - inicio

@@ -27,13 +27,22 @@ interface ProductoCtx {
 async function identificarProducto(
   imagenBase64: string,
   catalogo: ProductoCtx[],
-): Promise<{ termino: string; etiqueta: string; productosRecomendados: string[] } | null> {
+): Promise<{
+  termino: string
+  etiqueta: string
+  descripcion: string
+  productosRecomendados: string[]
+} | null> {
   if (!process.env.NVIDIA_API_KEY) return null
 
-  const prompt = `Eres un identificador visual de productos para una tienda de tecnología. Mira la IMAGEN y compárala con el CATÁLOGO.
+  const prompt = `Eres el asistente visual de InkaShop, una tienda de tecnología. Observa la IMAGEN con MUCHA atención y RAZONA qué es lo que aparece antes de responder.
+
+Fíjate en: el tipo de objeto, su forma y color, la marca o el texto que se lea, y para qué sirve. Sé preciso: no adivines a lo loco, describe lo que REALMENTE ves.
+
 Devuelve SOLO un objeto JSON válido, sin texto adicional, con esta forma exacta:
-{"termino": "categoría corta del producto (mouse, teclado, laptop, monitor, audífonos, parlante, celular, impresora, cámara web, etc.)", "etiqueta": "descripción breve y natural de lo que ves (tipo, color, marca visible si la hay)", "productosRecomendados": ["ids del catálogo que más se parecen a lo de la foto, como texto"]}
-Si en la foto no hay un producto tecnológico claro, usa "termino": "".
+{"descripcion": "en español, 1 o 2 frases naturales y concretas describiendo lo que ves (objeto, color, marca o texto visible)", "termino": "si es un producto tecnológico que una tienda así podría vender, su categoría corta (mouse, teclado, laptop, monitor, audífonos, parlante, celular, impresora, cámara web, componente...); si NO es tecnológico, deja una cadena vacía \\"\\"", "productosRecomendados": ["ids del catálogo que de verdad se parezcan a lo de la foto, como texto; usa [] si ninguno encaja"]}
+
+Importante: SIEMPRE rellena "descripcion", aunque el objeto no sea tecnológico (por ejemplo una botella, ropa o comida). "termino" solo se rellena si es algo de tecnología.
 CATÁLOGO (cada uno con su id real): ${JSON.stringify(catalogo)}`
 
   const ctrl = new AbortController()
@@ -71,8 +80,11 @@ CATÁLOGO (cada uno con su id real): ${JSON.stringify(catalogo)}`
 
     const obj = JSON.parse(texto.slice(ini, fin + 1))
     const termino = typeof obj.termino === 'string' ? obj.termino.trim() : ''
-    if (!termino) return null
-    const etiqueta = typeof obj.etiqueta === 'string' && obj.etiqueta.trim() ? obj.etiqueta.trim() : termino
+    const descripcion = typeof obj.descripcion === 'string' ? obj.descripcion.trim() : ''
+    // Solo fallamos (y caemos a MobileNet) si Gemma no devolvió NADA útil.
+    if (!termino && !descripcion) return null
+    // La "etiqueta" corta la usamos como descripción amigable de respaldo.
+    const etiqueta = descripcion || termino
 
     // Solo dejamos pasar ids que existan de verdad en el catálogo.
     const idsValidos = new Set(catalogo.map((p) => String(p.id)))
@@ -80,7 +92,7 @@ CATÁLOGO (cada uno con su id real): ${JSON.stringify(catalogo)}`
       ? obj.productosRecomendados.map((x: unknown) => String(x)).filter((id: string) => idsValidos.has(id))
       : []
 
-    return { termino, etiqueta, productosRecomendados }
+    return { termino, etiqueta, descripcion, productosRecomendados }
   } catch {
     // timeout / red / JSON inválido -> el frontend usará MobileNet
     return null

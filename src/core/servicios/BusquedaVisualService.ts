@@ -8,8 +8,9 @@ import { usarIAReal } from './AsistenteIAService'
 import { identificarEnNavegador, filtrarPorTermino } from './VisionService'
 
 export interface ResultadoBusquedaVisual {
-  termino: string // 'mouse', 'teclado'... o '' si no se identificó
+  termino: string // 'mouse', 'teclado'... o '' si no es un producto tecnológico
   etiqueta: string // descripción amigable ('un mouse')
+  descripcion?: string // lo que la IA "vio" en la foto (para que DeepSeek responda natural)
   productos: Producto[] // coincidencias del catálogo (distintas marcas/modelos)
   fuente: 'nube' | 'navegador' | 'manual'
   necesitaCategoria: boolean // true → el cliente debe elegir la categoría
@@ -44,18 +45,25 @@ async function consultarVisionNube(
   if (!resp.ok) return null
 
   const datos = await resp.json()
-  if (!datos || typeof datos.termino !== 'string' || datos.termino === '') return null
+  const termino = typeof datos?.termino === 'string' ? datos.termino : ''
+  const descripcion = typeof datos?.descripcion === 'string' ? datos.descripcion : ''
+  // Si Gemma no vio NADA (ni tipo ni descripción), caemos al respaldo del navegador.
+  if (!datos || (!termino && !descripcion)) return null
 
   const ids = Array.isArray(datos.productosRecomendados)
     ? datos.productosRecomendados.map((x: unknown) => String(x))
     : []
+  // Buscamos coincidencias por ids sugeridos o, si hay término, por el término.
   const encontrados = ids.length
     ? productos.filter((p) => ids.includes(String(p.id)))
-    : filtrarPorTermino(datos.termino, productos)
+    : termino
+      ? filtrarPorTermino(termino, productos)
+      : []
 
   return {
-    termino: datos.termino,
-    etiqueta: typeof datos.etiqueta === 'string' ? datos.etiqueta : datos.termino,
+    termino,
+    etiqueta: typeof datos.etiqueta === 'string' && datos.etiqueta ? datos.etiqueta : descripcion || termino,
+    descripcion,
     productos: encontrados,
     fuente: 'nube',
     necesitaCategoria: encontrados.length === 0,
