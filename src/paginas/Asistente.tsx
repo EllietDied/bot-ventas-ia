@@ -786,8 +786,8 @@ export function Asistente() {
 
       // Le pasamos a DeepSeek lo que la visión VIO, para que RAZONE y responda natural.
       const consulta = hayEnCatalogo
-        ? `El cliente subió una foto. Al mirarla con atención, vi: "${loQueVeo}". En nuestro catálogo tenemos productos que coinciden. Reconoce con naturalidad lo que ves en la foto (que note que la miraste bien) y recomiéndale o compara las mejores opciones.`
-        : `El cliente subió una foto. Al mirarla con atención, vi: "${loQueVeo}". Ese tipo de producto NO está en nuestro catálogo (InkaShop es una tienda de tecnología). Responde de forma humana y cálida: comenta con naturalidad y detalle lo que ves en la foto (que note que la analizaste de verdad), dile con amabilidad que eso no lo vendemos y ofrécele con soltura las categorías de tecnología que sí tenemos, o pregúntale qué anda buscando. Nada de sonar robótico ni de frases hechas.`
+        ? `El cliente subió una foto. Al mirarla con atención, vi: "${loQueVeo}". En nuestro catálogo tenemos productos que coinciden. Reconoce en UNA frase, con chispa, lo que ves (sin especular de más), y luego recomiéndale o compara las mejores opciones. Sé natural y breve.`
+        : `El cliente subió una foto. Al mirarla, vi: "${loQueVeo}". Ese tipo de producto NO está en el catálogo (InkaShop es tienda de tecnología). Responde con chispa pero BREVE (2 o 3 frases como máximo): 1) reconoce en UNA frase lo que ves, sin inventar para qué sirve ni especular; 2) dile con simpatía que eso no lo vendemos; 3) ofrécele alternativas CONCRETAS de tecnología (por ejemplo audífonos, teclado o mouse gamer) e invítalo a decirte qué busca. Usa 1 o 2 emojis. Nada robótico ni frases de relleno.`
       const inicio = Date.now()
       const resultado = await obtenerRespuestaAsistente(consulta, contexto)
 
