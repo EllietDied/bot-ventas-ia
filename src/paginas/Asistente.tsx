@@ -133,6 +133,9 @@ export function Asistente() {
   // para no pisarlo. En modo local, "listo" desde el inicio.
   const [listo, setListo] = useState(() => !usarSupabase())
   const [mensajes, setMensajes] = useState<MensajeAsistente[]>(() => {
+    // En modo nube el historial SOLO vive en la base de datos (lo trae el efecto de
+    // abajo). No leemos localStorage para no mostrar restos de una sesión ya cerrada.
+    if (usarSupabase()) return [bienvenida]
     const guardados = cargar<MensajeAsistente[]>(claveChat, [])
     if (guardados.length === 0) return [bienvenida]
     // El saludo inicial (A-0) se regenera con el nombre del usuario ACTUAL,
@@ -159,6 +162,9 @@ export function Asistente() {
         setMensajes(
           (guardados as unknown as MensajeAsistente[]).map((m) => (m.id === 'A-0' ? bienvenida : m)),
         )
+      } else {
+        // La nube no tiene historial (p. ej. se borró al cerrar sesión): empezamos limpio.
+        setMensajes([bienvenida])
       }
       setListo(true)
     })
@@ -171,8 +177,10 @@ export function Asistente() {
     if (!listo) return // no guardamos hasta cargar el historial (para no pisarlo)
     // No guardamos los mensajes "pensando" (son temporales).
     const limpios = mensajes.filter((m) => !m.pensando)
-    if (usarSupabase() && usuarioActual) {
-      guardarChatSupabase(usuarioActual.idUsuario, rolChat, limpios)
+    if (usarSupabase()) {
+      // Modo nube: guardamos SOLO si hay sesión; nunca usamos localStorage (así no
+      // quedan restos que reaparezcan tras cerrar sesión).
+      if (usuarioActual) guardarChatSupabase(usuarioActual.idUsuario, rolChat, limpios)
     } else {
       guardar(claveChat, limpios)
     }
