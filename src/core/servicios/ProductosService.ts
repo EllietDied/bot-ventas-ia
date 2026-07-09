@@ -9,28 +9,40 @@ interface FilaProducto {
   id: number | string
   nombre: string | null
   marca: string | null
+  modelo: string | null
+  material: string | null
   descripcion: string | null
+  caracteristicas: string | null
   categoria: string | null
   precio: number | string | null
   stock: number | string | null
   estado: string | null
   imagen: string | null
+  imagenes: unknown // jsonb: lista de URLs de la galería
   id_vendedor: string | null
   vendedor_nombre: string | null
 }
 
 // Convierte una fila de Supabase al modelo Producto de la app.
 export function mapProducto(fila: FilaProducto): Producto {
+  // La galería viene como jsonb (ya es un arreglo); nos aseguramos de que sean textos.
+  const imagenes = Array.isArray(fila.imagenes)
+    ? (fila.imagenes as unknown[]).map((x) => String(x)).filter(Boolean)
+    : []
   return {
     id: Number(fila.id),
     nombre: fila.nombre ?? '',
     marca: fila.marca ?? undefined,
+    modelo: fila.modelo ?? undefined,
+    material: fila.material ?? undefined,
     descripcion: fila.descripcion ?? '',
+    caracteristicas: fila.caracteristicas ?? undefined,
     categoria: fila.categoria ?? '',
     precio: Number(fila.precio ?? 0),
     stock: Number(fila.stock ?? 0),
     estado: fila.estado ?? 'disponible',
     imagen: fila.imagen ?? '📦',
+    imagenes,
     idVendedor: fila.id_vendedor ?? undefined,
     vendedorNombre: fila.vendedor_nombre ?? undefined,
   }
@@ -51,12 +63,16 @@ export async function listarProductosSupabase(): Promise<Producto[]> {
 export async function insertarProductoSupabase(p: {
   nombre: string
   marca?: string
+  modelo?: string
+  material?: string
   descripcion: string
+  caracteristicas?: string
   categoria: string
   precio: number
   stock: number
   estado: string
   imagen: string
+  imagenes?: string[]
   idVendedor: string
   vendedorNombre: string
 }): Promise<Producto | null> {
@@ -66,12 +82,16 @@ export async function insertarProductoSupabase(p: {
     .insert({
       nombre: p.nombre,
       marca: p.marca ?? null,
+      modelo: p.modelo ?? null,
+      material: p.material ?? null,
       descripcion: p.descripcion,
+      caracteristicas: p.caracteristicas ?? null,
       categoria: p.categoria,
       precio: p.precio,
       stock: p.stock,
       estado: p.estado,
       imagen: p.imagen,
+      imagenes: p.imagenes ?? [],
       id_vendedor: p.idVendedor,
       vendedor_nombre: p.vendedorNombre,
     })
@@ -87,15 +107,19 @@ export async function actualizarProductoSupabase(
   cambios: Partial<Producto>,
 ): Promise<void> {
   if (!supabase) return
-  const fila: Record<string, string | number | null> = {}
+  const fila: Record<string, string | number | null | string[]> = {}
   if (cambios.nombre !== undefined) fila.nombre = cambios.nombre
   if (cambios.marca !== undefined) fila.marca = cambios.marca || null
+  if (cambios.modelo !== undefined) fila.modelo = cambios.modelo || null
+  if (cambios.material !== undefined) fila.material = cambios.material || null
   if (cambios.descripcion !== undefined) fila.descripcion = cambios.descripcion
+  if (cambios.caracteristicas !== undefined) fila.caracteristicas = cambios.caracteristicas || null
   if (cambios.categoria !== undefined) fila.categoria = cambios.categoria
   if (cambios.precio !== undefined) fila.precio = cambios.precio
   if (cambios.stock !== undefined) fila.stock = cambios.stock
   if (cambios.estado !== undefined) fila.estado = cambios.estado
   if (cambios.imagen !== undefined) fila.imagen = cambios.imagen
+  if (cambios.imagenes !== undefined) fila.imagenes = cambios.imagenes
   if (Object.keys(fila).length === 0) return
   await supabase.from('productos').update(fila).eq('id', id)
 }

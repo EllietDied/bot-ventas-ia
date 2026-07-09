@@ -6,12 +6,16 @@ import { Producto } from '../modelos/Producto'
 export interface DatosProducto {
   nombre: string
   marca?: string
+  modelo?: string
+  material?: string
   descripcion: string
+  caracteristicas?: string
   categoria: string
   precio: number
   stock: number
   idVendedor: string
   imagen?: string
+  imagenes?: string[] // galería de fotos (la 1ª es la principal)
 }
 
 // Valida los datos mínimos de un producto (RA3).
@@ -33,16 +37,21 @@ export function siguienteId(productos: Producto[]): number {
 
 // Crea un producto nuevo (modo local). Conviene validar antes con validarProducto.
 export function crearProductoLocal(productos: Producto[], d: DatosProducto): Producto {
+  const imagenes = d.imagenes && d.imagenes.length > 0 ? d.imagenes : d.imagen ? [d.imagen] : []
   return {
     id: siguienteId(productos),
     nombre: d.nombre.trim(),
     marca: d.marca?.trim() || undefined,
+    modelo: d.modelo?.trim() || undefined,
+    material: d.material?.trim() || undefined,
     descripcion: d.descripcion,
+    caracteristicas: d.caracteristicas?.trim() || undefined,
     categoria: d.categoria,
     precio: d.precio,
     stock: d.stock,
     estado: d.stock > 0 ? 'disponible' : 'agotado',
-    imagen: d.imagen || '📦',
+    imagen: imagenes[0] || '📦', // la 1ª foto es la principal (o un emoji)
+    imagenes,
     idVendedor: d.idVendedor,
   }
 }

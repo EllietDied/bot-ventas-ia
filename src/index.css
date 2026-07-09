@@ -3192,3 +3192,172 @@ a:hover {
     grid-template-columns: minmax(90px, 1fr) 1.5fr auto;
   }
 }
+
+/* ===== Tarjeta clicable: abre el detalle del producto ===== */
+.tarjeta-clicable {
+  cursor: pointer;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+.tarjeta-clicable:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+.tarjeta-clicable:focus-visible {
+  outline: 2px solid #6366f1;
+  outline-offset: 2px;
+}
+
+/* ===== Galería de fotos en el formulario del vendedor ===== */
+.preview-galeria {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 0.4rem;
+}
+.preview-galeria-item {
+  position: relative;
+  width: 84px;
+  height: 84px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+.preview-galeria-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.preview-principal {
+  position: absolute;
+  inset: auto 0 0 0;
+  font-size: 0.62rem;
+  text-align: center;
+  padding: 1px 0;
+  background: rgba(99, 102, 241, 0.85);
+  color: #fff;
+}
+.preview-quitar {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 20px;
+  height: 20px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  cursor: pointer;
+  line-height: 1;
+  font-size: 0.7rem;
+}
+
+/* ===== Página de detalle del producto ===== */
+.detalle-producto {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+  gap: 2rem;
+  margin-top: 1rem;
+  align-items: start;
+}
+.detalle-foto-principal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1 / 1;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 6rem;
+  overflow: hidden;
+}
+.detalle-foto {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.detalle-miniaturas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.7rem;
+}
+.detalle-mini {
+  width: 64px;
+  height: 64px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 2px solid transparent;
+  background: rgba(255, 255, 255, 0.04);
+  cursor: pointer;
+  padding: 0;
+  font-size: 1.6rem;
+}
+.detalle-mini.activa {
+  border-color: #6366f1;
+}
+.detalle-mini img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.detalle-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+.detalle-etiquetas {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+.detalle-nombre {
+  margin: 0;
+}
+.detalle-ficha {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.detalle-ficha strong {
+  opacity: 0.7;
+  margin-right: 0.3rem;
+}
+.detalle-precio-fila {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 0.3rem 0;
+}
+.detalle-bloque {
+  margin-top: 0.5rem;
+}
+.detalle-bloque h2 {
+  font-size: 1rem;
+  margin: 0 0 0.35rem;
+}
+.detalle-caracteristicas {
+  margin: 0;
+  padding-left: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+.detalle-acciones {
+  display: flex;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+  margin-top: 0.8rem;
+}
+.detalle-vendedor {
+  margin: 0.2rem 0 0;
+}
+@media (max-width: 760px) {
+  .detalle-producto {
+    grid-template-columns: 1fr;
+  }
+}

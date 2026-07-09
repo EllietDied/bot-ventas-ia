@@ -23,11 +23,14 @@ export function PanelVendedor() {
 
   const [nombre, setNombre] = useState('')
   const [marca, setMarca] = useState('')
+  const [modelo, setModelo] = useState('')
+  const [material, setMaterial] = useState('')
   const [descripcion, setDescripcion] = useState('')
+  const [caracteristicas, setCaracteristicas] = useState('')
   const [categoria, setCategoria] = useState('')
   const [precio, setPrecio] = useState('')
   const [stock, setStock] = useState('')
-  const [imagen, setImagen] = useState('') // foto subida (dataURL) para el nuevo producto
+  const [imagenes, setImagenes] = useState<string[]>([]) // galería de fotos (dataURLs)
   const [error, setError] = useState('')
   const [exito, setExito] = useState('')
 
@@ -70,35 +73,48 @@ export function PanelVendedor() {
     publicarProducto({
       nombre,
       marca,
+      modelo,
+      material,
       descripcion,
+      caracteristicas,
       categoria,
       precio: precioNum,
       stock: stockNum,
       idVendedor: usuarioActual!.idUsuario,
-      imagen: imagen || undefined, // si subió foto la usa; si no, queda el emoji
+      imagenes, // galería de fotos (si está vacía, se usa un emoji)
     })
 
     // Limpiamos el formulario y mostramos confirmación.
     setNombre('')
     setMarca('')
+    setModelo('')
+    setMaterial('')
     setDescripcion('')
+    setCaracteristicas('')
     setCategoria('')
     setPrecio('')
     setStock('')
-    setImagen('')
+    setImagenes([])
     setExito('Producto publicado correctamente.')
     toast.exito('Producto publicado correctamente')
   }
 
-  // El vendedor elige una foto para el NUEVO producto (la comprime y la previsualiza).
+  // El vendedor elige una o VARIAS fotos para el nuevo producto (las comprime y agrega).
   async function alElegirImagen(e: React.ChangeEvent<HTMLInputElement>) {
-    const archivo = e.target.files?.[0]
-    if (!archivo) return
+    const archivos = Array.from(e.target.files ?? [])
+    if (archivos.length === 0) return
     try {
-      setImagen(await comprimirImagen(archivo))
+      const nuevas = await Promise.all(archivos.map((a) => comprimirImagen(a)))
+      setImagenes((prev) => [...prev, ...nuevas].slice(0, 6)) // hasta 6 fotos
     } catch {
-      toast.error('No se pudo procesar la imagen.')
+      toast.error('No se pudo procesar alguna imagen.')
     }
+    e.target.value = '' // permite volver a elegir los mismos archivos
+  }
+
+  // Quita una foto de la galería del nuevo producto (por su posición).
+  function quitarImagen(indice: number) {
+    setImagenes((prev) => prev.filter((_, i) => i !== indice))
   }
 
   // El vendedor cambia la foto de un producto YA publicado.
@@ -174,17 +190,44 @@ export function PanelVendedor() {
               <span>Nombre *</span>
               <input value={nombre} onChange={(e) => setNombre(e.target.value)} />
             </label>
+            <div className="form-grid">
+              <label className="campo">
+                <span>Marca</span>
+                <input
+                  value={marca}
+                  onChange={(e) => setMarca(e.target.value)}
+                  placeholder="Ej. Logitech, Asus..."
+                />
+              </label>
+              <label className="campo">
+                <span>Modelo</span>
+                <input
+                  value={modelo}
+                  onChange={(e) => setModelo(e.target.value)}
+                  placeholder="Ej. G502 HERO"
+                />
+              </label>
+            </div>
             <label className="campo">
-              <span>Marca</span>
+              <span>Material</span>
               <input
-                value={marca}
-                onChange={(e) => setMarca(e.target.value)}
-                placeholder="Ej. Logitech, Asus..."
+                value={material}
+                onChange={(e) => setMaterial(e.target.value)}
+                placeholder="Ej. Plástico ABS, aluminio, aleación..."
               />
             </label>
             <label className="campo">
               <span>Descripción</span>
               <input value={descripcion} onChange={(e) => setDescripcion(e.target.value)} />
+            </label>
+            <label className="campo">
+              <span>Características (una por línea)</span>
+              <textarea
+                value={caracteristicas}
+                onChange={(e) => setCaracteristicas(e.target.value)}
+                rows={4}
+                placeholder={'Ej.\n6 botones programables\nSensor óptico 25K DPI\nLuces RGB'}
+              />
             </label>
             <label className="campo">
               <span>Categoría *</span>
@@ -220,19 +263,26 @@ export function PanelVendedor() {
             </div>
 
             <label className="campo">
-              <span>Imagen del producto</span>
-              <input type="file" accept="image/*" onChange={alElegirImagen} />
+              <span>Fotos del producto (puedes elegir varias · máx. 6)</span>
+              <input type="file" accept="image/*" multiple onChange={alElegirImagen} />
             </label>
-            {imagen && (
-              <div className="preview-imagen">
-                <img src={imagen} alt="Vista previa del producto" />
-                <button
-                  type="button"
-                  className="btn btn-secundario btn-pequeno"
-                  onClick={() => setImagen('')}
-                >
-                  Quitar foto
-                </button>
+            {imagenes.length > 0 && (
+              <div className="preview-galeria">
+                {imagenes.map((img, i) => (
+                  <div key={i} className="preview-galeria-item">
+                    <img src={img} alt={`Foto ${i + 1}`} />
+                    {i === 0 && <span className="preview-principal">Principal</span>}
+                    <button
+                      type="button"
+                      className="preview-quitar"
+                      title="Quitar foto"
+                      aria-label="Quitar foto"
+                      onClick={() => quitarImagen(i)}
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ))}
               </div>
             )}
 

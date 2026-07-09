@@ -3,12 +3,16 @@ export interface Producto {
   id: number
   nombre: string
   marca?: string // marca del producto (ej. Logitech). Opcional.
+  modelo?: string // modelo específico (ej. G502 HERO). Opcional.
+  material?: string // material principal (ej. plástico ABS, aluminio). Opcional.
   descripcion: string
+  caracteristicas?: string // ficha técnica / características (texto en varias líneas). Opcional.
   categoria: string
   precio: number
   stock: number
   estado: string // 'disponible' | 'agotado'
-  imagen: string // emoji representativo del producto
+  imagen: string // imagen principal (miniatura): 1ª foto de la galería o un emoji
+  imagenes?: string[] // galería: todas las fotos del producto (para el detalle)
   idVendedor?: string // qué vendedor lo publicó (opcional)
   vendedorNombre?: string // nombre del vendedor (lo usa la mensajería); presente con Supabase
 }

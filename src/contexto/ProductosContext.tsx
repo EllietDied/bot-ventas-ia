@@ -22,12 +22,16 @@ import { useSesion } from './SesionContext'
 export interface NuevoProducto {
   nombre: string
   marca?: string
+  modelo?: string
+  material?: string
   descripcion: string
+  caracteristicas?: string
   categoria: string
   precio: number
   stock: number
   idVendedor: string
-  imagen?: string // foto subida (dataURL); si no, se usa un emoji por defecto
+  imagen?: string // (compatibilidad) una sola foto subida por el chat del vendedor
+  imagenes?: string[] // galería: varias fotos subidas (dataURLs); la 1ª es la principal
 }
 
 interface ProductosContextType {
@@ -76,26 +80,40 @@ export function ProductosProvider({ children }: { children: ReactNode }) {
   // El vendedor publica un nuevo producto.
   async function publicarProducto(datos: NuevoProducto) {
     const estado = datos.stock > 0 ? 'disponible' : 'agotado'
-    const imagen = datos.imagen || '📦'
     const marca = datos.marca?.trim() || undefined
+    // Reunimos las fotos: la galería nueva o, si no, la foto única del chat.
+    const fotos =
+      datos.imagenes && datos.imagenes.length > 0
+        ? datos.imagenes
+        : datos.imagen
+          ? [datos.imagen]
+          : []
 
     if (usarSupabase()) {
-      // Si es una foto subida (dataURL), la guardamos en Supabase Storage y
-      // usamos su URL pública; si no, dejamos el emoji por defecto.
-      let imagenFinal = imagen
-      if (imagen.startsWith('data:')) {
-        const url = await subirImagenProducto(imagen)
-        if (url) imagenFinal = url
+      // Subimos cada foto (dataURL) a Supabase Storage y guardamos sus URLs públicas;
+      // las que ya sean URL o emoji se dejan tal cual.
+      const imagenesFinal: string[] = []
+      for (const foto of fotos) {
+        if (foto.startsWith('data:')) {
+          const url = await subirImagenProducto(foto)
+          imagenesFinal.push(url || foto)
+        } else {
+          imagenesFinal.push(foto)
+        }
       }
       const creado = await insertarProductoSupabase({
         nombre: datos.nombre,
         marca,
+        modelo: datos.modelo?.trim() || undefined,
+        material: datos.material?.trim() || undefined,
         descripcion: datos.descripcion,
+        caracteristicas: datos.caracteristicas?.trim() || undefined,
         categoria: datos.categoria,
         precio: datos.precio,
         stock: datos.stock,
         estado,
-        imagen: imagenFinal,
+        imagen: imagenesFinal[0] || '📦', // la 1ª foto es la principal (o un emoji)
+        imagenes: imagenesFinal,
         idVendedor: datos.idVendedor,
         vendedorNombre: usuarioActual
           ? `${usuarioActual.nombre} ${usuarioActual.apellido}`.trim()
@@ -106,7 +124,7 @@ export function ProductosProvider({ children }: { children: ReactNode }) {
     }
 
     // Modo local: lógica pura reutilizable y testeable (id incremental en memoria).
-    const producto = crearProductoLocal(productos, datos)
+    const producto = crearProductoLocal(productos, { ...datos, imagenes: fotos })
     setProductos((prev) => [...prev, producto])
   }
 

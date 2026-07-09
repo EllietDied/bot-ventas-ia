@@ -8,6 +8,7 @@ import { Intro } from './paginas/Intro'
 import { Login } from './paginas/Login'
 import { Registro } from './paginas/Registro'
 import { Catalogo } from './paginas/Catalogo'
+import { DetalleProducto } from './paginas/DetalleProducto'
 import { Carrito } from './paginas/Carrito'
 import { Checkout } from './paginas/Checkout'
 import { Pedidos } from './paginas/Pedidos'
@@ -54,6 +55,8 @@ export default function App() {
           <Route path="/restablecer" element={<Restablecer />} />
           {/* Catálogo público: el visitante puede mirar sin iniciar sesión */}
           <Route path="/catalogo" element={<Catalogo />} />
+          {/* Detalle de un producto (público, se abre al hacer clic en una tarjeta) */}
+          <Route path="/producto/:id" element={<DetalleProducto />} />
 
           {/* Páginas legales públicas (requisito de la pasarela de pagos) */}
           <Route path="/terminos" element={<Terminos />} />
