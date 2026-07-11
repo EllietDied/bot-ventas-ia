@@ -39,7 +39,20 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
 // Registro del Service Worker (solo en producción) para habilitar la PWA.
 // En desarrollo (npm run dev) no se registra, para no interferir con la recarga.
 if ('serviceWorker' in navigator && import.meta.env.PROD) {
+  // Cuando se publica una versión nueva, el Service Worker nuevo toma el control
+  // y disparamos UNA recarga automática, para que la PWA deje de mostrar la versión
+  // vieja al instante (era la causa de que los cambios "no aparecieran").
+  const teniaControl = !!navigator.serviceWorker.controller
+  let recargando = false
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!teniaControl || recargando) return // en la 1ª instalación no recargamos
+    recargando = true
+    window.location.reload()
+  })
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch(() => {})
+    navigator.serviceWorker
+      .register('/sw.js')
+      .then((reg) => reg.update()) // al cargar, busca si hay una versión nueva
+      .catch(() => {})
   })
 }
