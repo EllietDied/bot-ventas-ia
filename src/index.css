@@ -2873,6 +2873,20 @@ a:hover {
   .asistente-chat {
     height: 68vh;
   }
+  /* Botones rápidos en UNA sola fila DESLIZABLE (antes se apilaban en 3 filas
+     y se comían el chat). El usuario desliza de lado para ver el resto. */
+  .asistente-rapidos {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding: 0.5rem 0.8rem;
+    scrollbar-width: thin;
+  }
+  .asistente-rapidos > * {
+    flex: 0 0 auto; /* los chips no se encogen: se deslizan */
+  }
+  .asistente-rapidos .chip {
+    white-space: nowrap;
+  }
   .tarjeta-chat {
     width: 100%;
   }
