@@ -1101,7 +1101,7 @@ export function Asistente() {
             <p className="texto-tenue">Aún no hay consultas.</p>
           ) : (
             <ul className="lista-consultas">
-              {consultasRecientes.slice(0, 8).map((c, i) => (
+              {consultasRecientes.slice(0, 5).map((c, i) => (
                 <li key={i}>
                   <span>{c.termino}</span>
                   {c.categoria && <span className="chip-mini">{c.categoria}</span>}
