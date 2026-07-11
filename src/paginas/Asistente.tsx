@@ -10,7 +10,7 @@ import { LogoUSS } from '../componentes/LogoUSS'
 import { ImagenProducto } from '../componentes/ImagenProducto'
 import { Icono } from '../componentes/Icono'
 import { BotonBuscarFoto } from '../componentes/BotonBuscarFoto'
-import { type ResultadoBusquedaVisual } from '../core/servicios/BusquedaVisualService'
+import { buscarPorFoto, type ResultadoBusquedaVisual } from '../core/servicios/BusquedaVisualService'
 import { Producto, codigoProducto } from '../core/modelos/Producto'
 import {
   quiereCancelar,
@@ -148,6 +148,9 @@ export function Asistente() {
   const [cargando, setCargando] = useState(false) // mientras esperamos la respuesta del asistente
   const finRef = useRef<HTMLDivElement>(null)
   const idFotoBot = useRef('') // id del mensaje "analizando…" de la búsqueda por foto
+  // Guarda la última versión de la función que analiza una imagen PEGADA (Ctrl+V),
+  // para que el listener de "pegar" use siempre datos frescos sin re-suscribirse.
+  const pegarImagenRef = useRef<((archivo: File) => void) | null>(null)
 
   // Con Supabase: al entrar, cargamos el historial del chat desde la nube.
   useEffect(() => {
@@ -186,6 +189,22 @@ export function Asistente() {
     }
     finRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [mensajes, listo, claveChat])
+
+  // Pegar una imagen (Ctrl+V) en cualquier parte del chat dispara la búsqueda por
+  // foto directamente, sin pulsar "Buscar por foto" (solo para el comprador).
+  useEffect(() => {
+    if (!puedeComprar) return
+    function alPegar(e: ClipboardEvent) {
+      const items = Array.from(e.clipboardData?.items ?? [])
+      const archivo = items.find((it) => it.type.startsWith('image/'))?.getAsFile()
+      if (archivo && pegarImagenRef.current) {
+        e.preventDefault() // no pegamos el binario de la imagen como texto
+        pegarImagenRef.current(archivo)
+      }
+    }
+    document.addEventListener('paste', alPegar)
+    return () => document.removeEventListener('paste', alPegar)
+  }, [puedeComprar])
 
   function agregarMensaje(m: MensajeAsistente) {
     setMensajes((prev) => [...prev, m])
@@ -812,6 +831,33 @@ export function Asistente() {
       setCargando(false)
     }
   }
+
+  // Analiza una imagen (archivo) con el flujo de "buscar por foto". La usan tanto el
+  // pegado con Ctrl+V como el botón. Muestra la foto y el "analizando…" y luego razona.
+  async function buscarConImagen(archivo: File) {
+    if (cargando) return // ya hay un análisis en curso
+    let dataURL = ''
+    try {
+      dataURL = await comprimirImagen(archivo)
+    } catch {
+      /* si falla la compresión, el flujo mostrará el aviso correspondiente */
+    }
+    iniciarFotoComprador(dataURL) // muestra la foto pegada y el "analizando…"
+    try {
+      const resultado = await buscarPorFoto(dataURL, productos)
+      manejarFotoComprador(resultado)
+    } catch {
+      manejarFotoComprador({
+        termino: '',
+        etiqueta: '',
+        productos: [],
+        fuente: 'manual',
+        necesitaCategoria: true,
+      })
+    }
+  }
+  // Mantenemos el ref del pegado apuntando a la última versión de la función.
+  pegarImagenRef.current = buscarConImagen
 
   function compararProducto(p: Producto) {
     setComparar((prev) => {
