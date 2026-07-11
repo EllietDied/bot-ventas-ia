@@ -116,6 +116,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const imagen = typeof cuerpo.imagen === 'string' ? cuerpo.imagen : ''
     if (!imagen) return res.status(400).json({ error: 'Falta la imagen.' })
+    // El frontend ya comprime a ~768px; cortamos aqui cualquier imagen enorme
+    // (abuso/coste). ~4M de base64 equivalen a ~3MB de imagen, mas que suficiente.
+    if (imagen.length > 4_000_000) {
+      return res.status(413).json({ error: 'La imagen es demasiado grande.', termino: '' })
+    }
 
     const productos: ProductoCtx[] = Array.isArray(cuerpo.productos)
       ? cuerpo.productos.slice(0, 40)

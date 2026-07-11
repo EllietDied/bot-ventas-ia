@@ -53,6 +53,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(200).json({ ok: false, motivo: 'pagos/BD no configurados' })
     }
 
+    // 0) SEGURIDAD: si hay un secreto de webhook configurado, exigimos que la URL lo
+    //    traiga (?token=...). Solo Culqi conoce esa URL secreta (se configura en su
+    //    panel), asi que un atacante no puede falsificar pagos contra este endpoint.
+    const secretoWebhook = process.env.CULQI_WEBHOOK_SECRET || ''
+    if (secretoWebhook) {
+      const tokenUrl = typeof req.query?.token === 'string' ? req.query.token : ''
+      if (tokenUrl !== secretoWebhook) {
+        return res.status(401).json({ ok: false, motivo: 'no autorizado' })
+      }
+    }
+
     // 1) Del evento solo nos quedamos con el ID del objeto (orden o cargo).
     const evento = leerBody(req.body)
     const data = evento?.data?.object ?? evento?.data ?? evento
@@ -71,13 +82,29 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // "ruta inválida", así que usamos el objeto que Culqi ENVIÓ en el evento (este
     // webhook solo lo invoca Culqi hacia la URL registrada).
     let obj: any = data
+    let verificadoConCulqi = false
     try {
       const verif = await fetch(`${CULQI_API}/${recurso}/${id}`, {
         headers: { Authorization: 'Bearer ' + process.env.CULQI_SECRET_KEY },
       })
-      if (verif.ok) obj = await verif.json()
+      if (verif.ok) {
+        obj = await verif.json()
+        verificadoConCulqi = true
+      }
     } catch {
-      /* si no se puede consultar, usamos el objeto del evento */
+      /* no se pudo consultar; se evalua abajo segun el tipo */
+    }
+
+    // Los CARGOS (tarjeta/Yape) SI se pueden consultar en Culqi: exigimos esa
+    // confirmacion real y nunca confiamos en el objeto que llego en el evento.
+    if (!esOrden && !verificadoConCulqi) {
+      return res.status(200).json({ ok: false, motivo: 'cargo no verificado con Culqi' })
+    }
+    // Las ORDENES (PagoEfectivo) no se pueden consultar; solo las aceptamos si el
+    // webhook llego autenticado con el token secreto (paso 0). Sin ese token, no
+    // arriesgamos a acreditar un evento potencialmente falso.
+    if (esOrden && !verificadoConCulqi && !secretoWebhook) {
+      return res.status(200).json({ ok: false, motivo: 'orden requiere webhook seguro (token)' })
     }
 
     // 4) ¿Está realmente pagado?
@@ -93,6 +120,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const monto = Number(obj?.amount) / 100 // céntimos -> soles
     if (!usuarioId || !(monto > 0)) {
       return res.status(200).json({ ok: false, motivo: 'metadata incompleta' })
+    }
+    // Tope de seguridad por operación (igual que en pago-crear): evita acreditar
+    // cifras absurdas si algo se manipulara.
+    if (monto > 5000) {
+      return res.status(200).json({ ok: false, motivo: 'monto fuera de rango' })
     }
 
     // 6) IDEMPOTENCIA: registramos la transacción. Si choca con el índice único de
@@ -111,10 +143,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     })
     if (ins.status === 409) return res.status(200).json({ ok: true, motivo: 'pago ya procesado' })
     if (!ins.ok) {
+      // El detalle real solo va a los logs del servidor, nunca en la respuesta publica.
       const detalle = await ins.text().catch(() => '')
-      return res
-        .status(200)
-        .json({ ok: false, motivo: 'no se pudo registrar', supaStatus: ins.status, detalle: detalle.slice(0, 200) })
+      console.error('Webhook: no se pudo registrar la transaccion:', ins.status, detalle.slice(0, 300))
+      return res.status(200).json({ ok: false, motivo: 'no se pudo registrar' })
     }
 
     // 7) Acreditamos el saldo (solo en recargas): leer + sumar + guardar.
