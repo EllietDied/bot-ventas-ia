@@ -38,7 +38,7 @@ interface ProductosContextType {
   productos: Producto[]
   buscar: (termino: string) => Producto[]
   categorias: string[]
-  publicarProducto: (datos: NuevoProducto) => void
+  publicarProducto: (datos: NuevoProducto) => Promise<Producto | null>
   actualizarStock: (id: number, nuevoStock: number) => void
   actualizarImagen: (id: number, imagen: string) => void
   editarProducto: (id: number, cambios: Partial<Producto>) => void
@@ -77,8 +77,8 @@ export function ProductosProvider({ children }: { children: ReactNode }) {
     return buscarProductos(termino, productos)
   }
 
-  // El vendedor publica un nuevo producto.
-  async function publicarProducto(datos: NuevoProducto) {
+  // El vendedor publica un nuevo producto. Devuelve el producto creado, o null si falló.
+  async function publicarProducto(datos: NuevoProducto): Promise<Producto | null> {
     const estado = datos.stock > 0 ? 'disponible' : 'agotado'
     const marca = datos.marca?.trim() || undefined
     // Reunimos las fotos: la galería nueva o, si no, la foto única del chat.
@@ -120,12 +120,13 @@ export function ProductosProvider({ children }: { children: ReactNode }) {
           : '',
       })
       if (creado) setProductos((prev) => [...prev, creado])
-      return
+      return creado // null si la inserción falló
     }
 
     // Modo local: lógica pura reutilizable y testeable (id incremental en memoria).
     const producto = crearProductoLocal(productos, { ...datos, imagenes: fotos })
     setProductos((prev) => [...prev, producto])
+    return producto
   }
 
   // Editor general: aplica cambios parciales. Si cambia el stock, recalcula el estado.

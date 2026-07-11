@@ -195,6 +195,7 @@ export function Checkout() {
 
   function pagar() {
     if (!usuarioActual) return
+    if (procesando) return // evita el doble clic (dos pedidos)
     setError('')
 
     // La transferencia requiere elegir el banco.
@@ -251,43 +252,53 @@ export function Checkout() {
     setTimeout(() => setPasoActual(2), 1000) // subtotal calculado
     setTimeout(() => setPasoActual(3), 1500) // descuento aplicado
 
-    // Paso 4: aquí ocurre el trabajo real (descontar stock + registrar pedido).
+    // Paso 4: trabajo real. Registramos el pedido PRIMERO; solo si se creó bien
+    // descontamos stock, guardamos envío/billetera, vaciamos el carrito y
+    // confirmamos. Así no queda stock descontado ni "éxito" falso si algo falla.
     setTimeout(async () => {
-      for (const item of items) {
-        const actual = productos.find((p) => p.id === item.producto.id)
-        if (actual) actualizarStock(actual.id, actual.stock - item.cantidad)
-      }
-      const creado = await registrarPedido({
-        correoComprador: usuarioActual.correo,
-        items,
-        subtotal,
-        descuento,
-        total,
-        metodoPago,
-        banco: metodoPago === 'transferencia' ? banco : undefined,
-      })
-      if (creado && direccionEnvio) actualizarEnvio(creado.idPedido, direccionEnvio, empresaEnvio)
-      // Si pagó con la billetera, descontamos el total de su saldo.
-      if (metodoPago === 'billetera') {
-        const nuevo = aplicarCompra(
-          billetera,
+      try {
+        const creado = await registrarPedido({
+          correoComprador: usuarioActual.correo,
+          items,
+          subtotal,
+          descuento,
           total,
-          'Compra en InkaShop',
-          'mov-' + Date.now(),
-          new Date().toISOString(),
-        )
-        setBilletera(nuevo)
-        guardarBilletera(idUsuario, nuevo)
+          metodoPago,
+          banco: metodoPago === 'transferencia' ? banco : undefined,
+        })
+        if (!creado) {
+          setProcesando(false)
+          setError('No se pudo registrar el pedido. Inténtalo de nuevo.')
+          toast.error('No se pudo registrar el pedido')
+          return
+        }
+        // Pedido creado: recién ahora aplicamos los efectos.
+        for (const item of items) {
+          const actual = productos.find((p) => p.id === item.producto.id)
+          if (actual) actualizarStock(actual.id, actual.stock - item.cantidad)
+        }
+        if (direccionEnvio) actualizarEnvio(creado.idPedido, direccionEnvio, empresaEnvio)
+        if (metodoPago === 'billetera') {
+          const nuevo = aplicarCompra(
+            billetera,
+            total,
+            'Compra en InkaShop',
+            'mov-' + Date.now(),
+            new Date().toISOString(),
+          )
+          setBilletera(nuevo)
+          guardarBilletera(idUsuario, nuevo)
+        }
+        setPasoActual(4)
+        vaciarCarrito()
+        setPagado(true)
+        toast.exito('¡Pedido registrado correctamente!')
+      } catch {
+        setProcesando(false)
+        setError('Ocurrió un error al procesar el pedido. Inténtalo de nuevo.')
+        toast.error('Error al procesar el pedido')
       }
-      setPasoActual(4)
-      vaciarCarrito()
     }, 2000)
-
-    // Confirmación final.
-    setTimeout(() => {
-      setPagado(true)
-      toast.exito('¡Pedido registrado correctamente!')
-    }, 2700)
   }
 
   // Pago con billetera en PRODUCCIÓN: la función del servidor calcula el total con
@@ -464,8 +475,12 @@ export function Checkout() {
 
           {error && <p className="mensaje-error">{error}</p>}
 
-          <button className="btn btn-primario btn-bloque" onClick={pagar}>
-            Pagar S/ {total.toFixed(2)}
+          <button
+            className="btn btn-primario btn-bloque"
+            onClick={pagar}
+            disabled={procesando}
+          >
+            {procesando ? 'Procesando…' : `Pagar S/ ${total.toFixed(2)}`}
           </button>
           <p className="texto-tenue texto-centro">
             <Icono nombre="candado" size={15} /> Pago seguro · tus datos están protegidos.

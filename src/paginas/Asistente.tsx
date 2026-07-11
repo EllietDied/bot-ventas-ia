@@ -312,8 +312,10 @@ export function Asistente() {
   }
 
   // Publica el producto del borrador y muestra una tarjeta de confirmación.
-  function finalizarAgregar(b: Partial<Producto>) {
-    publicarProducto({
+  async function finalizarAgregar(b: Partial<Producto>) {
+    setFlujo(FLUJO_INICIAL)
+    // Esperamos el resultado: solo confirmamos si de verdad se publicó.
+    const creado = await publicarProducto({
       nombre: b.nombre || 'Producto',
       marca: b.marca,
       descripcion: b.descripcion || '',
@@ -323,26 +325,21 @@ export function Asistente() {
       idVendedor: usuarioActual!.idUsuario,
       imagen: b.imagen,
     })
-    const muestra: Producto = {
-      id: -1,
-      nombre: b.nombre || 'Producto',
-      marca: b.marca,
-      descripcion: b.descripcion || '',
-      categoria: b.categoria || 'General',
-      precio: b.precio || 0,
-      stock: b.stock ?? 0,
-      estado: (b.stock ?? 0) > 0 ? 'disponible' : 'agotado',
-      imagen: b.imagen || '📦',
-      idVendedor: usuarioActual!.idUsuario,
+    if (!creado) {
+      return agregarMensaje({
+        id: idUnico(),
+        emisor: 'bot',
+        texto: 'Uy, no pude publicar el producto (puede ser la conexión). ¿Lo intentamos de nuevo?',
+        acciones: MENU_VENDEDOR,
+      })
     }
-    setFlujo(FLUJO_INICIAL)
     agregarMensaje({
       id: idUnico(),
       emisor: 'bot',
-      texto: `¡Listo! Publiqué "${muestra.nombre}" en ${muestra.categoria}, a S/ ${muestra.precio.toFixed(
+      texto: `¡Listo! Publiqué "${creado.nombre}" en ${creado.categoria}, a S/ ${creado.precio.toFixed(
         2,
-      )} con ${muestra.stock} en stock. ¿Algo más?`,
-      productos: [muestra],
+      )} con ${creado.stock} en stock. ¿Algo más?`,
+      productos: [creado],
       acciones: MENU_VENDEDOR,
     })
   }

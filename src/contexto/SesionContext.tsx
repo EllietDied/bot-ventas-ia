@@ -212,22 +212,25 @@ export function SesionProvider({ children }: { children: ReactNode }) {
   }
 
   async function logout() {
-    // Borramos la conversación del asistente al salir (comprador y vendedor).
-    // En Supabase debe hacerse ANTES de cerrar sesión: mientras el token sigue
-    // activo, para que las reglas de seguridad (RLS) permitan el borrado.
-    if (usuarioActual && usarSupabase()) {
+    const id = usuarioActual?.idUsuario
+    const supa = usarSupabase()
+    // Cortamos PRIMERO la sesión en memoria: así el efecto que guarda el chat deja
+    // de guardar (usuarioActual = null) y una respuesta de IA en vuelo no puede
+    // "resucitar" el historial que estamos a punto de borrar.
+    setUsuarioActual(null)
+    // Vaciamos SIEMPRE la copia local del chat (ambos roles), en cualquier modo.
+    guardar('asistente_chat_comprador', [])
+    guardar('asistente_chat_vendedor', [])
+    if (id && supa) {
       try {
-        await limpiarChatSupabase(usuarioActual.idUsuario)
+        // El token de Supabase sigue activo aquí (logoutSupabase va después),
+        // así que el borrado en la nube respeta el RLS y funciona.
+        await limpiarChatSupabase(id)
       } catch {
         /* si el borrado en la nube falla, igual cerramos la sesión */
       }
     }
-    // Vaciamos SIEMPRE la copia local del chat (ambos roles), en cualquier modo,
-    // para que no reaparezca al volver a entrar.
-    guardar('asistente_chat_comprador', [])
-    guardar('asistente_chat_vendedor', [])
-    if (usarSupabase()) await logoutSupabase()
-    setUsuarioActual(null)
+    if (supa) await logoutSupabase()
   }
 
   return (

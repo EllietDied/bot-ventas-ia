@@ -56,7 +56,7 @@ export function PanelVendedor() {
     (m) => m.destinatario === usuarioActual.correo && !m.leido && m.tipoMensaje === 'consulta',
   )
 
-  function publicar(e: React.FormEvent) {
+  async function publicar(e: React.FormEvent) {
     e.preventDefault()
     setError('')
     setExito('')
@@ -70,7 +70,8 @@ export function PanelVendedor() {
     if (isNaN(precioNum) || precioNum <= 0) return setError('El precio debe ser mayor a 0.')
     if (isNaN(stockNum) || stockNum < 0) return setError('El stock no puede ser negativo.')
 
-    publicarProducto({
+    // Esperamos el resultado: solo confirmamos si de verdad se publicó.
+    const creado = await publicarProducto({
       nombre,
       marca,
       modelo,
@@ -83,6 +84,11 @@ export function PanelVendedor() {
       idVendedor: usuarioActual!.idUsuario,
       imagenes, // galería de fotos (si está vacía, se usa un emoji)
     })
+    if (!creado) {
+      setError('No se pudo publicar el producto. Revisa tu conexión e inténtalo de nuevo.')
+      toast.error('No se pudo publicar el producto')
+      return
+    }
 
     // Limpiamos el formulario y mostramos confirmación.
     setNombre('')
