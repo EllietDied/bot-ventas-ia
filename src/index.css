@@ -2554,6 +2554,7 @@ a:hover {
   display: flex;
   flex-direction: column;
   height: 72vh;
+  min-width: 0; /* permite que el chat se encoja y contenga su contenido ancho */
   box-shadow: var(--sombra);
 }
 .asistente-mensajes {
@@ -2861,7 +2862,9 @@ a:hover {
   .chat-layout,
   .vendedor-layout,
   .asistente-layout {
-    grid-template-columns: 1fr;
+    /* minmax(0, 1fr) evita que el contenido ancho (p. ej. los botones en fila)
+       estire la columna más allá de la pantalla y cause scroll horizontal. */
+    grid-template-columns: minmax(0, 1fr);
   }
   .resumen,
   .asistente-panel {
