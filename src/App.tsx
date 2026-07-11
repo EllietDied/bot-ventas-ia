@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { BarraNavegacion } from './componentes/BarraNavegacion'
+import { ScrollToTop } from './componentes/ScrollToTop'
 import { PieInstitucional } from './componentes/PieInstitucional'
 import { RutaProtegida } from './componentes/RutaProtegida'
 import { InkaAnimatedBackground } from './componentes/InkaAnimatedBackground'
@@ -38,6 +39,7 @@ export default function App() {
     ubicacion.pathname === '/restablecer'
   return (
     <>
+      <ScrollToTop />
       {usuarioActual && !esAuth && (
         <div className="inka-fondo-global" aria-hidden="true">
           {/* Versión ambiental: menos figuras y menos dorado que el login. El
