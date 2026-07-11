@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useSesion } from '../contexto/SesionContext'
 import { useCarrito } from '../contexto/CarritoContext'
@@ -14,11 +15,15 @@ export function BarraNavegacion() {
   const { noLeidosDe } = useMensajeria()
   const navegar = useNavigate()
   const ubicacion = useLocation()
+  // En móvil los enlaces se ocultan tras un botón ☰ (menú hamburguesa).
+  const [menuAbierto, setMenuAbierto] = useState(false)
+  const cerrarMenu = () => setMenuAbierto(false)
 
   // Mensajes recibidos sin leer del usuario actual (para el aviso).
   const noLeidos = usuarioActual ? noLeidosDe(usuarioActual.idUsuario) : 0
 
   async function cerrarSesion() {
+    cerrarMenu()
     // Esperamos a que logout TERMINE (borra el chat de la base y del navegador)
     // antes de navegar; si no, la navegación corta el borrado a medias.
     await logout()
@@ -27,14 +32,26 @@ export function BarraNavegacion() {
 
   return (
     <nav className="navbar">
-      <Link to="/" className="navbar-marca">
+      <Link to="/" className="navbar-marca" onClick={cerrarMenu}>
         <LogoUSS size="small" />
         <span className="navbar-marca-texto">
           <span className="marca-ia">IA</span> <span className="marca-shop">InkaShop</span>
         </span>
       </Link>
 
-      <div className="navbar-links">
+      {/* Botón del menú (solo se ve en móvil, por CSS) */}
+      <button
+        type="button"
+        className="navbar-toggle"
+        aria-label={menuAbierto ? 'Cerrar menú' : 'Abrir menú'}
+        aria-expanded={menuAbierto}
+        onClick={() => setMenuAbierto((v) => !v)}
+      >
+        {menuAbierto ? '✕' : '☰'}
+      </button>
+
+      {/* Al pulsar cualquier enlace/botón dentro, se cierra el menú en móvil */}
+      <div className={'navbar-links' + (menuAbierto ? ' abierto' : '')} onClick={cerrarMenu}>
         {usuarioActual && (
           <>
             <Link to="/">Asistente IA</Link>

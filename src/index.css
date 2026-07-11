@@ -265,6 +265,17 @@ a:hover {
   color: var(--texto-tenue);
   font-size: 0.85rem;
 }
+/* Botón del menú hamburguesa: oculto en escritorio, visible en móvil. */
+.navbar-toggle {
+  display: none;
+  background: transparent;
+  border: none;
+  color: var(--texto);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0.1rem 0.4rem;
+}
 .badge {
   background: var(--primario);
   color: #fff;
@@ -2866,18 +2877,43 @@ a:hover {
     width: 100%;
   }
 }
-@media (max-width: 640px) {
+/* ===== Navbar en móvil: menú hamburguesa (☰) ===== */
+@media (max-width: 720px) {
   .navbar {
     padding: 0.7rem 0.9rem;
   }
+  .navbar-toggle {
+    display: inline-flex;
+    align-items: center;
+  }
+  /* Los enlaces se ocultan y se despliegan en vertical al abrir el menú. */
   .navbar-links {
-    gap: 0.55rem 0.85rem;
-    font-size: 0.9rem;
+    display: none;
+    flex-basis: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.15rem;
+    margin-top: 0.5rem;
+  }
+  .navbar-links.abierto {
+    display: flex;
+  }
+  .navbar-links a,
+  .navbar-links > .btn {
+    display: block;
+    width: 100%;
+    padding: 0.6rem 0.5rem;
+    border-radius: 8px;
+  }
+  .navbar-links a:hover {
+    background: rgba(127, 127, 127, 0.12);
+    text-decoration: none;
   }
   .navbar-usuario {
-    width: 100%;
-    order: 1;
+    padding: 0.3rem 0.5rem;
   }
+}
+@media (max-width: 640px) {
   .contenedor {
     padding: 1.1rem 0.8rem 2.5rem;
   }
@@ -3394,4 +3430,27 @@ a:hover {
   cursor: pointer;
   line-height: 1;
   font-size: 0.7rem;
+}
+
+/* ===== Red de seguridad responsive (móvil) ===== */
+html {
+  /* Evita el scroll horizontal por algún elemento que se salga, sin romper el
+     navbar "sticky" (a diferencia de overflow:hidden). */
+  overflow-x: clip;
+}
+img {
+  max-width: 100%; /* ninguna imagen desborda su contenedor */
+}
+@media (max-width: 480px) {
+  /* Detalle: la foto y los botones se adaptan mejor en pantallas muy chicas. */
+  .detalle-foto-principal {
+    font-size: 4rem;
+  }
+  .detalle-acciones .btn {
+    flex: 1 1 100%;
+  }
+  /* El cuadro de escribir del chat no se desborda en móvil. */
+  .asistente-entrada input {
+    min-width: 0;
+  }
 }
