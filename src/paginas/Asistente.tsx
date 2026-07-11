@@ -143,14 +143,15 @@ export function Asistente() {
     return guardados.map((m) => (m.id === 'A-0' ? bienvenida : m))
   })
   const [texto, setTexto] = useState('')
+  const [imagenAdjunta, setImagenAdjunta] = useState('') // foto pegada, esperando enviarse
   const [comparar, setComparar] = useState<Producto[]>([])
   const [flujo, setFlujo] = useState<FlujoVendedor>(FLUJO_INICIAL)
   const [cargando, setCargando] = useState(false) // mientras esperamos la respuesta del asistente
   const finRef = useRef<HTMLDivElement>(null)
   const idFotoBot = useRef('') // id del mensaje "analizando…" de la búsqueda por foto
-  // Guarda la última versión de la función que analiza una imagen PEGADA (Ctrl+V),
+  // Guarda la última versión de la función que ADJUNTA una imagen pegada (Ctrl+V),
   // para que el listener de "pegar" use siempre datos frescos sin re-suscribirse.
-  const pegarImagenRef = useRef<((archivo: File) => void) | null>(null)
+  const adjuntarImagenRef = useRef<((archivo: File) => void) | null>(null)
 
   // Con Supabase: al entrar, cargamos el historial del chat desde la nube.
   useEffect(() => {
@@ -190,16 +191,16 @@ export function Asistente() {
     finRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [mensajes, listo, claveChat])
 
-  // Pegar una imagen (Ctrl+V) en cualquier parte del chat dispara la búsqueda por
-  // foto directamente, sin pulsar "Buscar por foto" (solo para el comprador).
+  // Pegar una imagen (Ctrl+V) en el chat la deja ADJUNTA en el cuadro de escribir
+  // (no busca aún): el cliente puede añadir una descripción y luego pulsar Enter.
   useEffect(() => {
     if (!puedeComprar) return
     function alPegar(e: ClipboardEvent) {
       const items = Array.from(e.clipboardData?.items ?? [])
       const archivo = items.find((it) => it.type.startsWith('image/'))?.getAsFile()
-      if (archivo && pegarImagenRef.current) {
+      if (archivo && adjuntarImagenRef.current) {
         e.preventDefault() // no pegamos el binario de la imagen como texto
-        pegarImagenRef.current(archivo)
+        adjuntarImagenRef.current(archivo)
       }
     }
     document.addEventListener('paste', alPegar)
@@ -708,8 +709,20 @@ export function Asistente() {
 
   function enviar(e: React.FormEvent) {
     e.preventDefault()
-    if (esVendedorActual) enviarVendedor(texto)
-    else enviarTexto(texto)
+    if (esVendedorActual) {
+      enviarVendedor(texto)
+      return
+    }
+    // Si hay una imagen adjunta, buscamos por foto usando la imagen + el texto (pista).
+    if (imagenAdjunta) {
+      const pista = texto.trim()
+      const img = imagenAdjunta
+      setImagenAdjunta('')
+      setTexto('')
+      analizarFotoAdjunta(img, pista)
+      return
+    }
+    enviarTexto(texto)
   }
 
   // ---- Acciones de las tarjetas de producto dentro del chat ----
@@ -735,13 +748,13 @@ export function Asistente() {
 
   // Al ELEGIR la foto (antes de analizarla): mostramos el mensaje del usuario y un
   // "analizando…" en el chat, para que la espera (la visión puede tardar) se sienta bien.
-  function iniciarFotoComprador(dataURL: string) {
-    // Si hay foto, la mostramos SOLA (sin texto). Solo si falló la compresión
-    // usamos un texto de respaldo para que la burbuja no quede vacía.
+  function iniciarFotoComprador(dataURL: string, pista = '') {
+    // Mostramos la foto y, si el cliente escribió una descripción (pista), la ponemos
+    // como su mensaje. Si no hay pista ni foto, un texto de respaldo.
     agregarMensaje({
       id: idUnico(),
       emisor: 'usuario',
-      texto: dataURL ? '' : 'Te envié una foto',
+      texto: pista.trim() || (dataURL ? '' : 'Te envié una foto'),
       imagen: dataURL,
     })
     const idBot = idUnico()
@@ -752,7 +765,7 @@ export function Asistente() {
 
   // Búsqueda por foto HÍBRIDA: la visión (Gemma/MobileNet) identifica el producto y
   // luego DeepSeek RAZONA sobre el catálogo para recomendar. Actualiza el "analizando…".
-  async function manejarFotoComprador(r: ResultadoBusquedaVisual) {
+  async function manejarFotoComprador(r: ResultadoBusquedaVisual, pista = '') {
     // Reusamos el mensaje "analizando…" que se mostró al elegir la foto (o creamos uno).
     let idBot = idFotoBot.current
     if (!idBot) {
@@ -804,9 +817,13 @@ export function Asistente() {
       }
 
       // Le pasamos a DeepSeek lo que la visión VIO, para que RAZONE y responda natural.
+      // Si el cliente escribió una pista (palabras clave), la sumamos para acertar más.
+      const notaPista = pista.trim()
+        ? ` Además, el cliente escribió como pista: "${pista.trim()}". Tenlo MUY en cuenta para acertar.`
+        : ''
       const consulta = hayEnCatalogo
-        ? `El cliente subió una foto. Al mirarla con atención, vi: "${loQueVeo}". En nuestro catálogo tenemos productos que coinciden. Reconoce en UNA frase, con chispa, lo que ves (sin especular de más), y luego recomiéndale o compara las mejores opciones. Sé natural y breve.`
-        : `El cliente subió una foto. Al mirarla, vi: "${loQueVeo}". Ese tipo de producto NO está en el catálogo (InkaShop es tienda de tecnología). Responde con chispa pero BREVE (2 o 3 frases como máximo): 1) reconoce en UNA frase lo que ves, sin inventar para qué sirve ni especular; 2) dile con simpatía que eso no lo vendemos; 3) ofrécele alternativas CONCRETAS de tecnología (por ejemplo audífonos, teclado o mouse gamer) e invítalo a decirte qué busca. Usa 1 o 2 emojis. Nada robótico ni frases de relleno.`
+        ? `El cliente subió una foto. Al mirarla con atención, vi: "${loQueVeo}".${notaPista} En nuestro catálogo tenemos productos que coinciden. Reconoce en UNA frase, con chispa, lo que ves (sin especular de más), y luego recomiéndale o compara las mejores opciones. Sé natural y breve.`
+        : `El cliente subió una foto. Al mirarla, vi: "${loQueVeo}".${notaPista} Ese tipo de producto NO está en el catálogo (InkaShop es tienda de tecnología). Responde con chispa pero BREVE (2 o 3 frases como máximo): 1) reconoce en UNA frase lo que ves, sin inventar para qué sirve ni especular; 2) dile con simpatía que eso no lo vendemos; 3) ofrécele alternativas CONCRETAS de tecnología (por ejemplo audífonos, teclado o mouse gamer) e invítalo a decirte qué busca. Usa 1 o 2 emojis. Nada robótico ni frases de relleno.`
       const inicio = Date.now()
       const resultado = await obtenerRespuestaAsistente(consulta, contexto)
 
@@ -832,33 +849,33 @@ export function Asistente() {
     }
   }
 
-  // Analiza una imagen (archivo) con el flujo de "buscar por foto". La usan tanto el
-  // pegado con Ctrl+V como el botón. Muestra la foto y el "analizando…" y luego razona.
-  async function buscarConImagen(archivo: File) {
-    if (cargando) return // ya hay un análisis en curso
-    let dataURL = ''
+  // Adjunta la imagen pegada al cuadro de escribir (la comprime; TODAVÍA no busca).
+  async function adjuntarImagen(archivo: File) {
     try {
       // 768px: resolución suficiente para que la IA lea el texto de las cajas.
-      dataURL = await comprimirImagen(archivo, 768)
+      setImagenAdjunta(await comprimirImagen(archivo, 768))
     } catch {
-      /* si falla la compresión, el flujo mostrará el aviso correspondiente */
-    }
-    iniciarFotoComprador(dataURL) // muestra la foto pegada y el "analizando…"
-    try {
-      const resultado = await buscarPorFoto(dataURL, productos)
-      manejarFotoComprador(resultado)
-    } catch {
-      manejarFotoComprador({
-        termino: '',
-        etiqueta: '',
-        productos: [],
-        fuente: 'manual',
-        necesitaCategoria: true,
-      })
+      toast.error('No se pudo procesar la imagen.')
     }
   }
   // Mantenemos el ref del pegado apuntando a la última versión de la función.
-  pegarImagenRef.current = buscarConImagen
+  adjuntarImagenRef.current = adjuntarImagen
+
+  // Dispara la búsqueda por foto con la imagen adjunta (dataURL) y una PISTA opcional
+  // (lo que el cliente escribió), para que la identificación sea más exacta.
+  async function analizarFotoAdjunta(dataURL: string, pista: string) {
+    if (cargando) return // ya hay un análisis en curso
+    iniciarFotoComprador(dataURL, pista) // muestra la foto (y la pista) y el "analizando…"
+    try {
+      const resultado = await buscarPorFoto(dataURL, productos, pista)
+      manejarFotoComprador(resultado, pista)
+    } catch {
+      manejarFotoComprador(
+        { termino: '', etiqueta: '', productos: [], fuente: 'manual', necesitaCategoria: true },
+        pista,
+      )
+    }
+  }
 
   function compararProducto(p: Producto) {
     setComparar((prev) => {
@@ -1041,18 +1058,35 @@ export function Asistente() {
 
           {/* Entrada de texto */}
           <form className="asistente-entrada" onSubmit={enviar}>
+            {/* Imagen adjunta (pegada): se puede quitar; se busca al pulsar Enter */}
+            {imagenAdjunta && (
+              <div className="adjunto-preview">
+                <img src={imagenAdjunta} alt="Imagen adjunta" />
+                <button
+                  type="button"
+                  className="adjunto-quitar"
+                  title="Quitar imagen"
+                  aria-label="Quitar imagen"
+                  onClick={() => setImagenAdjunta('')}
+                >
+                  ✕
+                </button>
+              </div>
+            )}
             <input
               type="text"
               value={texto}
               onChange={(e) => setTexto(e.target.value)}
               placeholder={
-                esVendedorActual
-                  ? 'Escribe “agregar” o “modificar”… o usa los botones'
-                  : 'Escribe lo que buscas... (ej. “laptop hasta 2000”)'
+                imagenAdjunta
+                  ? 'Añade una descripción (opcional) y pulsa Enter para buscar…'
+                  : esVendedorActual
+                    ? 'Escribe “agregar” o “modificar”… o usa los botones'
+                    : 'Escribe lo que buscas... (ej. “laptop hasta 2000”)'
               }
             />
             <button type="submit" className="btn btn-primario" disabled={cargando}>
-              {cargando ? 'Enviando…' : 'Enviar'}
+              {cargando ? 'Enviando…' : imagenAdjunta ? 'Buscar' : 'Enviar'}
             </button>
           </form>
         </div>

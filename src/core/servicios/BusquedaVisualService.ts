@@ -17,9 +17,11 @@ export interface ResultadoBusquedaVisual {
 }
 
 // Consulta el proveedor de visión en la nube (cuando esté configurado).
+// `pista` es una descripción opcional que escribe el cliente para acertar más.
 async function consultarVisionNube(
   dataURL: string,
   productos: Producto[],
+  pista = '',
 ): Promise<ResultadoBusquedaVisual | null> {
   // Cortamos la espera a los 55s (la función en Vercel dura máx. 60s): si la nube
   // no responde, abortamos y seguimos con la visión del navegador en vez de colgarnos.
@@ -33,6 +35,7 @@ async function consultarVisionNube(
       signal: controlador.signal,
       body: JSON.stringify({
         imagen: dataURL,
+        pista,
         productos: productos
           .filter((p) => p.stock > 0)
           .slice(0, 30)
@@ -74,6 +77,7 @@ async function consultarVisionNube(
 export async function buscarPorFoto(
   dataURL: string,
   productos: Producto[],
+  pista = '',
 ): Promise<ResultadoBusquedaVisual> {
   // 1) Nube (si hay proveedor de visión configurado). Reintentamos UNA vez: la
   //    primera llamada tras un rato suele fallar por "arranque en frío" del modelo
@@ -81,7 +85,7 @@ export async function buscarPorFoto(
   if (usarIAReal()) {
     for (let intento = 0; intento < 2; intento++) {
       try {
-        const nube = await consultarVisionNube(dataURL, productos)
+        const nube = await consultarVisionNube(dataURL, productos, pista)
         if (nube) return nube
       } catch {
         // si la nube falla, reintentamos o pasamos al respaldo del navegador

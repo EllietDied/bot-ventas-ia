@@ -27,6 +27,7 @@ interface ProductoCtx {
 async function identificarProducto(
   imagenBase64: string,
   catalogo: ProductoCtx[],
+  pista = '',
 ): Promise<{
   termino: string
   etiqueta: string
@@ -35,7 +36,12 @@ async function identificarProducto(
 } | null> {
   if (!process.env.NVIDIA_API_KEY) return null
 
-  const prompt = `Eres el asistente visual de InkaShop, una tienda de tecnología. Observa la IMAGEN con MUCHA atención y RAZONA qué es lo que aparece antes de responder.
+  // Pista opcional del cliente (palabras clave) para afinar la identificación.
+  const lineaPista = pista.trim()
+    ? `\nEl cliente escribió esta PISTA sobre la foto: "${pista.trim().slice(0, 200)}". Úsala para afinar tu identificación (pero fíjate en lo que REALMENTE muestra la imagen).`
+    : ''
+
+  const prompt = `Eres el asistente visual de InkaShop, una tienda de tecnología. Observa la IMAGEN con MUCHA atención y RAZONA qué es lo que aparece antes de responder.${lineaPista}
 
 Fíjate en: el tipo de objeto, su forma y color, la marca o el texto que se lea, y para qué sirve. Sé preciso: no adivines a lo loco, describe lo que REALMENTE ves.
 
@@ -114,11 +120,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const productos: ProductoCtx[] = Array.isArray(cuerpo.productos)
       ? cuerpo.productos.slice(0, 40)
       : []
+    const pista = typeof cuerpo.pista === 'string' ? cuerpo.pista : ''
 
     // Quitamos el prefijo "data:image/...;base64," si viene.
     const base64 = imagen.includes(',') ? imagen.split(',')[1] : imagen
 
-    const resultado = await identificarProducto(base64, productos)
+    const resultado = await identificarProducto(base64, productos, pista)
     if (!resultado) {
       // Sin proveedor / Gemma falló: el frontend usará la visión del navegador.
       return res.status(200).json({ error: 'vision_no_configurado', termino: '' })
