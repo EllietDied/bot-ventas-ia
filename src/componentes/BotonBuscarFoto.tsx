@@ -34,7 +34,9 @@ export function BotonBuscarFoto({ onResultado, onInicio, className }: Props) {
   async function alElegir(file: File) {
     let dataURL = ''
     try {
-      dataURL = await comprimirImagen(file)
+      // Comprimimos a 768px (más que el resto): así la IA puede LEER el texto de las
+      // cajas de productos (marca, modelo, "DDR5"...) y no solo ver la forma.
+      dataURL = await comprimirImagen(file, 768)
     } catch {
       /* si falla la compresión, la búsqueda caerá al aviso de abajo */
     }

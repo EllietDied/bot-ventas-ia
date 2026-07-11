@@ -75,13 +75,17 @@ export async function buscarPorFoto(
   dataURL: string,
   productos: Producto[],
 ): Promise<ResultadoBusquedaVisual> {
-  // 1) Nube (si hay proveedor de visión configurado).
+  // 1) Nube (si hay proveedor de visión configurado). Reintentamos UNA vez: la
+  //    primera llamada tras un rato suele fallar por "arranque en frío" del modelo
+  //    (tarda en despertar); la segunda ya lo encuentra listo y responde.
   if (usarIAReal()) {
-    try {
-      const nube = await consultarVisionNube(dataURL, productos)
-      if (nube) return nube
-    } catch {
-      // si la nube falla, seguimos con el navegador
+    for (let intento = 0; intento < 2; intento++) {
+      try {
+        const nube = await consultarVisionNube(dataURL, productos)
+        if (nube) return nube
+      } catch {
+        // si la nube falla, reintentamos o pasamos al respaldo del navegador
+      }
     }
   }
 

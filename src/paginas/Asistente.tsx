@@ -838,7 +838,8 @@ export function Asistente() {
     if (cargando) return // ya hay un análisis en curso
     let dataURL = ''
     try {
-      dataURL = await comprimirImagen(archivo)
+      // 768px: resolución suficiente para que la IA lea el texto de las cajas.
+      dataURL = await comprimirImagen(archivo, 768)
     } catch {
       /* si falla la compresión, el flujo mostrará el aviso correspondiente */
     }
