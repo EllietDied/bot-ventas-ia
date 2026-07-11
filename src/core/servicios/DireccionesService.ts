@@ -41,19 +41,24 @@ export async function listarDirecciones(idUsuario: string): Promise<Direccion[]>
   return cargar<Direccion[]>(clave(idUsuario), [])
 }
 
-// Agrega una dirección (respeta el máximo de 3). Devuelve la creada, o null si ya
-// llegó al límite o falló.
+// Resultado de agregar: distinguimos "llegó al límite" de "falló el guardado",
+// para poder mostrar un mensaje honesto (no siempre "máximo 3").
+export type ResultadoAgregar =
+  | { ok: true; direccion: Direccion }
+  | { ok: false; motivo: 'limite' | 'error' }
+
+// Agrega una dirección (respeta el máximo de 3).
 export async function agregarDireccion(
   idUsuario: string,
   dir: Omit<Direccion, 'id'>,
-): Promise<Direccion | null> {
+): Promise<ResultadoAgregar> {
   const actuales = await listarDirecciones(idUsuario)
-  if (actuales.length >= MAX_DIRECCIONES) return null
+  if (actuales.length >= MAX_DIRECCIONES) return { ok: false, motivo: 'limite' }
 
   if (usarSupabase() && supabase) {
     const { data: sesion } = await supabase.auth.getSession()
     const uid = sesion.session?.user?.id
-    if (!uid) return null
+    if (!uid) return { ok: false, motivo: 'error' }
     const { data, error } = await supabase
       .from('direcciones')
       .insert({
@@ -70,13 +75,17 @@ export async function agregarDireccion(
       })
       .select()
       .single()
-    if (error || !data) return null
-    return mapFila(data)
+    if (error || !data) {
+      // El detalle real (p. ej. "column ... does not exist") ayuda a diagnosticar.
+      console.error('No se pudo guardar la dirección:', error)
+      return { ok: false, motivo: 'error' }
+    }
+    return { ok: true, direccion: mapFila(data) }
   }
 
   const nueva: Direccion = { id: 'dir-' + Date.now(), ...dir }
   guardar(clave(idUsuario), [...actuales, nueva])
-  return nueva
+  return { ok: true, direccion: nueva }
 }
 
 // Elimina una dirección guardada.

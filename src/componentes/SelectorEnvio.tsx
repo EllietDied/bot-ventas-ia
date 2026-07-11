@@ -68,7 +68,7 @@ export function SelectorEnvio({ idUsuario, prefill, onSeleccionar }: Props) {
       return
     }
     setGuardando(true)
-    const nueva = await agregarDireccion(idUsuario, {
+    const res = await agregarDireccion(idUsuario, {
       receptor: form.receptor.trim(),
       telefono: form.telefono.trim(),
       direccion: form.direccion.trim(),
@@ -80,13 +80,17 @@ export function SelectorEnvio({ idUsuario, prefill, onSeleccionar }: Props) {
       correo: form.correo.trim(),
     })
     setGuardando(false)
-    if (!nueva) {
-      setError(`No se pudo guardar (máximo ${MAX_DIRECCIONES} direcciones).`)
+    if (!res.ok) {
+      setError(
+        res.motivo === 'limite'
+          ? `Ya tienes el máximo de ${MAX_DIRECCIONES} direcciones. Elimina una para agregar otra.`
+          : 'No se pudo guardar la dirección. Revisa tu conexión e inténtalo de nuevo.',
+      )
       return
     }
-    setDirecciones((prev) => [...prev, nueva])
-    setElegida(nueva.id)
-    onSeleccionar(nueva)
+    setDirecciones((prev) => [...prev, res.direccion])
+    setElegida(res.direccion.id)
+    onSeleccionar(res.direccion)
     setAgregando(false)
     setForm({
       receptor: '', telefono: '', direccion: '', referencia: '',
