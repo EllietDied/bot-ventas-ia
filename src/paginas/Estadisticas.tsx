@@ -88,7 +88,14 @@ export function Estadisticas() {
         ) : (
           <ul className="stats-barras">
             {masVendidos.map((v) => (
-              <li key={v.id}>
+              <li
+                key={v.id}
+                className="stats-lista-clic"
+                role="button"
+                tabIndex={0}
+                title="Editar este producto"
+                onClick={() => navegar('/vendedor/editar/' + v.id)}
+              >
                 <span className="stats-barra-nombre">{v.nombre}</span>
                 <span className="stats-barra-track">
                   <span
@@ -110,7 +117,14 @@ export function Estadisticas() {
         ) : (
           <ul className="stats-lista">
             {stockBajo.map((p) => (
-              <li key={p.id}>
+              <li
+                key={p.id}
+                className="stats-lista-clic"
+                role="button"
+                tabIndex={0}
+                title="Editar este producto (reabastecer)"
+                onClick={() => navegar('/vendedor/editar/' + p.id)}
+              >
                 <span>{p.nombre}</span>
                 <span className={p.stock < 5 ? 'stats-alerta' : 'texto-tenue'}>
                   {p.stock} en stock

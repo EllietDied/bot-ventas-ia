@@ -3788,3 +3788,17 @@ img {
   border-top: 2px solid var(--borde);
   border-bottom: none;
 }
+
+/* ===== Estadísticas: filas de lista clicables (llevan a editar el producto) ===== */
+.stats-lista-clic {
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background 0.12s ease;
+}
+.stats-lista-clic:hover {
+  background: rgba(127, 127, 127, 0.08);
+}
+.stats-lista-clic:focus-visible {
+  outline: 2px solid var(--primario);
+  outline-offset: 2px;
+}
