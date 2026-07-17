@@ -32,6 +32,14 @@ export function PedidoDetalle() {
     ? [e.distrito, e.provincia, e.departamento].filter(Boolean).join(', ')
     : ''
 
+  // El pedido guarda el CORREO del comprador, no su nombre. Mostramos el nombre así:
+  // si es TU propio pedido, tu nombre; si no, el de quien recibe (envío); y de último,
+  // la parte del correo antes de la @.
+  const nombreComprador =
+    usuarioActual.correo === pedido.correoComprador
+      ? `${usuarioActual.nombre} ${usuarioActual.apellido ?? ''}`.trim()
+      : e?.receptor || pedido.correoComprador.split('@')[0]
+
   return (
     <div className="pagina">
       <button className="btn btn-secundario btn-pequeno" onClick={() => navegar('/pedidos')}>
@@ -53,7 +61,10 @@ export function PedidoDetalle() {
         <h2 className="pedido-detalle-titulo">Datos del pedido</h2>
         <ul className="detalle-ficha">
           <li>
-            <strong>Comprador:</strong> {pedido.correoComprador}
+            <strong>Comprador:</strong> {nombreComprador}
+          </li>
+          <li>
+            <strong>Correo:</strong> {pedido.correoComprador}
           </li>
           <li>
             <strong>Método de pago:</strong>{' '}
@@ -111,12 +122,12 @@ export function PedidoDetalle() {
         </div>
       </section>
 
-      {/* Envío */}
-      {e && (
-        <section className="panel">
-          <h2 className="pedido-detalle-titulo">
-            <Icono nombre="caja" size={16} /> Datos de envío
-          </h2>
+      {/* Envío (se muestra siempre; si no hay datos, lo avisamos) */}
+      <section className="panel">
+        <h2 className="pedido-detalle-titulo">
+          <Icono nombre="caja" size={16} /> Datos de envío
+        </h2>
+        {e ? (
           <ul className="detalle-ficha">
             <li>
               <strong>Recibe:</strong> {e.receptor}
@@ -147,8 +158,12 @@ export function PedidoDetalle() {
               </li>
             )}
           </ul>
-        </section>
-      )}
+        ) : (
+          <p className="texto-tenue">
+            Este pedido no tiene datos de envío guardados (se registró antes de esta mejora).
+          </p>
+        )}
+      </section>
     </div>
   )
 }
