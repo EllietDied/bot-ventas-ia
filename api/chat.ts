@@ -13,10 +13,10 @@ const DEEPSEEK_URL = 'https://api.deepseek.com/chat/completions'
 // variable de entorno DEEPSEEK_MODELO (p. ej. DEEPSEEK_MODELO=deepseek-chat para
 // volver al modelo anterior al instante, sin redesplegar).
 const MODELO = process.env.DEEPSEEK_MODELO || 'deepseek-v4-pro'
-// Límite de tokens de la respuesta. Debe ser holgado porque el modelo v4-pro
-// "piensa" antes de responder (ese razonamiento también consume tokens): si es
-// bajo, el mensaje final se corta a la mitad y llega un JSON incompleto.
-const MAX_TOKENS = 2000
+// Límite de tokens de la respuesta. Con esfuerzo 'medium' (ver abajo) el modelo
+// "piensa" menos, así que 1200 alcanza para respuestas de ventas completas y
+// consume menos. Si subes el esfuerzo a 'high', considera subir también este número.
+const MAX_TOKENS = 1200
 // Límite de caracteres del mensaje del usuario.
 const MAX_MENSAJE = 1000
 // Cuántos mensajes de historial conservamos como mucho.
@@ -211,11 +211,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         model: MODELO,
         max_tokens: MAX_TOKENS,
         temperature: 0.8,
-        // "Pensamiento" del modelo v4-pro: razona internamente antes de responder
-        // (respuestas más cuidadas, pero más lentas). DeepSeek ignora estos
-        // parámetros si el modelo elegido no los soporta (no da error).
+        // "Pensamiento" del modelo v4-pro: razona internamente antes de responder.
+        // Nivel EQUILIBRADO ('medium') para gastar menos tokens (más barato y rápido)
+        // sin perder calidad en un chat de ventas. Ajustable con DEEPSEEK_ESFUERZO
+        // ('low' = más barato, 'high' = más cuidado) sin tocar el código.
         thinking: { type: 'enabled' },
-        reasoning_effort: 'high',
+        reasoning_effort: process.env.DEEPSEEK_ESFUERZO || 'medium',
         response_format: { type: 'json_object' },
         messages: [{ role: 'system', content: sistema + '\n\n' + contexto }, ...mensajes],
       }),
