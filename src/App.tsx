@@ -16,6 +16,8 @@ import { Pedidos } from './paginas/Pedidos'
 import { Asistente } from './paginas/Asistente'
 import { PanelVendedor } from './paginas/PanelVendedor'
 import { EditarProducto } from './paginas/EditarProducto'
+import { DetalleInventario } from './paginas/DetalleInventario'
+import { DetalleVentas } from './paginas/DetalleVentas'
 import { Mensajes } from './paginas/Mensajes'
 import { Estadisticas } from './paginas/Estadisticas'
 import { Billetera } from './paginas/Billetera'
@@ -117,6 +119,22 @@ export default function App() {
             element={
               <RutaProtegida rol="vendedor">
                 <EditarProducto />
+              </RutaProtegida>
+            }
+          />
+          <Route
+            path="/vendedor/inventario"
+            element={
+              <RutaProtegida rol="vendedor">
+                <DetalleInventario />
+              </RutaProtegida>
+            }
+          />
+          <Route
+            path="/vendedor/ventas"
+            element={
+              <RutaProtegida rol="vendedor">
+                <DetalleVentas />
               </RutaProtegida>
             }
           />

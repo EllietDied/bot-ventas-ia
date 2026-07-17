@@ -1,3 +1,5 @@
+import { useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useProductos } from '../contexto/ProductosContext'
 import { usePedidos } from '../contexto/PedidosContext'
 import { useSesion } from '../contexto/SesionContext'
@@ -8,6 +10,8 @@ export function Estadisticas() {
   const { productos } = useProductos()
   const { pedidos } = usePedidos()
   const { usuarioActual } = useSesion()
+  const navegar = useNavigate()
+  const stockBajoRef = useRef<HTMLElement>(null)
 
   // Solo los productos publicados por este vendedor.
   const mios = productos.filter((p) => p.idVendedor === usuarioActual?.idUsuario)
@@ -48,11 +52,33 @@ export function Estadisticas() {
       </header>
 
       <section className="stats-cards">
-        <StatCard etiqueta="Mis productos" valor={String(totalProductos)} />
-        <StatCard etiqueta="Valor del inventario" valor={`S/ ${valorInventario.toFixed(2)}`} />
-        <StatCard etiqueta="Pedidos" valor={String(totalPedidos)} sub={`${pendientes} pendientes`} />
-        <StatCard etiqueta="Ventas (mis productos)" valor={`S/ ${ventas.toFixed(2)}`} />
-        <StatCard etiqueta="Stock bajo" valor={String(stockBajo.length)} sub={`${agotados} agotados`} />
+        <StatCard
+          etiqueta="Mis productos"
+          valor={String(totalProductos)}
+          onClick={() => navegar('/vendedor')}
+        />
+        <StatCard
+          etiqueta="Valor del inventario"
+          valor={`S/ ${valorInventario.toFixed(2)}`}
+          onClick={() => navegar('/vendedor/inventario')}
+        />
+        <StatCard
+          etiqueta="Pedidos"
+          valor={String(totalPedidos)}
+          sub={`${pendientes} pendientes`}
+          onClick={() => navegar('/pedidos')}
+        />
+        <StatCard
+          etiqueta="Ventas (mis productos)"
+          valor={`S/ ${ventas.toFixed(2)}`}
+          onClick={() => navegar('/vendedor/ventas')}
+        />
+        <StatCard
+          etiqueta="Stock bajo"
+          valor={String(stockBajo.length)}
+          sub={`${agotados} agotados`}
+          onClick={() => stockBajoRef.current?.scrollIntoView({ behavior: 'smooth' })}
+        />
       </section>
 
       <section className="stats-bloque">
@@ -77,7 +103,7 @@ export function Estadisticas() {
         )}
       </section>
 
-      <section className="stats-bloque">
+      <section className="stats-bloque" ref={stockBajoRef}>
         <h2>Stock bajo (menos de 10)</h2>
         {stockBajo.length === 0 ? (
           <p className="texto-tenue">¡Bien! No tienes productos con stock bajo.</p>
@@ -98,12 +124,31 @@ export function Estadisticas() {
   )
 }
 
-function StatCard({ etiqueta, valor, sub }: { etiqueta: string; valor: string; sub?: string }) {
-  return (
-    <div className="stat-card">
+function StatCard({
+  etiqueta,
+  valor,
+  sub,
+  onClick,
+}: {
+  etiqueta: string
+  valor: string
+  sub?: string
+  onClick?: () => void
+}) {
+  const contenido = (
+    <>
       <span className="stat-card-valor">{valor}</span>
       <span className="stat-card-etiqueta">{etiqueta}</span>
       {sub && <span className="stat-card-sub">{sub}</span>}
-    </div>
+    </>
   )
+  // Si es clicable, la renderizamos como botón (atajo a su detalle).
+  if (onClick) {
+    return (
+      <button type="button" className="stat-card stat-card-clic" onClick={onClick}>
+        {contenido}
+      </button>
+    )
+  }
+  return <div className="stat-card">{contenido}</div>
 }
