@@ -15,6 +15,7 @@ import { Checkout } from './paginas/Checkout'
 import { Pedidos } from './paginas/Pedidos'
 import { Asistente } from './paginas/Asistente'
 import { PanelVendedor } from './paginas/PanelVendedor'
+import { EditarProducto } from './paginas/EditarProducto'
 import { Mensajes } from './paginas/Mensajes'
 import { Estadisticas } from './paginas/Estadisticas'
 import { Billetera } from './paginas/Billetera'
@@ -108,6 +109,14 @@ export default function App() {
             element={
               <RutaProtegida rol="vendedor">
                 <PanelVendedor />
+              </RutaProtegida>
+            }
+          />
+          <Route
+            path="/vendedor/editar/:id"
+            element={
+              <RutaProtegida rol="vendedor">
+                <EditarProducto />
               </RutaProtegida>
             }
           />

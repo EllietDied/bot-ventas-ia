@@ -3691,3 +3691,22 @@ img {
 .badge-pocas {
   background: #d97706;
 }
+
+/* ===== Panel del vendedor: nombre del producto clicable (abre su edición) ===== */
+.fila-nombre-btn {
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+}
+.fila-nombre-btn:hover {
+  color: var(--primario);
+  text-decoration: underline;
+}
+.fila-nombre-btn:hover .fila-codigo {
+  text-decoration: none;
+}

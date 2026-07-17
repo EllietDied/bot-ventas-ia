@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useProductos } from '../contexto/ProductosContext'
 import { useSesion } from '../contexto/SesionContext'
 import { useConsultas } from '../contexto/ConsultasContext'
@@ -20,6 +21,7 @@ export function PanelVendedor() {
   const { mensajes } = useMensajeria()
   const { pedidosPendientes } = usePedidos()
   const toast = useToast()
+  const navegar = useNavigate()
 
   const [nombre, setNombre] = useState('')
   const [marca, setMarca] = useState('')
@@ -319,10 +321,15 @@ export function PanelVendedor() {
                       onChange={(e) => alCambiarImagen(e, p.id)}
                     />
                   </label>
-                  <span className="fila-nombre">
+                  <button
+                    type="button"
+                    className="fila-nombre fila-nombre-btn"
+                    title="Editar este producto"
+                    onClick={() => navegar('/vendedor/editar/' + p.id)}
+                  >
                     {p.nombre}
                     <small className="fila-codigo">{codigoProducto(p)}</small>
-                  </span>
+                  </button>
                   <span className="texto-tenue">S/ {p.precio.toFixed(2)}</span>
                   <ControlStock
                     stockActual={p.stock}
