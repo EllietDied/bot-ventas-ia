@@ -53,6 +53,12 @@ interface MensajeAsistente {
   pedirFoto?: boolean // muestra un selector de foto dentro del chat
   pensando?: boolean // mientras el asistente "procesa" la consulta
   imagen?: string // foto que el cliente envió (búsqueda por foto), para mostrarla en el chat
+  hora?: string // hora en que se envió el mensaje (ej. "3:22 p. m.")
+}
+
+// Hora corta (hh:mm a. m./p. m.) para mostrar debajo de cada mensaje.
+function horaCorta(): string {
+  return new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
 }
 
 // Botones rápidos: lo que se muestra (label) y lo que se le envía al bot (query).
@@ -211,7 +217,8 @@ export function Asistente() {
   }, [puedeComprar])
 
   function agregarMensaje(m: MensajeAsistente) {
-    setMensajes((prev) => [...prev, m])
+    // Le ponemos la hora al vuelo (si no la trae ya).
+    setMensajes((prev) => [...prev, { ...m, hora: m.hora ?? horaCorta() }])
   }
 
   // Reemplaza el contenido de un mensaje ya existente (por su id).
@@ -945,24 +952,34 @@ export function Asistente() {
           <div className="asistente-mensajes">
             {mensajes.map((m) => (
               <div key={m.id} className="asistente-fila">
-                <div
-                  className={
-                    m.emisor === 'bot'
-                      ? 'burbuja bot' + (m.pensando ? ' pensando' : '')
-                      : 'burbuja usuario'
-                  }
-                >
-                  {m.imagen && (
-                    <img className="chat-foto-enviada" src={m.imagen} alt="Foto que enviaste" />
+                <div className={'chat-linea' + (m.emisor === 'usuario' ? ' propio' : '')}>
+                  {/* Avatar de la mascota junto a cada respuesta del asistente */}
+                  {m.emisor === 'bot' && (
+                    <img className="chat-avatar" src="/assistant-inkashop.svg" alt="Asistente" />
                   )}
-                  {m.texto}
-                  {m.pensando && (
-                    <span className="puntos-pensando">
-                      <span>.</span>
-                      <span>.</span>
-                      <span>.</span>
-                    </span>
-                  )}
+                  <div className="chat-burbuja-grupo">
+                    <div
+                      className={
+                        m.emisor === 'bot'
+                          ? 'burbuja bot' + (m.pensando ? ' pensando' : '')
+                          : 'burbuja usuario'
+                      }
+                    >
+                      {m.imagen && (
+                        <img className="chat-foto-enviada" src={m.imagen} alt="Foto que enviaste" />
+                      )}
+                      {m.texto}
+                      {m.pensando && (
+                        <span className="puntos-pensando">
+                          <span>.</span>
+                          <span>.</span>
+                          <span>.</span>
+                        </span>
+                      )}
+                    </div>
+                    {/* Hora del mensaje (no en el "analizando…") */}
+                    {m.hora && !m.pensando && <span className="chat-hora">{m.hora}</span>}
+                  </div>
                 </div>
 
                 {/* Productos recomendados dentro del chat */}
