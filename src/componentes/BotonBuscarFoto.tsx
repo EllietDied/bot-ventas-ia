@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { useProductos } from '../contexto/ProductosContext'
 import { comprimirImagen } from '../util/imagen'
 import { buscarPorFoto, type ResultadoBusquedaVisual } from '../core/servicios/BusquedaVisualService'
@@ -13,23 +13,14 @@ interface Props {
   className?: string
 }
 
-// Botón "Buscar por foto": abre un menú con dos opciones —elegir una foto de la
-// galería o tomarla con la cámara—. La IA identifica el producto (MobileNet en el
-// navegador, o la nube) y devuelve los productos del catálogo similares.
+// Botón "Buscar por foto": abre el selector de imágenes del sistema.
+// En el celular, el propio sistema ofrece "Cámara / Galería / Archivos"; en la PC,
+// abre el explorador de archivos. (Antes usábamos un menú propio, pero el overflow
+// del contenedor lo recortaba en móvil; el selector nativo es más simple y robusto.)
 export function BotonBuscarFoto({ onResultado, onInicio, className }: Props) {
   const { productos } = useProductos()
   const [analizando, setAnalizando] = useState(false)
-  const [menu, setMenu] = useState(false)
-  const inputGaleria = useRef<HTMLInputElement>(null)
-  const inputCamara = useRef<HTMLInputElement>(null)
-
-  // Cierra el menú al hacer clic fuera de él.
-  useEffect(() => {
-    if (!menu) return
-    const cerrar = () => setMenu(false)
-    document.addEventListener('click', cerrar)
-    return () => document.removeEventListener('click', cerrar)
-  }, [menu])
+  const inputFoto = useRef<HTMLInputElement>(null)
 
   async function alElegir(file: File) {
     let dataURL = ''
@@ -59,57 +50,16 @@ export function BotonBuscarFoto({ onResultado, onInicio, className }: Props) {
         type="button"
         className={className ?? 'chip'}
         disabled={analizando}
-        onClick={(e) => {
-          e.stopPropagation() // evita que el mismo clic cierre el menú al abrirlo
-          setMenu((m) => !m)
-        }}
+        onClick={() => inputFoto.current?.click()}
       >
         <Icono nombre="camara" size={15} /> {analizando ? 'Analizando…' : 'Buscar por foto'}
       </button>
 
-      {menu && (
-        <div className="foto-menu">
-          <button
-            type="button"
-            className="foto-menu-item"
-            onClick={() => {
-              setMenu(false)
-              inputGaleria.current?.click()
-            }}
-          >
-            🖼️ Seleccionar de mi galería
-          </button>
-          <button
-            type="button"
-            className="foto-menu-item"
-            onClick={() => {
-              setMenu(false)
-              inputCamara.current?.click()
-            }}
-          >
-            📷 Tomar una foto con la cámara
-          </button>
-        </div>
-      )}
-
-      {/* Galería: selector de archivos normal */}
+      {/* Un solo selector: en el celular el sistema ofrece Cámara o Galería. */}
       <input
-        ref={inputGaleria}
+        ref={inputFoto}
         type="file"
         accept="image/*"
-        hidden
-        onChange={(e) => {
-          const file = e.target.files?.[0]
-          if (file) alElegir(file)
-          e.currentTarget.value = ''
-        }}
-      />
-      {/* Cámara: en el celular abre directo la cámara trasera */}
-      <input
-        ref={inputCamara}
-        type="file"
-        accept="image/*"
-        capture="environment"
         hidden
         onChange={(e) => {
           const file = e.target.files?.[0]
