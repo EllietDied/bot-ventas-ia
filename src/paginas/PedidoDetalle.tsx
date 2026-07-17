@@ -4,6 +4,18 @@ import { useSesion } from '../contexto/SesionContext'
 import { NOMBRE_METODO } from '../core/modelos/Pago'
 import { Icono } from '../componentes/Icono'
 
+// Convierte la parte del correo (antes de la @) en un nombre presentable:
+// "beryher.agip" -> "Beryher Agip" (sin puntos/guiones y con mayúsculas).
+function nombreDesdeCorreo(correo: string): string {
+  return correo
+    .split('@')[0]
+    .replace(/[._-]+/g, ' ')
+    .split(' ')
+    .filter(Boolean)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ')
+}
+
 // Página de DETALLE de un pedido: datos generales, productos, resumen de importes,
 // pago y envío, presentados de forma clara y profesional.
 export function PedidoDetalle() {
@@ -38,7 +50,7 @@ export function PedidoDetalle() {
   const nombreComprador =
     usuarioActual.correo === pedido.correoComprador
       ? `${usuarioActual.nombre} ${usuarioActual.apellido ?? ''}`.trim()
-      : e?.receptor || pedido.correoComprador.split('@')[0]
+      : e?.receptor || nombreDesdeCorreo(pedido.correoComprador)
 
   return (
     <div className="pagina">
