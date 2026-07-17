@@ -64,9 +64,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
     }
 
-    // 1) Del evento solo nos quedamos con el ID del objeto (orden o cargo).
+    // 1) Sacamos el OBJETO (orden/cargo) del evento. OJO: según el evento, Culqi manda
+    //    el objeto en "data.object" (un objeto) o en "data" (y "data.object" es solo el
+    //    TEXTO del tipo, p. ej. "order"). Tomamos el que de verdad sea un objeto.
     const evento = leerBody(req.body)
-    const data = evento?.data?.object ?? evento?.data ?? evento
+    const esObjeto = (x: unknown): x is Record<string, any> => x !== null && typeof x === 'object'
+    let data: any = evento?.data?.object
+    if (!esObjeto(data)) data = evento?.data
+    if (!esObjeto(data)) data = evento
     const id: unknown = data?.id
     if (typeof id !== 'string' || !id) {
       return res.status(200).json({ ok: false, motivo: 'evento sin id' })
