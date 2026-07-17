@@ -34,6 +34,12 @@ export function TarjetaProducto({ producto, alAgregar, textoBoton }: Props) {
       }}
     >
       <div className="tarjeta-imagen">
+        {/* Badge de estado: agotado o pocas unidades */}
+        {agotado ? (
+          <span className="tarjeta-badge badge-agotado">Agotado</span>
+        ) : bajoStock ? (
+          <span className="tarjeta-badge badge-pocas">Últimas unidades</span>
+        ) : null}
         <ImagenProducto imagen={producto.imagen} nombre={producto.nombre} />
       </div>
       <span className="tarjeta-categoria">{producto.categoria}</span>

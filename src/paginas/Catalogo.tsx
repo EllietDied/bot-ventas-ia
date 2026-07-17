@@ -27,6 +27,7 @@ export function Catalogo() {
 
   const [termino, setTermino] = useState('')
   const [categoria, setCategoria] = useState('')
+  const [orden, setOrden] = useState('relevancia') // cómo se ordenan los productos
   const [foto, setFoto] = useState<ResultadoBusquedaVisual | null>(null)
 
   // Al identificar una foto, guardamos su resultado (para mostrar los similares).
@@ -52,6 +53,14 @@ export function Catalogo() {
   if (categoria !== '') {
     resultados = resultados.filter((p) => p.categoria === categoria)
   }
+  // Ordenamiento elegido por el usuario (relevancia = orden original).
+  if (orden === 'precio-asc') resultados = [...resultados].sort((a, b) => a.precio - b.precio)
+  else if (orden === 'precio-desc') resultados = [...resultados].sort((a, b) => b.precio - a.precio)
+  else if (orden === 'nombre')
+    resultados = [...resultados].sort((a, b) => a.nombre.localeCompare(b.nombre))
+
+  // Cuántos productos hay en cada categoría (para mostrarlo en los filtros).
+  const conteoCategoria = (cat: string) => productos.filter((p) => p.categoria === cat).length
 
   // Productos recomendados según las categorías consultadas.
   const recomendados = bot.recomendarProducto(categoriasConsultadas, productos)
@@ -92,12 +101,27 @@ export function Catalogo() {
 
       {/* Buscador */}
       <form className="buscador" onSubmit={buscarAhora}>
-        <input
-          type="text"
-          placeholder="Buscar producto o categoría..."
-          value={termino}
-          onChange={(e) => setTermino(e.target.value)}
-        />
+        <div className="buscador-campo">
+          <span className="buscador-lupa" aria-hidden="true">
+            🔍
+          </span>
+          <input
+            type="text"
+            placeholder="Buscar producto o categoría..."
+            value={termino}
+            onChange={(e) => setTermino(e.target.value)}
+          />
+          {termino && (
+            <button
+              type="button"
+              className="buscador-limpiar"
+              aria-label="Limpiar búsqueda"
+              onClick={() => setTermino('')}
+            >
+              ✕
+            </button>
+          )}
+        </div>
         <button type="submit" className="btn btn-primario">
           Buscar
         </button>
@@ -123,7 +147,7 @@ export function Catalogo() {
             className={categoria === c ? 'chip activo' : 'chip'}
             onClick={() => setCategoria(c)}
           >
-            {c}
+            {c} <span className="chip-conteo">{conteoCategoria(c)}</span>
           </button>
         ))}
       </div>
@@ -181,7 +205,20 @@ export function Catalogo() {
 
       {/* Resultados del catálogo */}
       <section>
-        <h2>Todos los productos</h2>
+        <div className="catalogo-seccion-top">
+          <h2>
+            Todos los productos <span className="texto-tenue">({resultados.length})</span>
+          </h2>
+          <label className="catalogo-orden">
+            <span>Ordenar:</span>
+            <select value={orden} onChange={(e) => setOrden(e.target.value)}>
+              <option value="relevancia">Relevancia</option>
+              <option value="precio-asc">Precio: menor a mayor</option>
+              <option value="precio-desc">Precio: mayor a menor</option>
+              <option value="nombre">Nombre (A-Z)</option>
+            </select>
+          </label>
+        </div>
         {resultados.length === 0 ? (
           <p className="texto-tenue">No se encontraron productos para tu búsqueda.</p>
         ) : (
