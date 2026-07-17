@@ -188,7 +188,10 @@ export function Asistente() {
     } else {
       guardar(claveChat, limpios)
     }
-    finRef.current?.scrollIntoView({ behavior: 'smooth' })
+    // Auto-scroll SOLO dentro del chat (su contenedor de mensajes), no de toda la
+    // página: en móvil, scrollIntoView movía la ventana entera hacia el final.
+    const cont = finRef.current?.parentElement
+    if (cont) cont.scrollTo({ top: cont.scrollHeight, behavior: 'smooth' })
   }, [mensajes, listo, claveChat])
 
   // Pegar una imagen (Ctrl+V) en el chat la deja ADJUNTA en el cuadro de escribir
