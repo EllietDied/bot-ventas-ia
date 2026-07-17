@@ -3710,3 +3710,21 @@ img {
 .fila-nombre-btn:hover .fila-codigo {
   text-decoration: none;
 }
+
+/* ===== Panel del vendedor: tarjetas de sugerencia clicables (atajos) ===== */
+.sugerencia-clic {
+  cursor: pointer;
+  transition:
+    transform 0.14s ease,
+    box-shadow 0.14s ease,
+    border-color 0.14s ease;
+}
+.sugerencia-clic:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22);
+  border-color: var(--primario);
+}
+.sugerencia-clic:focus-visible {
+  outline: 2px solid var(--primario);
+  outline-offset: 2px;
+}

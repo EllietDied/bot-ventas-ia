@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useProductos } from '../contexto/ProductosContext'
 import { useSesion } from '../contexto/SesionContext'
@@ -22,6 +22,7 @@ export function PanelVendedor() {
   const { pedidosPendientes } = usePedidos()
   const toast = useToast()
   const navegar = useNavigate()
+  const misProductosRef = useRef<HTMLElement>(null) // para el atajo "Bajo stock"
 
   const [nombre, setNombre] = useState('')
   const [marca, setMarca] = useState('')
@@ -148,7 +149,13 @@ export function PanelVendedor() {
           <Icono nombre="ia" size={18} /> Sugerencias del asistente IA
         </h2>
         <div className="sugerencias-grid">
-          <div className="sugerencia">
+          <div
+            className="sugerencia sugerencia-clic"
+            role="button"
+            tabIndex={0}
+            title="Ver tus productos para reabastecer"
+            onClick={() => misProductosRef.current?.scrollIntoView({ behavior: 'smooth' })}
+          >
             <span className="sugerencia-num">{bajoStock.length}</span>
             <div>
               <strong>Bajo stock</strong>
@@ -157,7 +164,13 @@ export function PanelVendedor() {
               </p>
             </div>
           </div>
-          <div className="sugerencia">
+          <div
+            className="sugerencia sugerencia-clic"
+            role="button"
+            tabIndex={0}
+            title="Ver estadísticas"
+            onClick={() => navegar('/estadisticas')}
+          >
             <span className="sugerencia-num">{masConsultados.length}</span>
             <div>
               <strong>Más consultados</strong>
@@ -168,7 +181,13 @@ export function PanelVendedor() {
               </p>
             </div>
           </div>
-          <div className="sugerencia">
+          <div
+            className="sugerencia sugerencia-clic"
+            role="button"
+            tabIndex={0}
+            title="Ir a Mensajes"
+            onClick={() => navegar('/mensajes')}
+          >
             <span className="sugerencia-num">{mensajesPendientes.length}</span>
             <div>
               <strong>Mensajes pendientes</strong>
@@ -177,7 +196,13 @@ export function PanelVendedor() {
               </p>
             </div>
           </div>
-          <div className="sugerencia">
+          <div
+            className="sugerencia sugerencia-clic"
+            role="button"
+            tabIndex={0}
+            title="Ir a Pedidos"
+            onClick={() => navegar('/pedidos')}
+          >
             <span className="sugerencia-num">{pedidosPendientes.length}</span>
             <div>
               <strong>Pedidos pendientes</strong>
@@ -304,7 +329,7 @@ export function PanelVendedor() {
         </section>
 
         {/* Lista de productos del vendedor con actualización de stock */}
-        <section className="panel">
+        <section className="panel" ref={misProductosRef}>
           <h2>Mis productos ({misProductos.length})</h2>
           {misProductos.length === 0 ? (
             <p className="texto-tenue">Todavía no has publicado productos.</p>
