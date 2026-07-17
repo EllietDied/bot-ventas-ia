@@ -3471,3 +3471,54 @@ img {
     min-width: 0;
   }
 }
+
+/* ===== Modal "Buscar producto por foto" (cámara / galería) ===== */
+.foto-modal-fondo {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+.foto-modal {
+  width: 100%;
+  max-width: 340px;
+  background: var(--tarjeta);
+  border: 1px solid var(--borde);
+  border-radius: 16px;
+  padding: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+}
+.foto-modal-titulo {
+  margin: 0 0 0.4rem;
+  font-size: 1.05rem;
+  text-align: center;
+}
+.foto-modal-opcion {
+  padding: 0.85rem 1rem;
+  border-radius: 10px;
+  border: 1px solid var(--borde);
+  background: rgba(127, 127, 127, 0.08);
+  color: var(--texto);
+  font-size: 1rem;
+  text-align: left;
+  cursor: pointer;
+}
+.foto-modal-opcion:hover {
+  background: rgba(127, 127, 127, 0.16);
+}
+.foto-modal-cancelar {
+  margin-top: 0.2rem;
+  padding: 0.55rem;
+  border: none;
+  background: transparent;
+  color: var(--texto-tenue);
+  font-size: 0.9rem;
+  cursor: pointer;
+}

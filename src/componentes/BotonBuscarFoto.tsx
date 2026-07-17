@@ -13,20 +13,20 @@ interface Props {
   className?: string
 }
 
-// Botón "Buscar por foto": abre el selector de imágenes del sistema.
-// En el celular, el propio sistema ofrece "Cámara / Galería / Archivos"; en la PC,
-// abre el explorador de archivos. (Antes usábamos un menú propio, pero el overflow
-// del contenedor lo recortaba en móvil; el selector nativo es más simple y robusto.)
+// Botón "Buscar por foto": abre un modal con dos opciones —tomar una foto con la
+// cámara o elegir de la galería—. El modal va a PANTALLA COMPLETA (position: fixed),
+// así no lo recorta ningún contenedor. En Android/iOS "Cámara" abre la cámara directa.
 export function BotonBuscarFoto({ onResultado, onInicio, className }: Props) {
   const { productos } = useProductos()
   const [analizando, setAnalizando] = useState(false)
-  const inputFoto = useRef<HTMLInputElement>(null)
+  const [menu, setMenu] = useState(false)
+  const inputCamara = useRef<HTMLInputElement>(null)
+  const inputGaleria = useRef<HTMLInputElement>(null)
 
   async function alElegir(file: File) {
     let dataURL = ''
     try {
-      // Comprimimos a 768px (más que el resto): así la IA puede LEER el texto de las
-      // cajas de productos (marca, modelo, "DDR5"...) y no solo ver la forma.
+      // 768px: resolución suficiente para que la IA lea el texto de las cajas.
       dataURL = await comprimirImagen(file, 768)
     } catch {
       /* si falla la compresión, la búsqueda caerá al aviso de abajo */
@@ -37,7 +37,6 @@ export function BotonBuscarFoto({ onResultado, onInicio, className }: Props) {
       const resultado = await buscarPorFoto(dataURL, productos)
       onResultado(resultado)
     } catch {
-      // Si algo falla, devolvemos un resultado vacío (el padre muestra el aviso).
       onResultado({ termino: '', etiqueta: '', productos: [], fuente: 'manual', necesitaCategoria: true })
     } finally {
       setAnalizando(false)
@@ -45,19 +44,64 @@ export function BotonBuscarFoto({ onResultado, onInicio, className }: Props) {
   }
 
   return (
-    <span className="foto-wrap">
+    <>
       <button
         type="button"
         className={className ?? 'chip'}
         disabled={analizando}
-        onClick={() => inputFoto.current?.click()}
+        onClick={() => setMenu(true)}
       >
         <Icono nombre="camara" size={15} /> {analizando ? 'Analizando…' : 'Buscar por foto'}
       </button>
 
-      {/* Un solo selector: en el celular el sistema ofrece Cámara o Galería. */}
+      {/* Modal a pantalla completa: no lo recorta ningún contenedor con overflow. */}
+      {menu && (
+        <div className="foto-modal-fondo" onClick={() => setMenu(false)}>
+          <div className="foto-modal" onClick={(e) => e.stopPropagation()}>
+            <h3 className="foto-modal-titulo">Buscar producto por foto</h3>
+            <button
+              type="button"
+              className="foto-modal-opcion"
+              onClick={() => {
+                setMenu(false)
+                inputCamara.current?.click()
+              }}
+            >
+              📷 Tomar una foto con la cámara
+            </button>
+            <button
+              type="button"
+              className="foto-modal-opcion"
+              onClick={() => {
+                setMenu(false)
+                inputGaleria.current?.click()
+              }}
+            >
+              🖼️ Elegir de mi galería
+            </button>
+            <button type="button" className="foto-modal-cancelar" onClick={() => setMenu(false)}>
+              Cancelar
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Cámara: en el celular "capture" abre directo la cámara trasera. */}
       <input
-        ref={inputFoto}
+        ref={inputCamara}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        hidden
+        onChange={(e) => {
+          const file = e.target.files?.[0]
+          if (file) alElegir(file)
+          e.currentTarget.value = ''
+        }}
+      />
+      {/* Galería: selector de archivos normal. */}
+      <input
+        ref={inputGaleria}
         type="file"
         accept="image/*"
         hidden
@@ -67,6 +111,6 @@ export function BotonBuscarFoto({ onResultado, onInicio, className }: Props) {
           e.currentTarget.value = ''
         }}
       />
-    </span>
+    </>
   )
 }
