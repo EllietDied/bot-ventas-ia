@@ -10,6 +10,7 @@ import { Direccion } from '../modelos/Direccion'
 interface FilaPedido {
   id: number | string
   correo_comprador: string | null
+  comprador_nombre?: string | null
   subtotal: number | string | null
   descuento: number | string | null
   total: number | string | null
@@ -44,6 +45,7 @@ function mapPedido(fila: FilaPedido, detalles: FilaDetalle[]): Pedido {
   return {
     idPedido: String(fila.id),
     correoComprador: fila.correo_comprador ?? '',
+    compradorNombre: fila.comprador_nombre ?? undefined,
     fecha,
     detalles: detalles.map((d) => {
       const cantidad = Number(d.cantidad ?? 0)

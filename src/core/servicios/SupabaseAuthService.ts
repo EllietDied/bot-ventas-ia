@@ -31,6 +31,7 @@ export function mapPerfilAUsuario(perfil: FilaPerfil, correo: string): Usuario {
     rol: (perfil.rol as Rol) ?? 'comprador',
     sexo: (perfil.sexo as Sexo) || undefined,
     estado: perfil.estado ?? 'activo',
+    numero: perfil.numero ? Number(perfil.numero) : undefined,
     paisCodigo: perfil.pais_codigo ?? undefined,
     paisNombre: perfil.pais_nombre ?? undefined,
     prefijoTelefonico: perfil.prefijo_telefonico ?? undefined,

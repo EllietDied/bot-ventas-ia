@@ -4,6 +4,7 @@ import { useSesion } from '../contexto/SesionContext'
 import { useCarrito } from '../contexto/CarritoContext'
 import { useMensajeria } from '../contexto/MensajeriaContext'
 import { esVendedor } from '../core/modelos/Vendedor'
+import { codigoUsuario } from '../core/modelos/Usuario'
 import { BotonInstalar } from './BotonInstalar'
 import { BotonTema } from './BotonTema'
 import { LogoUSS } from './LogoUSS'
@@ -86,6 +87,7 @@ export function BarraNavegacion() {
 
             <span className="navbar-usuario">
               {usuarioActual.nombre} ({usuarioActual.rol})
+              <span className="chip-codigo">{codigoUsuario(usuarioActual)}</span>
             </span>
             <button className="btn btn-secundario btn-pequeno" onClick={cerrarSesion}>
               Salir

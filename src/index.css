@@ -265,6 +265,20 @@ a:hover {
   color: var(--texto-tenue);
   font-size: 0.85rem;
 }
+
+/* Etiqueta con el código de identidad del usuario: BYR-001 / SLR-014. */
+.chip-codigo {
+  display: inline-block;
+  margin-left: 0.4rem;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  background: var(--acento, #2563eb);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  vertical-align: middle;
+}
 /* Botón del menú hamburguesa: oculto en escritorio, visible en móvil. */
 .navbar-toggle {
   display: none;

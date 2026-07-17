@@ -18,6 +18,7 @@ export interface Usuario extends Persona {
   rol: Rol
   sexo?: Sexo // 'masculino' | 'femenino' (opcional por compatibilidad con cuentas previas)
   estado: string // 'activo' | 'inactivo'
+  numero?: number // número correlativo único (base del código BYR-XXX / SLR-XXX)
   // Datos internacionales del registro (opcionales, por compatibilidad con cuentas previas).
   paisCodigo?: string // ISO del país (PE, CL...)
   paisNombre?: string
@@ -37,4 +38,14 @@ export interface Usuario extends Persona {
   nivel3Tipo?: string
   nivel3Codigo?: string
   nivel3Nombre?: string
+}
+
+// Código legible que identifica al usuario según su rol:
+//   comprador -> "BYR-001"   vendedor -> "SLR-014"
+// Se arma con un prefijo de iniciales + su número correlativo (con ceros a la
+// izquierda). Si todavía no tiene número, mostramos solo el prefijo.
+export function codigoUsuario(u: Pick<Usuario, 'rol' | 'numero'>): string {
+  const prefijo = u.rol === 'vendedor' ? 'SLR' : 'BYR'
+  if (!u.numero) return prefijo
+  return `${prefijo}-${String(u.numero).padStart(3, '0')}`
 }

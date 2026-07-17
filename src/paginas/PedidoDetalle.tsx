@@ -2,6 +2,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { usePedidos } from '../contexto/PedidosContext'
 import { useSesion } from '../contexto/SesionContext'
 import { NOMBRE_METODO } from '../core/modelos/Pago'
+import { codigoUsuario } from '../core/modelos/Usuario'
 import { Icono } from '../componentes/Icono'
 
 // Convierte la parte del correo (antes de la @) en un nombre presentable:
@@ -44,13 +45,22 @@ export function PedidoDetalle() {
     ? [e.distrito, e.provincia, e.departamento].filter(Boolean).join(', ')
     : ''
 
-  // El pedido guarda el CORREO del comprador, no su nombre. Mostramos el nombre así:
-  // si es TU propio pedido, tu nombre; si no, el de quien recibe (envío); y de último,
-  // la parte del correo antes de la @.
+  // ¿El pedido es del propio usuario que lo está viendo?
+  const esMiPedido = usuarioActual.correo === pedido.correoComprador
+
+  // Nombre del comprador, en orden de preferencia:
+  //  1) el que se guardó en el pedido (el nombre elegido al registrarse),
+  //  2) si es TU propio pedido, tu nombre de la sesión,
+  //  3) el de quien recibe (envío), y de último la parte del correo antes de la @.
   const nombreComprador =
-    usuarioActual.correo === pedido.correoComprador
-      ? `${usuarioActual.nombre} ${usuarioActual.apellido ?? ''}`.trim()
-      : e?.receptor || nombreDesdeCorreo(pedido.correoComprador)
+    pedido.compradorNombre ||
+    (esMiPedido
+      ? usuarioActual.nombre || `${usuarioActual.nombre} ${usuarioActual.apellido ?? ''}`.trim()
+      : e?.receptor || nombreDesdeCorreo(pedido.correoComprador))
+
+  // Código del comprador (BYR-XXX). Solo lo podemos calcular con certeza cuando el
+  // pedido es del propio usuario (tenemos su número de la sesión).
+  const codigoComprador = esMiPedido ? codigoUsuario(usuarioActual) : ''
 
   return (
     <div className="pagina">
@@ -74,6 +84,7 @@ export function PedidoDetalle() {
         <ul className="detalle-ficha">
           <li>
             <strong>Comprador:</strong> {nombreComprador}
+            {codigoComprador && <span className="chip-codigo">{codigoComprador}</span>}
           </li>
           <li>
             <strong>Correo:</strong> {pedido.correoComprador}

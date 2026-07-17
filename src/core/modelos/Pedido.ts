@@ -9,6 +9,7 @@ export type EstadoPedido = 'pendiente' | 'atendido'
 export interface Pedido {
   idPedido: string
   correoComprador: string
+  compradorNombre?: string // nombre elegido al registrarse (se guarda al crear el pedido)
   fecha: string
   detalles: DetallePedido[]
   subtotal: number
