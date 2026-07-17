@@ -35,6 +35,38 @@ export async function cargarSaldoServidor(): Promise<number> {
   return Number(data.saldo)
 }
 
+// Un movimiento de la billetera, ya listo para mostrarse en la pantalla.
+export interface MovimientoServidor {
+  id: string
+  detalle: string
+  fecha: string
+  monto: number
+  tipo: 'recarga' | 'compra'
+}
+
+// Lee los movimientos reales del usuario (recargas y compras) desde la tabla
+// `transacciones`, los más recientes primero. En modo local no se usa.
+export async function cargarMovimientosServidor(): Promise<MovimientoServidor[]> {
+  if (!supabase) return []
+  const { data, error } = await supabase
+    .from('transacciones')
+    .select('id, tipo, monto, metodo, creado_en')
+    .order('creado_en', { ascending: false })
+    .limit(30)
+  if (error || !data) return []
+  return data.map((t: any) => {
+    // Es "recarga" solo cuando el tipo lo dice; el resto son compras (gastos).
+    const esRecarga = String(t.tipo) === 'recarga'
+    return {
+      id: String(t.id),
+      detalle: esRecarga ? 'Recarga de saldo' : 'Compra en InkaShop',
+      fecha: t.creado_en ?? new Date().toISOString(),
+      monto: Number(t.monto ?? 0),
+      tipo: esRecarga ? 'recarga' : 'compra',
+    }
+  })
+}
+
 // Paga una compra con el saldo llamando a la función del servidor. El servidor
 // calcula el total con los precios reales, valida el saldo y descuenta: el
 // navegador NO decide cuánto se cobra.

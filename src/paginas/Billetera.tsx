@@ -9,7 +9,11 @@ import {
 } from '../core/servicios/BilleteraLocal'
 import { usarPagosReales, crearPagoEfectivo, type PagoEfectivo } from '../core/servicios/PagosService'
 import { usarSupabase } from '../core/datos/supabase'
-import { cargarSaldoServidor } from '../core/servicios/BilleteraSupabase'
+import {
+  cargarSaldoServidor,
+  cargarMovimientosServidor,
+  type MovimientoServidor,
+} from '../core/servicios/BilleteraSupabase'
 
 // Montos rápidos de recarga (soles).
 const MONTOS = [10, 20, 50, 100]
@@ -31,22 +35,53 @@ export function Billetera() {
   const enSupabase = usarSupabase()
   const [saldoReal, setSaldoReal] = useState<number | null>(null)
   const [refrescando, setRefrescando] = useState(false)
+  // Movimientos reales (recargas/compras) leídos de la base, en modo Supabase.
+  const [movimientosReales, setMovimientosReales] = useState<MovimientoServidor[]>([])
   const saldoMostrado = enSupabase ? saldoReal ?? 0 : billetera.saldo
+  // Movimientos a mostrar: los reales de la base (Supabase) o los locales (modo prueba).
+  const movimientos = enSupabase ? movimientosReales : billetera.movimientos
 
   async function refrescarSaldo() {
     setRefrescando(true)
     try {
       setSaldoReal(await cargarSaldoServidor())
+      setMovimientosReales(await cargarMovimientosServidor())
     } finally {
       setRefrescando(false)
     }
   }
 
-  // Al entrar cargamos la billetera local y, en Supabase, el saldo real de la base.
+  // Al entrar cargamos la billetera local y, en Supabase, el saldo real + movimientos.
   useEffect(() => {
     setBilletera(cargarBilletera(idUsuario))
-    if (enSupabase) cargarSaldoServidor().then(setSaldoReal)
+    if (enSupabase) {
+      cargarSaldoServidor().then(setSaldoReal)
+      cargarMovimientosServidor().then(setMovimientosReales)
+    }
   }, [idUsuario, enSupabase])
+
+  // AUTO-REFRESCO: mientras hay un código de pago (CIP) pendiente, revisamos el saldo
+  // solos cada 12 s. Cuando sube (el pago se acreditó), avisamos y ocultamos el CIP.
+  // Paramos tras ~10 min para no consultar de más.
+  useEffect(() => {
+    if (!enSupabase || !cip) return
+    const saldoInicial = saldoReal ?? 0
+    let intentos = 0
+    const intervalo = setInterval(async () => {
+      intentos += 1
+      const nuevo = await cargarSaldoServidor()
+      setSaldoReal(nuevo)
+      if (nuevo > saldoInicial) {
+        toast.exito('¡Tu recarga se acreditó! 🎉')
+        cargarMovimientosServidor().then(setMovimientosReales)
+        setCip(null) // ocultamos el código: ya se pagó
+      } else if (intentos >= 50) {
+        clearInterval(intervalo) // ~10 minutos como máximo
+      }
+    }, 12000)
+    return () => clearInterval(intervalo)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [enSupabase, cip])
 
   async function recargar() {
     const valor = Number(monto)
@@ -167,9 +202,9 @@ export function Billetera() {
           <h2 className="billetera-titulo">Tu código de pago (CIP)</h2>
           <p className="billetera-cip-codigo">{cip.cip}</p>
           <p className="texto-tenue">
-            Paga S/ {cip.monto.toFixed(2)} en cualquier agente, banca móvil o app de tu banco. Tu
-            saldo se acreditará automáticamente al confirmarse el pago (puede tardar unos minutos;
-            luego usa “↻ Actualizar saldo” arriba).
+            Paga S/ {cip.monto.toFixed(2)} en cualquier agente, banca móvil o app de tu banco. En
+            cuanto se confirme el pago, tu saldo se acreditará y te avisaremos aquí mismo — esta
+            pantalla se actualiza sola (puede tardar unos minutos).
           </p>
           {cip.qr && <img className="billetera-qr" src={cip.qr} alt="Código QR de PagoEfectivo" />}
           {cip.url && (
@@ -188,11 +223,11 @@ export function Billetera() {
       {/* Movimientos */}
       <section className="tarjeta">
         <h2 className="billetera-titulo">Movimientos</h2>
-        {billetera.movimientos.length === 0 ? (
+        {movimientos.length === 0 ? (
           <p className="texto-tenue">Aún no tienes movimientos.</p>
         ) : (
           <ul className="billetera-movimientos">
-            {billetera.movimientos.map((m) => (
+            {movimientos.map((m) => (
               <li key={m.id} className="billetera-mov">
                 <span>
                   <span className="billetera-mov-detalle">{m.detalle}</span>
