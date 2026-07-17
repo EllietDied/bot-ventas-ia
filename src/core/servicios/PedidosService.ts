@@ -110,7 +110,9 @@ export async function listarPedidosSupabase(): Promise<Pedido[]> {
   return (pedidos as FilaPedido[]).map((p) => mapPedido(p, porPedido.get(String(p.id)) ?? []))
 }
 
-// Inserta un pedido y sus líneas; devuelve el Pedido creado (con su id real).
+// Crea un pedido de forma SEGURA llamando a la función del servidor `crear_pedido`,
+// que calcula el total con los PRECIOS REALES del catálogo (el navegador ya no puede
+// inventar precios). Devuelve el Pedido creado, o null si falló.
 export async function insertarPedidoSupabase(p: {
   idComprador: string
   correoComprador: string
@@ -123,33 +125,46 @@ export async function insertarPedidoSupabase(p: {
 }): Promise<Pedido | null> {
   if (!supabase) return null
 
-  const { data: pedido, error } = await supabase
-    .from('pedidos')
-    .insert({
-      id_comprador: p.idComprador,
-      correo_comprador: p.correoComprador,
-      subtotal: p.subtotal,
-      descuento: p.descuento,
-      total: p.total,
-      metodo_pago: p.metodoPago,
-      banco: p.banco ?? null,
-      estado: 'pendiente',
-      estado_pago: 'aprobado',
-    })
-    .select()
-    .single()
-  if (error || !pedido) return null
-
-  const filasDetalle: FilaDetalle[] = p.items.map((i) => ({
-    pedido_id: (pedido as FilaPedido).id,
+  // Solo mandamos qué producto y cuánto: el precio lo pone el servidor.
+  const items = p.items.map((i) => ({
     producto_id: i.producto.id,
-    nombre: i.producto.nombre,
     cantidad: i.cantidad,
-    precio: i.producto.precio,
+    nombre: i.producto.nombre,
   }))
-  if (filasDetalle.length > 0) await supabase.from('detalle_pedido').insert(filasDetalle)
+  const { data, error } = await supabase.rpc('crear_pedido', {
+    items,
+    metodo: p.metodoPago,
+    banco: p.banco ?? null,
+  })
+  const r = data as { ok?: boolean; pedido_id?: number; subtotal?: number; descuento?: number; total?: number } | null
+  if (error || !r || r.ok !== true || !r.pedido_id) return null
 
-  return mapPedido(pedido as FilaPedido, filasDetalle)
+  // Reconstruimos el Pedido para la interfaz con los totales REALES de la función.
+  const ahora = new Date().toLocaleString()
+  return {
+    idPedido: String(r.pedido_id),
+    correoComprador: p.correoComprador,
+    fecha: ahora,
+    detalles: p.items.map((i) => ({
+      idProducto: Number(i.producto.id),
+      nombreProducto: i.producto.nombre,
+      cantidad: i.cantidad,
+      precioUnitario: i.producto.precio,
+      subtotal: i.producto.precio * i.cantidad,
+    })),
+    subtotal: Number(r.subtotal ?? p.subtotal),
+    descuento: Number(r.descuento ?? p.descuento),
+    total: Number(r.total ?? p.total),
+    estado: 'pendiente',
+    pago: {
+      idPago: 'PG-' + r.pedido_id,
+      metodoPago: p.metodoPago,
+      banco: p.banco,
+      monto: Number(r.total ?? p.total),
+      estadoPago: 'aprobado',
+      fechaPago: ahora,
+    },
+  }
 }
 
 // Marca un pedido como atendido.
