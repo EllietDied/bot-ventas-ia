@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom'
 import { usePedidos } from '../contexto/PedidosContext'
 import { useSesion } from '../contexto/SesionContext'
 import { esVendedor } from '../core/modelos/Vendedor'
@@ -9,6 +10,7 @@ import { Icono } from '../componentes/Icono'
 export function Pedidos() {
   const { pedidos, pedidosPendientes, atenderSiguiente, pedidosDe } = usePedidos()
   const { usuarioActual } = useSesion()
+  const navegar = useNavigate()
 
   if (!usuarioActual) return null
 
@@ -44,7 +46,14 @@ export function Pedidos() {
           ) : (
             <ol className="cola-lista">
               {pedidosPendientes.map((p, i) => (
-                <li key={p.idPedido}>
+                <li
+                  key={p.idPedido}
+                  className="cola-clic"
+                  role="button"
+                  tabIndex={0}
+                  title="Ver el detalle del pedido"
+                  onClick={() => navegar('/pedidos/' + p.idPedido)}
+                >
                   <span className="cola-pos">{i + 1}</span>
                   <span>
                     {p.idPedido} — {p.correoComprador}
@@ -63,17 +72,29 @@ export function Pedidos() {
         {mios.length === 0 ? (
           <p className="texto-tenue">Aún no hay pedidos registrados.</p>
         ) : (
-          mios.map((p) => <TarjetaPedido key={p.idPedido} pedido={p} />)
+          mios.map((p) => (
+            <TarjetaPedido
+              key={p.idPedido}
+              pedido={p}
+              onVer={() => navegar('/pedidos/' + p.idPedido)}
+            />
+          ))
         )}
       </section>
     </div>
   )
 }
 
-// Tarjeta con el detalle de un pedido.
-function TarjetaPedido({ pedido }: { pedido: Pedido }) {
+// Tarjeta con el resumen de un pedido (clic → ver su detalle completo).
+function TarjetaPedido({ pedido, onVer }: { pedido: Pedido; onVer: () => void }) {
   return (
-    <div className="pedido-tarjeta">
+    <div
+      className="pedido-tarjeta pedido-tarjeta-clic"
+      role="button"
+      tabIndex={0}
+      title="Ver el detalle del pedido"
+      onClick={onVer}
+    >
       <div className="pedido-cabecera">
         <div>
           <strong>{pedido.idPedido}</strong>

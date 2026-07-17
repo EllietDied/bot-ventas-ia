@@ -13,6 +13,7 @@ import { DetalleProducto } from './paginas/DetalleProducto'
 import { Carrito } from './paginas/Carrito'
 import { Checkout } from './paginas/Checkout'
 import { Pedidos } from './paginas/Pedidos'
+import { PedidoDetalle } from './paginas/PedidoDetalle'
 import { Asistente } from './paginas/Asistente'
 import { PanelVendedor } from './paginas/PanelVendedor'
 import { EditarProducto } from './paginas/EditarProducto'
@@ -103,6 +104,14 @@ export default function App() {
             element={
               <RutaProtegida>
                 <Pedidos />
+              </RutaProtegida>
+            }
+          />
+          <Route
+            path="/pedidos/:id"
+            element={
+              <RutaProtegida>
+                <PedidoDetalle />
               </RutaProtegida>
             }
           />

@@ -3802,3 +3802,71 @@ img {
   outline: 2px solid var(--primario);
   outline-offset: 2px;
 }
+
+/* ===== Pedidos: tarjetas y filas clicables (llevan al detalle) ===== */
+.pedido-tarjeta-clic {
+  cursor: pointer;
+  transition:
+    transform 0.14s ease,
+    box-shadow 0.14s ease,
+    border-color 0.14s ease;
+}
+.pedido-tarjeta-clic:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+  border-color: var(--primario);
+}
+.cola-clic {
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background 0.12s ease;
+}
+.cola-clic:hover {
+  background: rgba(127, 127, 127, 0.08);
+}
+.cola-clic:focus-visible,
+.pedido-tarjeta-clic:focus-visible {
+  outline: 2px solid var(--primario);
+  outline-offset: 2px;
+}
+
+/* ===== Detalle del pedido ===== */
+.pedido-detalle-cab {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin: 0.8rem 0 1rem;
+}
+.pedido-detalle-cab h1 {
+  margin: 0;
+}
+.pedido-detalle-titulo {
+  font-size: 1rem;
+  margin: 0 0 0.6rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.pedido-resumen {
+  margin-top: 0.9rem;
+  margin-left: auto;
+  max-width: 280px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+.pedido-resumen-fila {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.92rem;
+}
+.pedido-resumen-total {
+  font-weight: 800;
+  font-size: 1.05rem;
+  border-top: 1px solid var(--borde);
+  padding-top: 0.4rem;
+  margin-top: 0.2rem;
+  color: var(--primario);
+}
