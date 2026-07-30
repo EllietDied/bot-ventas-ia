@@ -5,7 +5,7 @@
 //
 // SEGURIDAD: clave ANÓNIMA + TOKEN del usuario => el RLS solo deja ver/enviar lo que
 // te corresponde (eres emisor o receptor). Sin sesión no se devuelve nada (son privados).
-import type { VercelRequest, VercelResponse } from '@vercel/node'
+import type { VercelRequest, VercelResponse } from './_types.js'
 
 const SUPA_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || ''
 const ANON = process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || ''

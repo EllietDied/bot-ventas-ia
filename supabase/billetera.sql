@@ -88,6 +88,69 @@ create trigger al_crear_perfil_billetera
 revoke execute on function public.crear_billetera() from public, anon, authenticated;
 
 -- ============================================================
--- Fin. (Las funciones de cobro/acreditación van en la capa serverless, Fase 2;
---  la función atómica de "pagar con saldo" se agrega en la Fase 4.)
+-- Acreditar una recarga confirmada por Culqi de forma ATÓMICA.
+-- La transacción y el nuevo saldo se guardan juntas o no se guarda ninguna.
+-- El índice único de referencia_externa vuelve idempotentes los reintentos.
+-- ============================================================
+create or replace function public.procesar_pago_culqi(
+  p_usuario uuid,
+  p_monto numeric,
+  p_metodo text,
+  p_referencia text
+)
+returns jsonb
+language plpgsql
+security invoker
+set search_path = ''
+as $$
+declare
+  v_transaccion_id bigint;
+begin
+  if p_usuario is null
+     or p_monto is null or p_monto <= 0 or p_monto > 5000
+     or p_referencia is null or length(trim(p_referencia)) = 0 then
+    raise exception 'Datos de pago inválidos';
+  end if;
+
+  insert into public.transacciones (
+    usuario_id, tipo, monto, estado, metodo, referencia_externa
+  )
+  values (
+    p_usuario, 'recarga', round(p_monto, 2), 'aprobado',
+    left(coalesce(p_metodo, 'culqi'), 30), left(trim(p_referencia), 120)
+  )
+  on conflict (referencia_externa) where referencia_externa is not null
+  do nothing
+  returning id into v_transaccion_id;
+
+  if v_transaccion_id is null then
+    return jsonb_build_object('ok', true, 'duplicado', true);
+  end if;
+
+  update public.billeteras
+     set saldo = saldo + round(p_monto, 2),
+         actualizado_en = now()
+   where id = p_usuario;
+
+  if not found then
+    raise exception 'El usuario no tiene billetera';
+  end if;
+
+  return jsonb_build_object(
+    'ok', true,
+    'duplicado', false,
+    'acreditado', round(p_monto, 2),
+    'transaccion_id', v_transaccion_id
+  );
+end;
+$$;
+
+-- Solo el backend con service role puede confirmar dinero real.
+revoke execute on function public.procesar_pago_culqi(uuid, numeric, text, text)
+  from public, anon, authenticated;
+grant execute on function public.procesar_pago_culqi(uuid, numeric, text, text)
+  to service_role;
+
+-- ============================================================
+-- Fin. La función atómica de "pagar con saldo" se agrega en la Fase 4.
 -- ============================================================

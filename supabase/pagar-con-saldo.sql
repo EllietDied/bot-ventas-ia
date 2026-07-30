@@ -19,6 +19,7 @@ declare
   v_saldo     numeric;
   v_item      jsonb;
   v_precio    numeric;
+  v_nombre_producto text;
   v_stock     int;
   v_cantidad  int;
   v_prod_id   bigint;
@@ -72,9 +73,10 @@ begin
   for v_item in select * from jsonb_array_elements(items) loop
     v_prod_id  := (v_item->>'producto_id')::bigint;
     v_cantidad := (v_item->>'cantidad')::int;
-    select precio into v_precio from public.productos where id = v_prod_id;
+    select precio, nombre into v_precio, v_nombre_producto
+      from public.productos where id = v_prod_id;
     insert into public.detalle_pedido (pedido_id, producto_id, nombre, cantidad, precio)
-      values (v_pedido_id, v_prod_id, coalesce(v_item->>'nombre', ''), v_cantidad, v_precio);
+      values (v_pedido_id, v_prod_id, v_nombre_producto, v_cantidad, v_precio);
     update public.productos set stock = stock - v_cantidad where id = v_prod_id;
   end loop;
 

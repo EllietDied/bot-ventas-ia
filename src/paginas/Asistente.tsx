@@ -10,7 +10,7 @@ import { LogoUSS } from '../componentes/LogoUSS'
 import { ImagenProducto } from '../componentes/ImagenProducto'
 import { Icono } from '../componentes/Icono'
 import { BotonBuscarFoto } from '../componentes/BotonBuscarFoto'
-import { buscarPorFoto, type ResultadoBusquedaVisual } from '../core/servicios/BusquedaVisualService'
+import type { ResultadoBusquedaVisual } from '../core/servicios/BusquedaVisualService'
 import { Producto, codigoProducto } from '../core/modelos/Producto'
 import {
   quiereCancelar,
@@ -874,6 +874,9 @@ export function Asistente() {
     if (cargando) return // ya hay un análisis en curso
     iniciarFotoComprador(dataURL, pista) // muestra la foto (y la pista) y el "analizando…"
     try {
+      // Este flujo alternativo para imágenes adjuntas mantiene toda la visión
+      // fuera del paquete inicial, igual que el botón "Buscar por foto".
+      const { buscarPorFoto } = await import('../core/servicios/BusquedaVisualService')
       const resultado = await buscarPorFoto(dataURL, productos, pista)
       manejarFotoComprador(resultado, pista)
     } catch {

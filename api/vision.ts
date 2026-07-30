@@ -7,7 +7,8 @@
 // clave, o Gemma falla / tarda (cold start), devolvemos "no configurado" y el frontend
 // usa la visión del navegador (MobileNet) como respaldo.
 
-import type { VercelRequest, VercelResponse } from '@vercel/node'
+import type { VercelRequest, VercelResponse } from './_types.js'
+import { autenticar } from './_auth.js'
 
 const NVIDIA_URL = 'https://integrate.api.nvidia.com/v1/chat/completions'
 // Modelo multimodal de Gemma en NVIDIA (cambiable con NVIDIA_MODELO sin tocar código).
@@ -112,6 +113,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({ error: 'Método no permitido.' })
   }
   try {
+    if (!(await autenticar(req))) {
+      return res.status(401).json({ error: 'Necesitas iniciar sesión para usar la visión en la nube.' })
+    }
+
     const cuerpo = typeof req.body === 'string' ? JSON.parse(req.body) : req.body ?? {}
 
     const imagen = typeof cuerpo.imagen === 'string' ? cuerpo.imagen : ''

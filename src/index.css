@@ -3277,6 +3277,20 @@ a:hover {
   animation: girar 0.7s linear infinite;
 }
 
+.ruta-cargando {
+  min-height: min(55vh, 32rem);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  color: var(--texto-tenue);
+}
+
+.ruta-cargando .spinner {
+  width: 20px;
+  height: 20px;
+}
+
 /* Respeta a quien prefiere menos movimiento (accesibilidad) */
 @media (prefers-reduced-motion: reduce) {
   *,

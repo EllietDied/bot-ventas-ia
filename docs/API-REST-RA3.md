@@ -10,7 +10,8 @@ La API usa **Supabase** del lado del servidor. Variables de entorno (servidor, s
 
 ```
 SUPABASE_URL=https://xxxxx.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=...   # service role: permite CRUD completo (POST/PUT/DELETE)
+SUPABASE_ANON_KEY=...           # clave pública usada para validar sesiones y aplicar RLS
+SUPABASE_SERVICE_ROLE_KEY=...   # secreta; solo el webhook acredita recargas
 ```
 
 Si no se definen, la API reutiliza `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY`
@@ -47,7 +48,7 @@ Base URL en los ejemplos: `BASE` = la URL de tu despliegue (o `http://localhost:
 ```json
 { "nombre": "Teclado Mecánico", "marca": "Redragon", "descripcion": "Switches azules", "categoria": "Periféricos", "precio": 199.0, "stock": 18, "imagen": "⌨️" }
 ```
-  > `idVendedor` es opcional: si no se envía, se asigna al primer vendedor registrado.
+  > Requiere `Authorization: Bearer <token>` y una cuenta con rol `vendedor` activa.
 - **Respuesta 201:** `{ "producto": { "id": 16, "nombre": "Teclado Mecánico", ... } }`
 - **Errores:** `400` (nombre/categoría faltan, precio ≤ 0, stock negativo, o no hay vendedor), `405` (método), `500`.
 
@@ -90,11 +91,13 @@ Base URL en los ejemplos: `BASE` = la URL de tu despliegue (o `http://localhost:
 - **Método:** POST · **URL:** `BASE/api/pedidos`
 - **Body:**
 ```json
-{ "idComprador": "<uuid-del-comprador>", "correoComprador": "comprador@demo.com", "metodoPago": "tarjeta", "items": [ { "idProducto": 1, "nombre": "Mouse Gamer RGB", "cantidad": 1, "precio": 89.9 } ] }
+{ "metodoPago": "tarjeta", "items": [ { "idProducto": 1, "cantidad": 1 } ] }
 ```
-  > Los totales (`subtotal`, `descuento`, `total`) son opcionales: se calculan desde `items` si no se envían.
+  > Requiere `Authorization: Bearer <token>`. El usuario, nombre, precios, descuento y
+  > total se obtienen y calculan dentro de PostgreSQL; los valores monetarios enviados
+  > por el cliente se ignoran.
 - **Respuesta 201:** `{ "pedido": { "id": 6, "estado": "pendiente", "estado_pago": "aprobado", "detalle_pedido": [ ... ] } }`
-- **Errores:** `400` (items vacío, falta `idComprador`), `405`, `500`.
+- **Errores:** `400` (items o cantidades inválidas, producto inexistente/sin stock), `401`, `405`, `500`.
 
 ---
 
@@ -140,6 +143,7 @@ Base URL en los ejemplos: `BASE` = la URL de tu despliegue (o `http://localhost:
 
 ### POST `/api/chat` — respuesta del asistente
 - **Método:** POST · **URL:** `BASE/api/chat`
+- **Autorización:** `Authorization: Bearer <token de Supabase>`.
 - **Body:**
 ```json
 { "mensaje": "Busco una laptop hasta 2500 soles", "productos": [ { "id": 13, "nombre": "Laptop HP 15", "categoria": "Laptops", "precio": 2200, "stock": 7 } ], "historial": [] }
@@ -148,7 +152,7 @@ Base URL en los ejemplos: `BASE` = la URL de tu despliegue (o `http://localhost:
 ```json
 { "mensaje": "Te recomiendo la Laptop HP 15...", "productosRecomendados": ["13"], "accionSugerida": "VER_PRODUCTO" }
 ```
-- **Errores:** `400` (mensaje vacío o > 1000 caracteres), `405`, `500` (sin `DEEPSEEK_API_KEY`), `502` (DeepSeek falló).
+- **Errores:** `400` (mensaje vacío), `401` (sesión inválida), `405`, `500` (sin `DEEPSEEK_API_KEY`), `502` (DeepSeek falló).
 - **Nota:** requiere `DEEPSEEK_API_KEY` (servidor) y saldo en DeepSeek. Si falla, el frontend usa
   automáticamente la **IA simulada** (`ChatBotIA`). Nunca se envían contraseñas ni datos de pago.
 
@@ -161,6 +165,8 @@ Base URL en los ejemplos: `BASE` = la URL de tu despliegue (o `http://localhost:
 | 200 | OK (GET/PUT/DELETE correctos) |
 | 201 | Creado (POST correcto) |
 | 400 | Petición inválida (validación) |
+| 401 | Falta una sesión válida |
+| 403 | El rol no autoriza la operación |
 | 404 | Recurso no encontrado |
 | 405 | Método HTTP no permitido |
 | 500 | Error interno / Supabase no configurado |

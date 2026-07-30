@@ -5,13 +5,11 @@
 //
 // SEGURIDAD: clave ANÓNIMA + TOKEN del usuario => el RLS de la base decide qué pedidos
 // ve/crea cada quien. Sin sesión, no se devuelve nada (datos personales).
-import type { VercelRequest, VercelResponse } from '@vercel/node'
+import type { VercelRequest, VercelResponse } from './_types.js'
 
 const SUPA_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || ''
 const ANON = process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || ''
 const SUPA_OK = !!(SUPA_URL && ANON)
-const RETORNAR = { Prefer: 'return=representation' }
-
 function leerBody(body: unknown): Record<string, any> {
   if (!body) return {}
   if (typeof body === 'string') {
@@ -79,56 +77,57 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (req.method === 'POST') {
       const b = leerBody(req.body)
 
-      const items = Array.isArray(b.items) ? b.items : []
-      if (items.length === 0) {
-        return res.status(400).json({ error: 'El pedido debe incluir al menos un producto (items).' })
+      const itemsEntrada = Array.isArray(b.items) ? b.items : []
+      if (itemsEntrada.length === 0 || itemsEntrada.length > 50) {
+        return res.status(400).json({ error: 'El pedido debe incluir entre 1 y 50 productos.' })
       }
 
-      const subtotal = Number(
-        b.subtotal ??
-          items.reduce(
-            (s: number, i: any) => s + Number(i.precio ?? 0) * Number(i.cantidad ?? 0),
-            0,
-          ),
+      const items = itemsEntrada.map((item: any) => ({
+        producto_id: Number(item.producto_id ?? item.idProducto),
+        cantidad: Number(item.cantidad),
+      }))
+      const itemsValidos = items.every(
+        (item) =>
+          Number.isSafeInteger(item.producto_id) &&
+          item.producto_id > 0 &&
+          Number.isSafeInteger(item.cantidad) &&
+          item.cantidad > 0 &&
+          item.cantidad <= 100,
       )
-      const descuento = Number(b.descuento ?? 0)
-      const total = Number(b.total ?? subtotal - descuento)
+      if (!itemsValidos) {
+        return res.status(400).json({ error: 'Los productos o cantidades no son válidos.' })
+      }
 
-      // id_comprador = el usuario autenticado (NO del cuerpo). El RLS exige que coincida.
+      const metodo =
+        typeof (b.metodoPago ?? b.metodo_pago) === 'string'
+          ? String(b.metodoPago ?? b.metodo_pago).slice(0, 30)
+          : 'tarjeta'
+      const banco = typeof b.banco === 'string' ? b.banco.slice(0, 60) : null
+
+      // La RPC toma el usuario del token y calcula precios, descuento y total
+      // exclusivamente con datos actuales del catálogo.
       const { ok, datos } = await pedir(
-        'pedidos',
+        'rpc/crear_pedido',
         {
           method: 'POST',
-          headers: RETORNAR,
-          body: JSON.stringify({
-            id_comprador: uid,
-            correo_comprador: b.correoComprador ?? b.correo_comprador ?? '',
-            subtotal,
-            descuento,
-            total,
-            metodo_pago: b.metodoPago ?? b.metodo_pago ?? 'tarjeta',
-            banco: b.banco ?? null,
-            estado: 'pendiente',
-            estado_pago: 'aprobado', // pago simulado
-          }),
+          body: JSON.stringify({ items, metodo, banco }),
         },
         token,
       )
-      const pedido = Array.isArray(datos) ? datos[0] : datos
-      if (!ok || !pedido) {
-        return res.status(500).json({ error: 'No se pudo registrar el pedido.' })
+      if (!ok || !datos?.ok || !Number.isSafeInteger(Number(datos?.pedido_id))) {
+        const mensaje =
+          typeof datos?.error === 'string' ? datos.error : 'No se pudo registrar el pedido.'
+        return res.status(ok ? 400 : 500).json({ error: mensaje })
       }
 
-      const detalle = items.map((i: any) => ({
-        pedido_id: pedido.id,
-        producto_id: i.idProducto ?? i.producto_id ?? null,
-        nombre: i.nombre ?? '',
-        cantidad: Number(i.cantidad ?? 1),
-        precio: Number(i.precio ?? 0),
-      }))
-      await pedir('detalle_pedido', { method: 'POST', body: JSON.stringify(detalle) }, token)
-
-      return res.status(201).json({ pedido: { ...pedido, detalle_pedido: detalle } })
+      const pedidoId = Number(datos.pedido_id)
+      const lectura = await pedir(
+        `pedidos?id=eq.${pedidoId}&select=*,detalle_pedido(*)`,
+        {},
+        token,
+      )
+      const pedido = Array.isArray(lectura.datos) ? lectura.datos[0] : null
+      return res.status(201).json({ pedido: pedido ?? { id: pedidoId, ...datos } })
     }
 
     res.setHeader('Allow', 'GET, POST')

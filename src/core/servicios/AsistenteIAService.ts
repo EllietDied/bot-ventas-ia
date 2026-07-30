@@ -7,6 +7,7 @@
 
 import { ChatBotIA } from '../modelos/ChatBotIA'
 import { Producto } from '../modelos/Producto'
+import { tokenSesionSupabase } from '../datos/supabase'
 
 // Acciones que el asistente puede sugerir (las ejecuta la app, no el modelo).
 export type AccionSugerida =
@@ -184,9 +185,13 @@ async function consultarClaude(
 
   let respuesta: Response
   try {
+    const token = await tokenSesionSupabase()
     respuesta = await fetch('/api/chat', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
       body: JSON.stringify(cuerpo),
       signal: controlador.signal,
     })

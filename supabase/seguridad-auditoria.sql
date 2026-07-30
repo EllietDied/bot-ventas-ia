@@ -20,8 +20,15 @@ create policy "fotos - borrar propias" on storage.objects
   for delete to authenticated
   using (bucket_id = 'productos' and owner = auth.uid());
 
--- (La política de subir se mantiene: un vendedor necesita subir. El owner queda
---  registrado, asi que ya nadie puede tocar fotos ajenas.)
+drop policy if exists "fotos - subir" on storage.objects;
+create policy "fotos - subir" on storage.objects
+  for insert to authenticated with check (
+    bucket_id = 'productos'
+    and exists (
+      select 1 from public.perfiles
+      where id = (select auth.uid()) and rol = 'vendedor' and estado = 'activo'
+    )
+  );
 
 -- ------------------------------------------------------------
 -- 2) PERFILES: impedir que un usuario cambie su propio ROL o ESTADO
@@ -55,6 +62,41 @@ create trigger tr_preservar_rol_estado
 drop policy if exists "perfil propio - editar" on public.perfiles;
 create policy "perfil propio - editar" on public.perfiles
   for update using (auth.uid() = id) with check (auth.uid() = id);
+
+-- ------------------------------------------------------------
+-- 3) PRODUCTOS: el dueño además debe ser un vendedor activo.
+-- ------------------------------------------------------------
+drop policy if exists "productos - crear" on public.productos;
+drop policy if exists "productos - editar" on public.productos;
+drop policy if exists "productos - borrar" on public.productos;
+
+create policy "productos - crear" on public.productos for insert with check (
+  (select auth.uid()) = id_vendedor
+  and exists (
+    select 1 from public.perfiles
+    where id = (select auth.uid()) and rol = 'vendedor' and estado = 'activo'
+  )
+);
+create policy "productos - editar" on public.productos for update using (
+  (select auth.uid()) = id_vendedor
+  and exists (
+    select 1 from public.perfiles
+    where id = (select auth.uid()) and rol = 'vendedor' and estado = 'activo'
+  )
+) with check (
+  (select auth.uid()) = id_vendedor
+  and exists (
+    select 1 from public.perfiles
+    where id = (select auth.uid()) and rol = 'vendedor' and estado = 'activo'
+  )
+);
+create policy "productos - borrar" on public.productos for delete using (
+  (select auth.uid()) = id_vendedor
+  and exists (
+    select 1 from public.perfiles
+    where id = (select auth.uid()) and rol = 'vendedor' and estado = 'activo'
+  )
+);
 
 -- ============================================================
 -- Fin. (El endurecimiento del webhook de pagos va en el código: api/pago-webhook.ts

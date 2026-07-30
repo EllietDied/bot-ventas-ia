@@ -13,7 +13,7 @@
 //     acredita saldo dos veces (Culqi puede reintentar el webhook).
 //   - Escribimos con la service role (salta RLS); el cliente nunca toca el saldo.
 
-import type { VercelRequest, VercelResponse } from '@vercel/node'
+import type { VercelRequest, VercelResponse } from './_types.js'
 
 const CULQI_API = 'https://api.culqi.com/v2'
 const SUPA_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || ''
@@ -121,9 +121,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // 5) Datos que dejamos en la metadata al crear el pago.
     const meta = obj?.metadata ?? {}
     const usuarioId: string = meta.usuario_id || ''
-    const concepto: string = meta.concepto === 'compra' ? 'compra' : 'recarga'
+    const concepto: string = meta.concepto === 'recarga' ? 'recarga' : ''
     const monto = Number(obj?.amount) / 100 // céntimos -> soles
-    if (!usuarioId || !(monto > 0)) {
+    if (!usuarioId || !concepto || !(monto > 0)) {
       return res.status(200).json({ ok: false, motivo: 'metadata incompleta' })
     }
     // Tope de seguridad por operación (igual que en pago-crear): evita acreditar
@@ -132,38 +132,26 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(200).json({ ok: false, motivo: 'monto fuera de rango' })
     }
 
-    // 6) IDEMPOTENCIA: registramos la transacción. Si choca con el índice único de
-    //    referencia_externa (HTTP 409), ya se procesó antes: no acreditamos de nuevo.
-    const ins = await supa('transacciones', {
+    // 6) IDEMPOTENCIA + ACREDITACIÓN ATÓMICA. PostgreSQL registra la transacción y
+    //    suma el saldo dentro de una sola transacción. Si algo falla, revierte ambas.
+    const rpc = await supa('rpc/procesar_pago_culqi', {
       method: 'POST',
-      headers: { Prefer: 'return=minimal' },
       body: JSON.stringify({
-        usuario_id: usuarioId,
-        tipo: concepto === 'recarga' ? 'recarga' : 'compra_directa',
-        monto,
-        estado: 'aprobado',
-        metodo: esOrden ? 'pagoefectivo' : 'tarjeta',
-        referencia_externa: id,
+        p_usuario: usuarioId,
+        p_monto: monto,
+        p_metodo: esOrden ? 'pagoefectivo' : 'tarjeta',
+        p_referencia: id,
       }),
     })
-    if (ins.status === 409) return res.status(200).json({ ok: true, motivo: 'pago ya procesado' })
-    if (!ins.ok) {
+    if (!rpc.ok) {
       // El detalle real solo va a los logs del servidor, nunca en la respuesta publica.
-      const detalle = await ins.text().catch(() => '')
-      console.error('Webhook: no se pudo registrar la transaccion:', ins.status, detalle.slice(0, 300))
-      return res.status(200).json({ ok: false, motivo: 'no se pudo registrar' })
+      const detalle = await rpc.text().catch(() => '')
+      console.error('Webhook: no se pudo acreditar el pago:', rpc.status, detalle.slice(0, 300))
+      return res.status(200).json({ ok: false, motivo: 'no se pudo acreditar' })
     }
-
-    // 7) Acreditamos el saldo (solo en recargas): leer + sumar + guardar.
-    if (concepto === 'recarga') {
-      const r = await supa(`billeteras?id=eq.${usuarioId}&select=saldo`)
-      const arr = await r.json().catch(() => [])
-      const saldoActual = Array.isArray(arr) && arr[0] ? Number(arr[0].saldo) : 0
-      const nuevoSaldo = Math.round((saldoActual + monto) * 100) / 100
-      await supa(`billeteras?id=eq.${usuarioId}`, {
-        method: 'PATCH',
-        body: JSON.stringify({ saldo: nuevoSaldo, actualizado_en: new Date().toISOString() }),
-      })
+    const resultado = await rpc.json().catch(() => null)
+    if (resultado?.duplicado) {
+      return res.status(200).json({ ok: true, motivo: 'pago ya procesado' })
     }
 
     return res.status(200).json({ ok: true, acreditado: monto })

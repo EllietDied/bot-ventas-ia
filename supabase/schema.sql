@@ -182,11 +182,35 @@ create policy "perfil propio - editar" on public.perfiles for update using (auth
 -- Nota: los nombres a mostrar se guardan ya copiados en productos.vendedor_nombre,
 -- mensajes.de_nombre/para_nombre, etc., así que NO hace falta exponer perfiles.
 
--- ---------- PRODUCTOS: catálogo visible para todos; solo el dueño los gestiona ----------
+-- ---------- PRODUCTOS: catálogo visible para todos; solo vendedores activos ----------
 create policy "productos - leer"   on public.productos for select using (true);
-create policy "productos - crear"  on public.productos for insert with check (auth.uid() = id_vendedor);
-create policy "productos - editar" on public.productos for update using (auth.uid() = id_vendedor);
-create policy "productos - borrar" on public.productos for delete using (auth.uid() = id_vendedor);
+create policy "productos - crear" on public.productos for insert with check (
+  (select auth.uid()) = id_vendedor
+  and exists (
+    select 1 from public.perfiles
+    where id = (select auth.uid()) and rol = 'vendedor' and estado = 'activo'
+  )
+);
+create policy "productos - editar" on public.productos for update using (
+  (select auth.uid()) = id_vendedor
+  and exists (
+    select 1 from public.perfiles
+    where id = (select auth.uid()) and rol = 'vendedor' and estado = 'activo'
+  )
+) with check (
+  (select auth.uid()) = id_vendedor
+  and exists (
+    select 1 from public.perfiles
+    where id = (select auth.uid()) and rol = 'vendedor' and estado = 'activo'
+  )
+);
+create policy "productos - borrar" on public.productos for delete using (
+  (select auth.uid()) = id_vendedor
+  and exists (
+    select 1 from public.perfiles
+    where id = (select auth.uid()) and rol = 'vendedor' and estado = 'activo'
+  )
+);
 
 -- ---------- PEDIDOS: el comprador ve/crea los suyos; el vendedor ve los que tienen sus productos ----------
 create policy "pedidos - crear" on public.pedidos for insert
@@ -235,9 +259,19 @@ on conflict (id) do nothing;
 
 -- Las fotos públicas se sirven por su URL pública (bucket public), sin policy de
 -- SELECT; así nadie puede LISTAR/enumerar los archivos del bucket.
-create policy "fotos - subir"  on storage.objects for insert to authenticated with check (bucket_id = 'productos');
-create policy "fotos - editar" on storage.objects for update to authenticated using (bucket_id = 'productos');
-create policy "fotos - borrar" on storage.objects for delete to authenticated using (bucket_id = 'productos');
+create policy "fotos - subir" on storage.objects for insert to authenticated with check (
+  bucket_id = 'productos'
+  and exists (
+    select 1 from public.perfiles
+    where id = (select auth.uid()) and rol = 'vendedor' and estado = 'activo'
+  )
+);
+create policy "fotos - editar" on storage.objects for update to authenticated using (
+  bucket_id = 'productos' and owner = (select auth.uid())
+);
+create policy "fotos - borrar" on storage.objects for delete to authenticated using (
+  bucket_id = 'productos' and owner = (select auth.uid())
+);
 
 -- ============================================================
 -- Fin del esquema. (La capa de IA es aparte: no toca estas tablas.)

@@ -62,7 +62,8 @@ VITE_SUPABASE_ANON_KEY=      # pública (la protege RLS)
 
 # API REST (servidor). Si se omiten, reutiliza las VITE_SUPABASE_* de arriba.
 SUPABASE_URL=
-SUPABASE_SERVICE_ROLE_KEY=   # SECRETA: habilita CRUD completo (POST/PUT/DELETE). Solo servidor.
+SUPABASE_ANON_KEY=           # pública; el servidor la usa para validar sesiones.
+SUPABASE_SERVICE_ROLE_KEY=   # SECRETA: solo operaciones privilegiadas como acreditar recargas.
 ```
 
 Las claves secretas (`DEEPSEEK_API_KEY`, `SUPABASE_SERVICE_ROLE_KEY`) viven **solo en el

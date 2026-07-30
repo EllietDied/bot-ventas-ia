@@ -10,7 +10,7 @@
 // estado del pedido se actualizan en el WEBHOOK (otra fase), cuando Culqi confirma el
 // pago de verdad. Aquí solo se "inicia" el cobro.
 
-import type { VercelRequest, VercelResponse } from '@vercel/node'
+import type { VercelRequest, VercelResponse } from './_types.js'
 
 const CULQI_API = 'https://api.culqi.com/v2'
 const MIN_MONTO = 10 // S/ mínimo por operación (PagoEfectivo en producción exige S/ 10)
@@ -46,8 +46,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
     const amount = Math.round(soles * 100)
 
-    // 4) Concepto y a quién pertenece el pago (la metadata la usa el webhook).
-    const concepto = cuerpo.concepto === 'compra' ? 'compra' : 'recarga'
+    // 4) Este flujo cobra solamente RECARGAS. Una compra real necesita calcular
+    // su total en el servidor antes de cobrar; nunca aceptamos ese monto del cliente.
+    if (cuerpo.concepto && cuerpo.concepto !== 'recarga') {
+      return res.status(400).json({ error: 'El pago directo de compras aún no está habilitado.' })
+    }
+    const concepto = 'recarga'
 
     // SEGURIDAD: NO confiamos en el navegador para saber QUIÉN paga. Tomamos el token
     // de sesión de Supabase (header Authorization), lo verificamos en el servidor y de
@@ -71,11 +75,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
     // (Para una COMPRA por pasarela, el monto debe calcularse en el servidor a partir
     //  del pedido en la BD, nunca del cliente. La recarga sí la define el usuario.)
-    const pedidoId = typeof cuerpo.pedidoId === 'string' ? cuerpo.pedidoId.slice(0, 64) : ''
     const cliente: ClienteCtx = cuerpo.cliente ?? {}
     const email = String(cliente.email || 'cliente@inkashop.com').slice(0, 100)
-    const metadata = { usuario_id: usuarioId, concepto, pedido_id: pedidoId }
-    const descripcion = concepto === 'recarga' ? 'Recarga de billetera InkaShop' : 'Compra en InkaShop'
+    const metadata = { usuario_id: usuarioId, concepto }
+    const descripcion = 'Recarga de billetera InkaShop'
 
     const metodo = cuerpo.metodo
 

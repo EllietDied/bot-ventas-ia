@@ -31,7 +31,7 @@ export interface PagoEfectivo {
 // Pide al servidor generar un pago por PagoEfectivo (devuelve el CIP para pagar).
 export async function crearPagoEfectivo(datos: {
   monto: number
-  concepto: 'recarga' | 'compra'
+  concepto: 'recarga'
   cliente: ClientePago
 }): Promise<PagoEfectivo> {
   // El servidor identifica al usuario por su token de sesión (no enviamos su id).

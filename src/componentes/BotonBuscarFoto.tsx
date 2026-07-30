@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import { useProductos } from '../contexto/ProductosContext'
 import { comprimirImagen } from '../util/imagen'
-import { buscarPorFoto, type ResultadoBusquedaVisual } from '../core/servicios/BusquedaVisualService'
+import type { ResultadoBusquedaVisual } from '../core/servicios/BusquedaVisualService'
 import { Icono } from './Icono'
 
 interface Props {
@@ -34,6 +34,9 @@ export function BotonBuscarFoto({ onResultado, onInicio, className }: Props) {
     onInicio?.(dataURL) // muestra la foto y el "analizando…" en el chat
     setAnalizando(true)
     try {
+      // El orquestador visual (y, a su vez, TensorFlow/MobileNet) se descarga
+      // únicamente cuando el usuario selecciona una imagen.
+      const { buscarPorFoto } = await import('../core/servicios/BusquedaVisualService')
       const resultado = await buscarPorFoto(dataURL, productos)
       onResultado(resultado)
     } catch {

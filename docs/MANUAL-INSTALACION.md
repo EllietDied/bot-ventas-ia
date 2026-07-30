@@ -78,6 +78,7 @@ plantilla). **Regla de oro de seguridad:**
 | `VITE_CULQI_PUBLIC_KEY` | Pública | Llave pública de Culqi (`pk_...`). |
 | `DEEPSEEK_API_KEY` | **Secreta** | Clave del asistente de conversación (servidor). |
 | `NVIDIA_API_KEY` | **Secreta** | Clave de la visión Gemma (servidor). |
+| `SUPABASE_ANON_KEY` | Pública | Clave anónima usada por el servidor para validar sesiones. |
 | `SUPABASE_SERVICE_ROLE_KEY` | **Secreta** | Clave maestra de la base (solo servidor). |
 | `CULQI_SECRET_KEY` | **Secreta** | Llave privada de Culqi (`sk_...`). |
 | `CULQI_WEBHOOK_SECRET` | **Secreta** | Token que protege el webhook de pagos (ver sección 9). |
@@ -108,7 +109,11 @@ Solo si usas el **modo real** (`VITE_USAR_SUPABASE=true`).
 | 9 | `chats_asistente.sql` | Historial del chat del asistente. |
 | 10 | `detalle-producto.sql` | Campos del detalle (modelo, material, galería). |
 | 11 | `fix-rls-pedidos.sql` | Corrige la seguridad de pedidos. |
-| 12 | `seguridad-auditoria.sql` | Correcciones de seguridad (fotos y roles). |
+| 12 | `seguridad-auditoria.sql` | Correcciones de seguridad (fotos, roles y productos). |
+| 13 | `crear-pedido.sql` | Creación segura de pedidos con precios reales. |
+| 14 | `id-y-nombre.sql` | Códigos de usuario y nombre histórico en pedidos. |
+| 15 | `crear-pedido-candado.sql` | Bloquea la creación directa de pedidos inseguros. |
+| 16 | `pedidos-envio.sql` | Permite guardar envío sin alterar importes ni pago. |
 
 > Los scripts son **idempotentes** (seguros de re-ejecutar): usan `if not exists`.
 

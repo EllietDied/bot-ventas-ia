@@ -6,7 +6,7 @@
 // SEGURIDAD: usamos la clave ANÓNIMA + el TOKEN del usuario que llama, así la base
 // aplica su seguridad por filas (RLS) automáticamente (no usamos la service role,
 // que se saltaría el RLS). Helper por fetch DENTRO del archivo (sin SDK, que crashea).
-import type { VercelRequest, VercelResponse } from '@vercel/node'
+import type { VercelRequest, VercelResponse } from './_types.js'
 
 const SUPA_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || ''
 const ANON = process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || ''
@@ -94,8 +94,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       // Nombre del vendedor: lo leemos de SU propio perfil (con su token; el RLS lo permite).
       let vendedorNombre = ''
-      const perfil = await pedir(`perfiles?id=eq.${uid}&select=nombre,apellido`, {}, token)
+      const perfil = await pedir(`perfiles?id=eq.${uid}&select=nombre,apellido,rol,estado`, {}, token)
       const p = Array.isArray(perfil.datos) ? perfil.datos[0] : null
+      if (!p || p.rol !== 'vendedor' || p.estado !== 'activo') {
+        return res.status(403).json({ error: 'Solo un vendedor activo puede crear productos.' })
+      }
       if (p) vendedorNombre = `${p.nombre ?? ''} ${p.apellido ?? ''}`.trim()
 
       // id_vendedor = el usuario autenticado (NO se acepta del cuerpo). El RLS exige

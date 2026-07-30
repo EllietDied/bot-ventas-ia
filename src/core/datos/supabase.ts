@@ -15,3 +15,11 @@ export const supabase: SupabaseClient | null =
 export function usarSupabase(): boolean {
   return import.meta.env.VITE_USAR_SUPABASE === 'true' && supabase !== null
 }
+
+// Token para llamar a funciones serverless protegidas. No refrescamos nada a mano:
+// getSession usa el mecanismo de sesión del cliente de Supabase.
+export async function tokenSesionSupabase(): Promise<string> {
+  if (!supabase) return ''
+  const { data } = await supabase.auth.getSession()
+  return data.session?.access_token ?? ''
+}

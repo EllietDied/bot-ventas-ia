@@ -4,7 +4,8 @@
 // servidor (DEEPSEEK_API_KEY) y NUNCA llega al navegador. Si algo falla, el
 // frontend usa el chatbot simulado.
 
-import type { VercelRequest, VercelResponse } from '@vercel/node'
+import type { VercelRequest, VercelResponse } from './_types.js'
+import { autenticar } from './_auth.js'
 
 // Proveedor de IA: DeepSeek (compatible con OpenAI).
 const DEEPSEEK_URL = 'https://api.deepseek.com/chat/completions'
@@ -94,6 +95,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
+    if (!(await autenticar(req))) {
+      return res.status(401).json({ error: 'Necesitas iniciar sesión para usar la IA.' })
+    }
+
     // El cuerpo puede llegar ya parseado o como texto.
     const cuerpo = typeof req.body === 'string' ? JSON.parse(req.body) : req.body ?? {}
 

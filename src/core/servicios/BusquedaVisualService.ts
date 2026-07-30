@@ -4,6 +4,7 @@
 //   2) Si no, identifica en el navegador con MobileNet (funciona sin proveedor).
 //   3) Si no logra identificar, el cliente elige la categoría a mano.
 import { Producto } from '../modelos/Producto'
+import { tokenSesionSupabase } from '../datos/supabase'
 import { usarIAReal } from './AsistenteIAService'
 import { identificarEnNavegador, filtrarPorTermino } from './VisionService'
 
@@ -29,9 +30,13 @@ async function consultarVisionNube(
   const temporizador = setTimeout(() => controlador.abort(), 55000)
   let resp: Response
   try {
+    const token = await tokenSesionSupabase()
     resp = await fetch('/api/vision', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
       signal: controlador.signal,
       body: JSON.stringify({
         imagen: dataURL,
