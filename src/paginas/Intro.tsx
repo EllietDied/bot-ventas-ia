@@ -77,7 +77,7 @@ export function Intro() {
   return (
     <div className="auth-landing inka-auth-bg">
       {/* El fondo de figuras inka cubre TODA la intro (hero + secciones) */}
-      <InkaAnimatedBackground total={170} />
+      <InkaAnimatedBackground total={60} activas={3} intervalo={1600} />
 
       {/* ===== Hero introductorio ===== */}
       <section className="auth-contenedor">

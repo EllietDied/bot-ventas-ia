@@ -528,102 +528,102 @@ a:hover {
   z-index: 0;
   pointer-events: none;
   overflow: hidden;
+  contain: layout paint;
 }
 .inka-fig {
   position: absolute;
   overflow: visible;
   aspect-ratio: 1 / 1;
-  transform: translate(-50%, -50%); /* se centra en el punto de su celda */
+  transform: translate(-50%, -50%);
+  opacity: 0.86;
+}
+.inka-fig--focal {
+  opacity: 1;
 }
 .inka-fig-base path,
 .inka-fig-base circle,
 .inka-fig-base rect {
   fill: none;
-  stroke: rgba(255, 255, 255, 0.25);
-  stroke-width: 1.6;
+  stroke: rgba(226, 232, 240, 0.23);
+  stroke-width: 1.35;
   stroke-linejoin: round;
   stroke-linecap: round;
+}
+.inka-fig--focal .inka-fig-base path,
+.inka-fig--focal .inka-fig-base circle,
+.inka-fig--focal .inka-fig-base rect {
+  stroke: rgba(241, 245, 249, 0.34);
+  stroke-width: 1.5;
 }
 .inka-fig-gold path,
 .inka-fig-gold circle,
 .inka-fig-gold rect {
   fill: none;
-  stroke: #ffd700;
-  stroke-width: 1.9;
+  stroke: var(--inka-gold, #e8b84b);
+  stroke-width: 1.75;
   stroke-linejoin: round;
   stroke-linecap: round;
   stroke-dasharray: 1;
   stroke-dashoffset: 1; /* oculto: nada dibujado */
   opacity: 0;
 }
-/* Figura activa: el dorado dibuja DESPACIO el contorno completo (~4.3 s), luego
-   brilla INTENSAMENTE ~1 s y se desvanece. El grupo anima su resplandor (inka-glow);
-   los trazos animan el dibujado (inka-trazo). Ambos duran 7 s. */
+/* El acento dorado recorre el símbolo, respira brevemente y desaparece. */
 .inka-fig.is-drawing .inka-fig-gold {
-  animation: inka-glow 7s ease-in-out forwards;
+  animation: inka-glow 4.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 .inka-fig.is-drawing .inka-fig-gold path,
 .inka-fig.is-drawing .inka-fig-gold circle,
 .inka-fig.is-drawing .inka-fig-gold rect {
-  animation: inka-trazo 7s ease-in-out forwards;
+  animation: inka-trazo 4.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 @keyframes inka-trazo {
   0% {
     stroke-dashoffset: 1;
+    opacity: 0.45;
+  }
+  64% {
+    stroke-dashoffset: 0;
     opacity: 1;
   }
-  62% {
+  78% {
     stroke-dashoffset: 0;
-    opacity: 1;
-  } /* contorno COMPLETO dibujado (~4.3 s, lento) */
-  76% {
-    stroke-dashoffset: 0;
-    opacity: 1;
-  } /* se mantiene dorada y brillando ~1 s */
+    opacity: 0.92;
+  }
   100% {
     stroke-dashoffset: 0;
     opacity: 0;
-  } /* se desvanece */
+  }
 }
-/* Resplandor del dorado: normal mientras dibuja, PICO intenso en el segundo de brillo. */
 @keyframes inka-glow {
   0% {
-    filter: drop-shadow(0 0 3px rgba(255, 240, 185, 0.8)) drop-shadow(0 0 8px rgba(255, 205, 75, 0.5));
+    filter: drop-shadow(0 0 2px rgba(255, 236, 177, 0.35));
   }
-  62% {
-    filter: drop-shadow(0 0 4px rgba(255, 240, 185, 0.95))
-      drop-shadow(0 0 12px rgba(255, 205, 75, 0.65)) drop-shadow(0 0 24px rgba(212, 175, 55, 0.45));
-  }
-  69% {
-    filter: drop-shadow(0 0 9px rgba(255, 250, 220, 1)) drop-shadow(0 0 22px rgba(255, 218, 95, 0.95))
-      drop-shadow(0 0 44px rgba(255, 190, 60, 0.7));
-  }
-  76% {
-    filter: drop-shadow(0 0 6px rgba(255, 246, 205, 0.95))
-      drop-shadow(0 0 16px rgba(255, 210, 85, 0.8)) drop-shadow(0 0 34px rgba(245, 185, 55, 0.5));
+  68% {
+    filter: drop-shadow(0 0 5px rgba(255, 241, 191, 0.88))
+      drop-shadow(0 0 15px rgba(232, 184, 75, 0.62));
   }
   100% {
-    filter: drop-shadow(0 0 2px rgba(255, 240, 185, 0.25)) drop-shadow(0 0 6px rgba(255, 205, 75, 0.12));
+    filter: drop-shadow(0 0 2px rgba(232, 184, 75, 0));
   }
 }
 
-/* Chispa: la "punta de la varita mágica" que recorre el contorno al dibujarlo */
+/* Una luz fina acompaña el frente del trazo, sin dominar la composición. */
 .inka-fig-spark path,
 .inka-fig-spark circle,
 .inka-fig-spark rect {
   fill: none;
-  stroke: #fffbe8;
-  stroke-width: 4.4;
+  stroke: #fff1b6;
+  stroke-width: 2.2;
   stroke-linecap: round;
   stroke-linejoin: round;
-  stroke-dasharray: 0.09 0.91; /* una chispa más grande que viaja por el trazo */
+  stroke-dasharray: 0.045 0.955;
   stroke-dashoffset: 1;
   opacity: 0;
-  animation: inka-chispa 7s ease-in-out forwards;
+  animation: inka-chispa 4.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 .inka-fig-spark {
-  filter: drop-shadow(0 0 7px #fff8d4) drop-shadow(0 0 18px rgba(255, 222, 115, 1))
-    drop-shadow(0 0 34px rgba(255, 200, 60, 0.7));
+  filter: drop-shadow(0 0 4px rgba(255, 241, 182, 0.9))
+    drop-shadow(0 0 10px rgba(232, 184, 75, 0.62));
 }
 @keyframes inka-chispa {
   0% {
@@ -633,24 +633,25 @@ a:hover {
   5% {
     opacity: 1;
   }
-  56% {
+  60% {
     opacity: 1;
   }
-  62% {
+  64% {
     stroke-dashoffset: 0;
     opacity: 0;
-  } /* al completar el contorno, la chispa se apaga */
+  }
   100% {
     stroke-dashoffset: 0;
     opacity: 0;
   }
 }
-/* En móvil: mostramos TODAS las figuras a tamaño base (no se solapan y llenan
-   la pantalla como en la web), y la tarjeta se vuelve más translúcida y compacta
-   para que los iconos y el dorado se aprecien a través y alrededor de ella. */
+/* En móvil queda solo la capa editorial principal. */
 @media (max-width: 600px) {
   .inka-fig.solo-pc {
-    display: block;
+    display: none;
+  }
+  .inka-fig:not(.solo-pc) {
+    transform: translate(-50%, -50%) scale(1.3);
   }
   .inka-auth-bg .auth-tarjeta {
     max-width: 288px;
@@ -675,6 +676,9 @@ a:hover {
   .inka-fig-spark circle,
   .inka-fig-spark rect {
     animation: none;
+  }
+  .inka-fig-spark {
+    display: none;
   }
 }
 /* Overlay oscuro radial para mejorar el contraste detras de la tarjeta */
@@ -754,13 +758,18 @@ a:hover {
 [data-theme='light'] .inka-fig-base path,
 [data-theme='light'] .inka-fig-base circle,
 [data-theme='light'] .inka-fig-base rect {
-  stroke: rgba(122, 78, 42, 0.17);
+  stroke: rgba(122, 78, 42, 0.22);
+}
+[data-theme='light'] .inka-fig--focal .inka-fig-base path,
+[data-theme='light'] .inka-fig--focal .inka-fig-base circle,
+[data-theme='light'] .inka-fig--focal .inka-fig-base rect {
+  stroke: rgba(106, 68, 34, 0.34);
 }
 /* Trazo dorado: oro más rico para resaltar sobre el fondo claro */
 [data-theme='light'] .inka-fig-gold path,
 [data-theme='light'] .inka-fig-gold circle,
 [data-theme='light'] .inka-fig-gold rect {
-  stroke: #cc9012;
+  stroke: var(--inka-gold, #cc9012);
 }
 [data-theme='light'] .inka-fig.is-drawing .inka-fig-gold {
   animation: inka-glow-claro 7s ease-in-out forwards;
@@ -802,8 +811,8 @@ a:hover {
   [data-theme='light'] .inka-fig-base path,
   [data-theme='light'] .inka-fig-base circle,
   [data-theme='light'] .inka-fig-base rect {
-    stroke: rgba(96, 54, 24, 0.38);
-    stroke-width: 1.9;
+    stroke: rgba(96, 54, 24, 0.24);
+    stroke-width: 1.55;
   }
 }
 /* Tarjeta glass CLARA con texto oscuro */

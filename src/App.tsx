@@ -82,7 +82,7 @@ export default function App() {
         <div className="inka-fondo-global" aria-hidden="true">
           {/* Versión ambiental: menos figuras y menos dorado que el login. El
               intervalo mayor da tiempo a que cada figura complete su dibujado de 7 s. */}
-          <InkaAnimatedBackground total={70} activas={10} intervalo={750} />
+          <InkaAnimatedBackground total={28} activas={2} intervalo={2300} />
         </div>
       )}
       <BarraNavegacion />
